@@ -11,7 +11,7 @@
 
 Arduino_DataBus *bus = new Arduino_ESP32SPI(21 /* DC */, 15 /* CS */, 14 /* SCK */, 13 /* MOSI */, -1 /* MISO */, VSPI /* spi_num */);
 Arduino_GFX *gfx = new Arduino_ST7796(bus, 22 /* RST */, 0 /* rotation */);
-ESP32Time rtc;
+ESP32Time rtc(3 * 3600);
 FT6336U ft6336u(I2C_SDA, I2C_SCL, RST_N_PIN, INT_N_PIN);
 
 /* Display flushing */
@@ -48,7 +48,7 @@ void setup()
 
   ft6336u.begin();
 
-  rtc.setTime(1663349211);
+  rtc.setTime(1663352526); //GMT: Friday, September 16, 2022 6:22:06 PM
 
   lv_init();
 
