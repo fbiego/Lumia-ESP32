@@ -7,7 +7,7 @@
 #include "ui.h"
 
 #include <Arduino_GFX_Library.h>
-#include <ESP32Time.h>>
+#include <ESP32Time.h>
 
 Arduino_DataBus *bus = new Arduino_ESP32SPI(21 /* DC */, 15 /* CS */, 14 /* SCK */, 13 /* MOSI */, -1 /* MISO */, VSPI /* spi_num */);
 Arduino_GFX *gfx = new Arduino_ST7796(bus, 22 /* RST */, 0 /* rotation */);
