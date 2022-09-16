@@ -26,6 +26,10 @@ lv_obj_t *ui_Image6;
 lv_obj_t *ui_Image7;
 lv_obj_t *ui_Screen5;
 
+lv_obj_t *ui_tileView;
+lv_obj_t *ui_tileStart;
+lv_obj_t *ui_tileApps;
+
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
 #error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
@@ -309,6 +313,10 @@ void ui_startScreen_screen_init(void)
 
     lv_obj_clear_flag(ui_startScreen, LV_OBJ_FLAG_SCROLLABLE);
 
+    lv_obj_set_style_bg_color(ui_startScreen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_startScreen, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
     // ui_Panel2
 
     ui_Panel2 = lv_obj_create(ui_startScreen);
@@ -463,6 +471,20 @@ void ui_startScreen_screen_init(void)
     lv_label_set_text(ui_lockTime, "18:40");
 
     lv_obj_set_style_text_font(ui_lockTime, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_tileView = lv_tileview_create(ui_startScreen);
+
+    lv_obj_set_x(ui_tileView, 0);
+    lv_obj_set_y(ui_tileView, 0);
+
+    lv_obj_set_width(ui_tileView, 320);
+    lv_obj_set_height(ui_tileView, 420);
+
+    lv_obj_set_scrollbar_mode(ui_tileView, LV_SCROLLBAR_MODE_OFF);
+    /*Tile1: just a label*/
+    ui_tileStart = lv_tileview_add_tile(ui_tileView, 0, 0, LV_DIR_RIGHT);
+    /*Tile2: a button*/
+    ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
 }
 void ui_Screen5_screen_init(void)
 {
