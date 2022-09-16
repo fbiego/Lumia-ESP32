@@ -62,11 +62,14 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
         if (dragging)
         {
             int vect = lastY - indev->proc.types.pointer.act_point.y;
-            lv_obj_set_y(ui_lockScreenTime, 138 - vect);
-            lv_obj_set_y(ui_lockScreenDate, 178 - vect);
+            if (vect >= 0)
+            {
+                lv_obj_set_y(ui_lockScreenTime, 138 - vect);
+                lv_obj_set_y(ui_lockScreenDate, 178 - vect);
 
-            lv_obj_set_style_text_opa(ui_lockScreenTime, 255 - (vect/2), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_opa(ui_lockScreenDate, 255 - (vect/2), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_opa(ui_lockScreenTime, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_opa(ui_lockScreenDate, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
         }
     }
     if (event == LV_EVENT_PRESSED)
@@ -75,7 +78,7 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
         lastY = indev->proc.types.pointer.act_point.y;
         if (lastY > 240)
         {
-            //dragging = true;
+            // dragging = true;
         }
         dragging = true;
     }
