@@ -34,6 +34,10 @@ extern lv_obj_t * ui_Image6;
 extern lv_obj_t * ui_Image7;
 extern lv_obj_t * ui_Screen5;
 
+extern lv_obj_t *ui_tileView;
+extern lv_obj_t *ui_tileStart;
+extern lv_obj_t *ui_tileApps;
+extern lv_obj_t * list1;
 
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
 LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
