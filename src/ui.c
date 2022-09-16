@@ -519,6 +519,7 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_style_bg_color(cont, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(cont, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(cont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_scrollbar_mode(cont, LV_SCROLLBAR_MODE_OFF);
 
     lv_obj_t * label;
     lv_obj_t * obj;
@@ -532,8 +533,8 @@ void ui_startScreen_screen_init(void)
         /*Stretch the cell horizontally and vertically too
          *Set span to 1 to make the cell 1 column/row sized*/
         lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, 1,
-                             LV_GRID_ALIGN_STRETCH, row, 1);
+        lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_SPACE_EVENLY, col, 1,
+                             LV_GRID_ALIGN_SPACE_EVENLY, row, 1);
 
         label = lv_label_create(obj);
         lv_label_set_text_fmt(label, "c%d, r%d", col, row);
