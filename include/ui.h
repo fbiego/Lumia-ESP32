@@ -37,9 +37,10 @@ extern lv_obj_t * ui_Screen5;
 
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
 LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
-LV_IMG_DECLARE(ui_img_1163530804);    // assets\battery-level.png
+LV_IMG_DECLARE(ui_img_1947241130);    // assets\battery-level (1).png
 LV_IMG_DECLARE(ui_img_wifi_png);    // assets\wifi.png
 LV_IMG_DECLARE(ui_img_2009460128);    // assets\no-signal.png
+LV_IMG_DECLARE(ui_img_716248923);    // assets\windows-small.png
 LV_IMG_DECLARE(ui_img_back_png);    // assets\back.png
 LV_IMG_DECLARE(ui_img_1954556228);    // assets\search-icon.png
 

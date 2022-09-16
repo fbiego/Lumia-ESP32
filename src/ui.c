@@ -20,11 +20,11 @@ lv_obj_t *ui_wifiIcon;
 lv_obj_t *ui_networkIcon;
 lv_obj_t *ui_lockTime;
 lv_obj_t *ui_startScreen;
-lv_obj_t * ui_Panel2;
-lv_obj_t * ui_Image5;
-lv_obj_t * ui_Image6;
-lv_obj_t * ui_Image7;
-lv_obj_t * ui_Screen5;
+lv_obj_t *ui_Panel2;
+lv_obj_t *ui_Image5;
+lv_obj_t *ui_Image6;
+lv_obj_t *ui_Image7;
+lv_obj_t *ui_Screen5;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -49,6 +49,18 @@ static void slider_event_cb(lv_event_t *e)
     //    int brightness = (int)lv_slider_get_value(slider);
     //    ledcWrite(ledChannel, brightness);
     //  }
+}
+
+static void ui_event_Image6(lv_event_t *e)
+{
+    lv_event_code_t event = lv_event_get_code(e);
+    lv_obj_t *ta = lv_event_get_target(e);
+
+    if (event == LV_EVENT_PRESSED)
+    {
+        lv_disp_load_scr(ui_lockScreen);
+    }
+    printf("Event code: %d\n", event);
 }
 
 static void ui_event_lockScreenPanel(lv_event_t *e)
@@ -80,7 +92,7 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
     {
         printf("Press\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
         lastY = indev->proc.types.pointer.act_point.y;
-        if (lastY > 240)
+        if (lastY > 150)
         {
             // dragging = true;
         }
@@ -92,8 +104,10 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
         dragging = false;
 
         int vect = lastY - indev->proc.types.pointer.act_point.y;
+        printf("Drag strength: %d\n", vect);
 
-        if (vect > 240){
+        if (vect > 150)
+        {
             lv_disp_load_scr(ui_startScreen);
         }
 
@@ -204,12 +218,12 @@ void ui_lockScreen_screen_init(void)
     // ui_batteryIcon
 
     ui_batteryIcon = lv_img_create(ui_lockScreen);
-    lv_img_set_src(ui_batteryIcon, &ui_img_1163530804);
+    lv_img_set_src(ui_batteryIcon, &ui_img_1947241130);
 
     lv_obj_set_width(ui_batteryIcon, LV_SIZE_CONTENT);
     lv_obj_set_height(ui_batteryIcon, LV_SIZE_CONTENT);
 
-    lv_obj_set_x(ui_batteryIcon, 110);
+    lv_obj_set_x(ui_batteryIcon, 102);
     lv_obj_set_y(ui_batteryIcon, -227);
 
     lv_obj_set_align(ui_batteryIcon, LV_ALIGN_CENTER);
@@ -223,10 +237,10 @@ void ui_lockScreen_screen_init(void)
     lv_bar_set_range(ui_batteryBar, 0, 100);
     lv_bar_set_value(ui_batteryBar, 25, LV_ANIM_OFF);
 
-    lv_obj_set_width(ui_batteryBar, 11);
-    lv_obj_set_height(ui_batteryBar, 4);
+    lv_obj_set_width(ui_batteryBar, 15);
+    lv_obj_set_height(ui_batteryBar, 6);
 
-    lv_obj_set_x(ui_batteryBar, 264);
+    lv_obj_set_x(ui_batteryBar, 254);
     lv_obj_set_y(ui_batteryBar, -227);
 
     lv_obj_set_align(ui_batteryBar, LV_ALIGN_LEFT_MID);
@@ -283,7 +297,7 @@ void ui_lockScreen_screen_init(void)
 
     lv_label_set_text(ui_lockTime, "18:40");
 
-    lv_obj_set_style_text_font(ui_lockTime, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_lockTime, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 void ui_startScreen_screen_init(void)
@@ -300,7 +314,7 @@ void ui_startScreen_screen_init(void)
     ui_Panel2 = lv_obj_create(ui_startScreen);
 
     lv_obj_set_width(ui_Panel2, 320);
-    lv_obj_set_height(ui_Panel2, 30);
+    lv_obj_set_height(ui_Panel2, 40);
 
     lv_obj_set_x(ui_Panel2, 0);
     lv_obj_set_y(ui_Panel2, 0);
@@ -317,7 +331,7 @@ void ui_startScreen_screen_init(void)
     // ui_Image5
 
     ui_Image5 = lv_img_create(ui_Panel2);
-    lv_img_set_src(ui_Image5, &ui_img_windows_logo_png);
+    lv_img_set_src(ui_Image5, &ui_img_716248923);
 
     lv_obj_set_width(ui_Image5, LV_SIZE_CONTENT);
     lv_obj_set_height(ui_Image5, LV_SIZE_CONTENT);
@@ -346,8 +360,9 @@ void ui_startScreen_screen_init(void)
 
     lv_obj_set_align(ui_Image6, LV_ALIGN_CENTER);
 
-    lv_obj_add_flag(ui_Image6, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_add_flag(ui_Image6, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(ui_Image6, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(ui_Image6, ui_event_Image6, LV_EVENT_ALL, NULL);
 
     // ui_Image7
 
@@ -368,12 +383,12 @@ void ui_startScreen_screen_init(void)
     // ui_batteryIcon
 
     ui_batteryIcon = lv_img_create(ui_startScreen);
-    lv_img_set_src(ui_batteryIcon, &ui_img_1163530804);
+    lv_img_set_src(ui_batteryIcon, &ui_img_1947241130);
 
     lv_obj_set_width(ui_batteryIcon, LV_SIZE_CONTENT);
     lv_obj_set_height(ui_batteryIcon, LV_SIZE_CONTENT);
 
-    lv_obj_set_x(ui_batteryIcon, 110);
+    lv_obj_set_x(ui_batteryIcon, 102);
     lv_obj_set_y(ui_batteryIcon, -227);
 
     lv_obj_set_align(ui_batteryIcon, LV_ALIGN_CENTER);
@@ -387,10 +402,10 @@ void ui_startScreen_screen_init(void)
     lv_bar_set_range(ui_batteryBar, 0, 100);
     lv_bar_set_value(ui_batteryBar, 25, LV_ANIM_OFF);
 
-    lv_obj_set_width(ui_batteryBar, 11);
-    lv_obj_set_height(ui_batteryBar, 4);
+    lv_obj_set_width(ui_batteryBar, 15);
+    lv_obj_set_height(ui_batteryBar, 6);
 
-    lv_obj_set_x(ui_batteryBar, 264);
+    lv_obj_set_x(ui_batteryBar, 254);
     lv_obj_set_y(ui_batteryBar, -227);
 
     lv_obj_set_align(ui_batteryBar, LV_ALIGN_LEFT_MID);
@@ -447,7 +462,7 @@ void ui_startScreen_screen_init(void)
 
     lv_label_set_text(ui_lockTime, "18:40");
 
-    lv_obj_set_style_text_font(ui_lockTime, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_lockTime, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 void ui_Screen5_screen_init(void)
 {
