@@ -526,15 +526,15 @@ void ui_startScreen_screen_init(void)
 
     uint32_t i;
     for(i = 0; i < 12; i++) {
-        uint8_t col = i % 4;
+        uint8_t col = i % 3;
         uint8_t row = i / 3;
 
         obj = lv_btn_create(cont);
         /*Stretch the cell horizontally and vertically too
          *Set span to 1 to make the cell 1 column/row sized*/
         lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_SPACE_EVENLY, col, 1,
-                             LV_GRID_ALIGN_SPACE_EVENLY, row, 1);
+        lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, 1,
+                             LV_GRID_ALIGN_STRETCH, row, 1);
 
         label = lv_label_create(obj);
         lv_label_set_text_fmt(label, "c%d, r%d", col, row);
