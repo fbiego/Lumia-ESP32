@@ -504,8 +504,8 @@ void ui_startScreen_screen_init(void)
     /*Tile1: just a label*/
     ui_tileStart = lv_tileview_add_tile(ui_tileView, 0, 0, LV_DIR_RIGHT);
 
-    static lv_coord_t col_dsc[] = {90, 90, 90, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {50, 50, 50, 50, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t col_dsc[] = {95, 95, 95, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {60, 60, 60, 60, LV_GRID_TEMPLATE_LAST};
 
     /*Create a container with grid*/
     lv_obj_t * cont = lv_obj_create(ui_tileStart);
@@ -525,8 +525,8 @@ void ui_startScreen_screen_init(void)
 
     uint32_t i;
     for(i = 0; i < 12; i++) {
-        uint8_t col = i % 4;
-        uint8_t row = i / 3;
+        uint8_t col = i % 3;
+        uint8_t row = i / 4;
 
         obj = lv_btn_create(cont);
         /*Stretch the cell horizontally and vertically too
