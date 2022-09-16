@@ -28,6 +28,10 @@ extern lv_obj_t * ui_wifiIcon;
 extern lv_obj_t * ui_networkIcon;
 extern lv_obj_t * ui_lockTime;
 extern lv_obj_t * ui_startScreen;
+extern lv_obj_t * ui_Panel2;
+extern lv_obj_t * ui_Image5;
+extern lv_obj_t * ui_Image6;
+extern lv_obj_t * ui_Image7;
 extern lv_obj_t * ui_Screen5;
 
 
@@ -36,6 +40,8 @@ LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
 LV_IMG_DECLARE(ui_img_1163530804);    // assets\battery-level.png
 LV_IMG_DECLARE(ui_img_wifi_png);    // assets\wifi.png
 LV_IMG_DECLARE(ui_img_2009460128);    // assets\no-signal.png
+LV_IMG_DECLARE(ui_img_back_png);    // assets\back.png
+LV_IMG_DECLARE(ui_img_1954556228);    // assets\search-icon.png
 
 
 
