@@ -30,7 +30,7 @@ lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
 lv_obj_t *ui_tileApps;
 
-lv_obj_t * list1;
+lv_obj_t *list1;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -57,11 +57,12 @@ static void slider_event_cb(lv_event_t *e)
     //  }
 }
 
-static void event_handler(lv_event_t * e)
+static void event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * obj = lv_event_get_target(e);
-    if(code == LV_EVENT_CLICKED) {
+    lv_obj_t *obj = lv_event_get_target(e);
+    if (code == LV_EVENT_CLICKED)
+    {
         printf("Clicked: %s\n", lv_list_get_btn_text(list1, obj));
     }
 }
@@ -327,6 +328,112 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_style_bg_color(ui_startScreen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_startScreen, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    // tile view
+
+    ui_tileView = lv_tileview_create(ui_startScreen);
+
+    lv_obj_set_width(ui_tileView, 320);
+    lv_obj_set_height(ui_tileView, 440);
+
+    lv_obj_set_x(ui_tileView, 0);
+    lv_obj_set_y(ui_tileView, -20);
+
+    lv_obj_set_align(ui_tileView, LV_ALIGN_CENTER);
+
+    lv_obj_set_scrollbar_mode(ui_tileView, LV_SCROLLBAR_MODE_OFF);
+
+    lv_obj_set_style_radius(ui_tileView, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_tileView, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_tileView, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_tileView, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    /*Tile1: just a label*/
+    ui_tileStart = lv_tileview_add_tile(ui_tileView, 0, 0, LV_DIR_RIGHT);
+
+    static lv_coord_t col_dsc[] = {92, 92, 92, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {60, 60, 60, 60, 60, 60, 60, LV_GRID_TEMPLATE_LAST};
+
+    /*Create a container with grid*/
+    lv_obj_t *cont = lv_obj_create(ui_tileStart);
+    lv_obj_set_style_grid_column_dsc_array(cont, col_dsc, 0);
+    lv_obj_set_style_grid_row_dsc_array(cont, row_dsc, 0);
+    lv_obj_set_size(cont, 320, 440);
+    lv_obj_center(cont);
+    lv_obj_set_layout(cont, LV_LAYOUT_GRID);
+
+    lv_obj_set_style_pad_top(cont, 30, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(cont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(cont, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(cont, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(cont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_scrollbar_mode(cont, LV_SCROLLBAR_MODE_OFF);
+
+    lv_obj_t *label;
+    lv_obj_t *obj;
+
+    uint32_t i;
+    for (i = 0; i < 21; i++)
+    {
+        uint8_t col = i % 3;
+        uint8_t row = i / 3;
+
+        obj = lv_btn_create(cont);
+        /*Stretch the cell horizontally and vertically too
+         *Set span to 1 to make the cell 1 column/row sized*/
+        lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, 1,
+                             LV_GRID_ALIGN_STRETCH, row, 1);
+
+        label = lv_label_create(obj);
+        lv_label_set_text_fmt(label, "c%d, r%d", col, row);
+        lv_obj_center(label);
+    }
+
+    /*Tile2: a button*/
+    ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
+    /*Create a list*/
+    list1 = lv_list_create(ui_tileApps);
+    lv_obj_set_size(list1, 320, 440);
+    lv_obj_center(list1);
+
+    lv_obj_set_style_pad_top(list1, 30, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(list1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(list1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(list1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(list1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_scrollbar_mode(list1, LV_SCROLLBAR_MODE_OFF);
+
+    /*Add buttons to the list*/
+    lv_obj_t *btn;
+
+    lv_list_add_text(list1, "File");
+    btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, "New");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_btn(list1, LV_SYMBOL_DIRECTORY, "Open");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_btn(list1, LV_SYMBOL_SAVE, "Save");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Delete");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_btn(list1, LV_SYMBOL_EDIT, "Edit");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+
+    lv_list_add_text(list1, "Connectivity");
+    btn = lv_list_add_btn(list1, LV_SYMBOL_BLUETOOTH, "Bluetooth");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_btn(list1, LV_SYMBOL_GPS, "Navigation");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_btn(list1, LV_SYMBOL_USB, "USB");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_btn(list1, LV_SYMBOL_BATTERY_FULL, "Battery");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+
+    lv_list_add_text(list1, "Exit");
+    btn = lv_list_add_btn(list1, LV_SYMBOL_OK, "Apply");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Close");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+
     // ui_Panel2
 
     ui_Panel2 = lv_obj_create(ui_startScreen);
@@ -483,107 +590,6 @@ void ui_startScreen_screen_init(void)
     lv_label_set_text(ui_lockTime, "18:40");
 
     lv_obj_set_style_text_font(ui_lockTime, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_tileView = lv_tileview_create(ui_startScreen);
-
-    lv_obj_set_width(ui_tileView, 320);
-    lv_obj_set_height(ui_tileView, 410);
-
-    lv_obj_set_x(ui_tileView, 0);
-    lv_obj_set_y(ui_tileView, -10);
-
-    lv_obj_set_align(ui_tileView, LV_ALIGN_CENTER);
-
-    lv_obj_set_scrollbar_mode(ui_tileView, LV_SCROLLBAR_MODE_OFF);
-
-    lv_obj_set_style_radius(ui_tileView, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_tileView, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_tileView, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_tileView, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    /*Tile1: just a label*/
-    ui_tileStart = lv_tileview_add_tile(ui_tileView, 0, 0, LV_DIR_RIGHT);
-
-    static lv_coord_t col_dsc[] = {92, 92, 92, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {60, 60, 60, 60, LV_GRID_TEMPLATE_LAST};
-
-    /*Create a container with grid*/
-    lv_obj_t * cont = lv_obj_create(ui_tileStart);
-    lv_obj_set_style_grid_column_dsc_array(cont, col_dsc, 0);
-    lv_obj_set_style_grid_row_dsc_array(cont, row_dsc, 0);
-    lv_obj_set_size(cont, 320, 410);
-    lv_obj_center(cont);
-    lv_obj_set_layout(cont, LV_LAYOUT_GRID);
-
-    lv_obj_set_style_radius(cont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(cont, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(cont, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(cont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_scrollbar_mode(cont, LV_SCROLLBAR_MODE_OFF);
-
-    lv_obj_t * label;
-    lv_obj_t * obj;
-
-    uint32_t i;
-    for(i = 0; i < 12; i++) {
-        uint8_t col = i % 3;
-        uint8_t row = i / 3;
-
-        obj = lv_btn_create(cont);
-        /*Stretch the cell horizontally and vertically too
-         *Set span to 1 to make the cell 1 column/row sized*/
-        lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, 1,
-                             LV_GRID_ALIGN_STRETCH, row, 1);
-
-        label = lv_label_create(obj);
-        lv_label_set_text_fmt(label, "c%d, r%d", col, row);
-        lv_obj_center(label);
-    }
-
-    /*Tile2: a button*/
-    ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
-    /*Create a list*/
-    list1 = lv_list_create(ui_tileApps);
-    lv_obj_set_size(list1,  320,  410);
-    lv_obj_center(list1);
-
-    lv_obj_set_style_radius(list1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(list1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(list1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(list1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_scrollbar_mode(list1, LV_SCROLLBAR_MODE_OFF);
-
-    /*Add buttons to the list*/
-    lv_obj_t * btn;
-
-    lv_list_add_text(list1, "File");
-    btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, "New");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_DIRECTORY, "Open");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_SAVE, "Save");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Delete");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_EDIT, "Edit");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-
-    lv_list_add_text(list1, "Connectivity");
-    btn = lv_list_add_btn(list1, LV_SYMBOL_BLUETOOTH, "Bluetooth");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_GPS, "Navigation");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_USB, "USB");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_BATTERY_FULL, "Battery");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-
-    lv_list_add_text(list1, "Exit");
-    btn = lv_list_add_btn(list1, LV_SYMBOL_OK, "Apply");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Close");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
 }
 void ui_Screen5_screen_init(void)
 {
