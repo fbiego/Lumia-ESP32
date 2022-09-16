@@ -20,7 +20,11 @@ lv_obj_t *ui_wifiIcon;
 lv_obj_t *ui_networkIcon;
 lv_obj_t *ui_lockTime;
 lv_obj_t *ui_startScreen;
-lv_obj_t *ui_Screen5;
+lv_obj_t * ui_Panel2;
+lv_obj_t * ui_Image5;
+lv_obj_t * ui_Image6;
+lv_obj_t * ui_Image7;
+lv_obj_t * ui_Screen5;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
