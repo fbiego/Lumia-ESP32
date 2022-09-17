@@ -69,4 +69,4 @@ struct LED{
   uint32_t color;
 } led;
 
-void setLed();
+

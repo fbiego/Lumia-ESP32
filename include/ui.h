@@ -112,6 +112,7 @@ void openStart();
 void openSettings();
 void openLock();
 void openAppLed();
+void setLed();
 
 #ifdef __cplusplus
 } /*extern "C"*/
