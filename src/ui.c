@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include "ui.h"
+#include "main.h"
 //#include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
@@ -81,16 +82,16 @@ drag notification;
 
 ///////////////////// ANIMATIONS ////////////////////
 
-///////////////////// FUNCTIONS ////////////////////
+///////////////////// CALLBACK FUNCTIONS ////////////////////
 
 static void slider_event_cb(lv_event_t *e)
 {
     lv_obj_t *slider = lv_event_get_target(e);
-    // if (slider == ui_Slider1)
-    //  {
-    //    int brightness = (int)lv_slider_get_value(slider);
-    //    ledcWrite(ledChannel, brightness);
-    //  }
+    if (slider == ui_brightnessSlider)
+    {
+        int brightness = (int)lv_slider_get_value(slider);
+        ledcWrite(ledChannel, brightness);
+    }
 }
 
 static void event_handler(lv_event_t *e)
@@ -99,7 +100,36 @@ static void event_handler(lv_event_t *e)
     lv_obj_t *obj = lv_event_get_target(e);
     if (code == LV_EVENT_CLICKED)
     {
-        
+    }
+}
+
+void theme_change(lv_event_t *e)
+{
+    lv_obj_t *picker = lv_event_get_target(e);
+    // val = lv_slider_get_value(picker); //
+    lv_color_t c = lv_colorwheel_get_rgb(picker);
+    lv_disp_t *display = lv_disp_get_default();
+    lv_theme_t *theme = lv_theme_default_init(display, c, lv_palette_main(LV_PALETTE_GREY),
+                                              true, LV_FONT_DEFAULT);
+    lv_disp_set_theme(display, theme);
+    //   lv_obj_set_style_img_recolor(ui_dragPanel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_dragPanel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_deviceLabel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+    //   lv_obj_set_style_img_recolor(ui_minuteIcon1, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+    //   lv_obj_set_style_img_recolor(ui_minuteIcon2, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+    //   lv_obj_set_style_text_color(ui_timeSeparator, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+    //   lv_obj_set_style_text_color(ui_dateText, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+    //   lv_obj_set_style_bg_color(ui_stepsProgress, c, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+    uint32_t i;
+    for (i = 0; i < lv_obj_get_child_cnt(list1); i++)
+    {
+        lv_obj_t *child = lv_obj_get_child(list1, i);
+        lv_obj_t *icon =  lv_obj_get_child(child, 1);
+
+        lv_obj_set_style_bg_color(icon, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_border_color(icon, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     }
 }
 
@@ -120,16 +150,23 @@ static void navigate(lv_event_t *e)
     lv_disp_t *display = lv_disp_get_default();
     lv_obj_t *actScr = lv_disp_get_scr_act(display);
 
-    
-
     if (code == LV_EVENT_CLICKED)
     {
         printf("Navigate action: ");
         if (obj == ui_backButton)
         {
             printf("Back\n");
-            if (actScr == ui_startScreen){
+            if (actScr == ui_startScreen)
+            {
                 openLock();
+            }
+            else if (actScr != ui_startScreen)
+            {
+                openStart();
+            }
+            else
+            {
+                lv_obj_set_tile_id(ui_tileView, 0, 0, LV_ANIM_ON);
             }
         }
         if (obj == ui_startButton)
@@ -138,7 +175,9 @@ static void navigate(lv_event_t *e)
             if (actScr != ui_startScreen)
             {
                 openStart();
-            } else {
+            }
+            else
+            {
                 lv_obj_set_tile_id(ui_tileView, 0, 0, LV_ANIM_ON);
             }
         }
@@ -146,7 +185,7 @@ static void navigate(lv_event_t *e)
         {
             printf("Search\n");
         }
-    } 
+    }
 }
 
 static void ui_event_Image6(lv_event_t *e)
@@ -359,6 +398,8 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
     }
 }
 
+///////////////////// FUNCTIONS ////////////////////
+
 void create_tile(lv_obj_t *parent, char *name, const void *src, int col, int row, int size, lv_event_cb_t callback)
 {
     lv_obj_t *label;
@@ -406,11 +447,11 @@ void create_action_tile(lv_obj_t *parent, char *name, const void *src, bool chec
 
     lv_obj_add_flag(obj, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
     lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color(obj, lv_color_hex(0x7A7A7A), LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_CHECKED);
+    // lv_obj_set_style_bg_color(obj, lv_color_hex(0x7A7A7A), LV_PART_MAIN | LV_STATE_CHECKED);
     lv_obj_set_style_bg_opa(obj, 255, LV_PART_MAIN | LV_STATE_CHECKED);
 
     label = lv_label_create(obj);
@@ -444,8 +485,8 @@ void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callb
     lv_obj_set_style_pad_bottom(obj, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_set_style_bg_color(obj, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_bg_opa(obj, 100, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(obj, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(obj, 50, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
 
@@ -464,9 +505,9 @@ void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callb
     lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
     lv_obj_add_flag(icon, LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_bg_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_border_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(icon, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
@@ -505,7 +546,6 @@ void navigation(lv_obj_t *parent)
     lv_obj_set_y(ui_startButton, 0);
     lv_obj_set_align(ui_startButton, LV_ALIGN_CENTER);
     lv_obj_add_event_cb(ui_startButton, navigate, LV_EVENT_ALL, NULL);
-    
 
     // ui_backButton
 
@@ -940,7 +980,7 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_style_bg_opa(ui_tileView, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_tileView, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    /*Tile1: just a label*/
+    /*Tile1: startMenu*/
     ui_tileStart = lv_tileview_add_tile(ui_tileView, 0, 0, LV_DIR_RIGHT);
 
     static lv_coord_t col_dsc[] = {92, 92, 92, LV_GRID_TEMPLATE_LAST};
@@ -981,7 +1021,7 @@ void ui_startScreen_screen_init(void)
     create_tile(cont, "Store", &ui_img_571330079, 1, 5, 1, NULL);
     create_tile(cont, "Wallet", &ui_img_wallet_png, 2, 5, 1, NULL);
 
-    /*Tile2: a button*/
+    /*Tile2: appList*/
     ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
     /*Create a list*/
     list1 = lv_list_create(ui_tileApps);
@@ -995,7 +1035,7 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_style_border_width(list1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(list1, LV_SCROLLBAR_MODE_OFF);
 
-    /*Add buttons to the list*/
+    /*Add apps to the list*/
 
     add_item(list1, "Phone", &ui_img_1276322231, NULL);
     add_item(list1, "People", &ui_img_people_png, NULL);
@@ -1051,7 +1091,7 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_style_pad_left(ui_settingsScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_settingsScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_settingsScroll, 40, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_settingsScroll, 80, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_settingsScroll, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_displayLabel
 
@@ -1082,13 +1122,15 @@ void ui_settingsScreen_screen_init(void)
     // ui_brightnessSlider
 
     ui_brightnessSlider = lv_slider_create(ui_settingsScroll);
-    lv_slider_set_range(ui_brightnessSlider, 0, 100);
+    lv_slider_set_range(ui_brightnessSlider, 1, 255);
 
     lv_obj_set_width(ui_brightnessSlider, 240);
     lv_obj_set_height(ui_brightnessSlider, 4);
 
     lv_obj_set_x(ui_brightnessSlider, 40);
     lv_obj_set_y(ui_brightnessSlider, 110);
+
+    lv_obj_add_event_cb(ui_brightnessSlider, slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // ui_timeoutLabel
 
@@ -1108,7 +1150,7 @@ void ui_settingsScreen_screen_init(void)
 
     ui_timeoutSelect = lv_dropdown_create(ui_settingsScroll);
     lv_dropdown_set_options(ui_timeoutSelect, "30 seconds\n1 minute\n3 minutes\n5 minutes");
-    lv_dropdown_set_text(ui_timeoutSelect, "30 seconds");
+    // lv_dropdown_set_text(ui_timeoutSelect, "30 seconds");
 
     lv_obj_set_width(ui_timeoutSelect, 189);
     lv_obj_set_height(ui_timeoutSelect, LV_SIZE_CONTENT);
@@ -1124,6 +1166,14 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_style_border_color(ui_timeoutSelect, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_timeoutSelect, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_timeoutSelect, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t *list = lv_dropdown_get_list(ui_timeoutSelect); /*Get the list*/
+    lv_obj_set_style_radius(list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(list, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(list, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(list, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(list, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(list, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_storageLabel
 
@@ -1149,7 +1199,7 @@ void ui_settingsScreen_screen_init(void)
 
     lv_label_set_text(ui_deviceLabel, "This device");
 
-    lv_obj_set_style_text_color(ui_deviceLabel, lv_color_hex(0x2095F6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_deviceLabel, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_deviceLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_deviceLabel, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -1207,6 +1257,8 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_x(ui_themeWheel, 50);
     lv_obj_set_y(ui_themeWheel, 318);
 
+    lv_obj_add_event_cb(ui_themeWheel, theme_change, LV_EVENT_VALUE_CHANGED, NULL);
+
     // ui_settingPanel
 
     ui_settingPanel = lv_obj_create(ui_settingsScreen);
@@ -1262,7 +1314,7 @@ void ui_settingsScreen_screen_init(void)
 void ui_init(void)
 {
     lv_disp_t *dispp = lv_disp_get_default();
-    lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED),
+    lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_GREY),
                                               true, LV_FONT_DEFAULT);
     lv_disp_set_theme(dispp, theme);
     ui_bootScreen_screen_init();
@@ -1274,7 +1326,7 @@ void ui_init(void)
 
 void openStart()
 {
-    
+
     lv_obj_set_parent(ui_Panel2, ui_startScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_startScreen);
     lv_obj_set_parent(ui_statusBar, ui_startScreen);
@@ -1283,7 +1335,7 @@ void openStart()
 
 void openSettings()
 {
-    
+
     lv_obj_set_parent(ui_Panel2, ui_settingsScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_settingsScreen);
     lv_obj_set_parent(ui_statusBar, ui_settingsScreen);

@@ -60,6 +60,8 @@ extern lv_obj_t * ui_settingsIcon;
 extern lv_obj_t * ui_settingsLabel;
 
 
+
+
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
 LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
 LV_IMG_DECLARE(ui_img_wifi_png);    // assets\wifi.png

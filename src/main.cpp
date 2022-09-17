@@ -70,7 +70,7 @@ void setup()
 
   ft6336u.begin();
 
-  rtc.setTime(1663352526); //GMT: Friday, September 16, 2022 6:22:06 PM
+  rtc.setTime(1663352526); // GMT: Friday, September 16, 2022 6:22:06 PM
 
   lv_init();
 
@@ -122,6 +122,48 @@ void setup()
     lv_timer_handler();
   }
   openLock();
+
+  uint64_t mac = ESP.getEfuseMac();
+  // Serial.print("Mac: ");
+
+  // for (int i = 0; i < 6; i++)
+  // {
+  //   if (i > 0)
+  //   {
+  //     Serial.print(":");
+  //   }
+  //   Serial.print(byte(mac >> (i * 8) & 0xFF), HEX);
+  // }
+  // Serial.println();
+
+  
+ String info;
+
+  info = "Flash size: " + String(ESP.getFlashChipSize());
+  info += "\nFlash speed: " + String(ESP.getFlashChipSpeed());
+  info += "\nRAM size: " + String(ESP.getHeapSize());
+  info += "\nPSRAM size: " + String(ESP.getPsramSize());
+  info += "\nCPU freq: " + String(ESP.getCpuFreqMHz());
+  info += "\nChip model: " + String(ESP.getChipModel());
+  info += "\nChip cores: " + String(ESP.getChipCores());
+  info += "\nChip version: " + String(ESP.getChipRevision());
+  info += "\nCode size: " + String(ESP.getSketchSize());
+  info += "\nMac: ";
+
+  for (int i = 0; i < 6; i++)
+  {
+    if (i > 0)
+    {
+      info += ":";
+    }
+    info += String(byte(mac >> (i * 8) & 0xFF), HEX);
+  }
+
+  Serial.println(info);
+
+  lv_slider_set_value(ui_brightnessSlider, 100, LV_ANIM_OFF);
+
+  //lv_label_set_text(ui_notificationText, info.c_str());
 }
 
 void loop()
