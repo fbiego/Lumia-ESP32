@@ -8,27 +8,34 @@
 //#include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-lv_obj_t *ui_bootScreen;
-lv_obj_t *ui_bootLogo;
-lv_obj_t *ui_lockScreen;
-lv_obj_t *ui_lockScreenPanel;
-lv_obj_t *ui_lockScreenTime;
-lv_obj_t *ui_lockScreenDate;
-lv_obj_t *ui_batteryIcon;
-lv_obj_t *ui_batteryBar;
-lv_obj_t *ui_wifiIcon;
-lv_obj_t *ui_networkIcon;
-lv_obj_t *ui_lockTime;
-lv_obj_t *ui_startScreen;
-lv_obj_t *ui_Panel2;
-lv_obj_t *ui_Image5;
-lv_obj_t *ui_Image6;
-lv_obj_t *ui_Image7;
-lv_obj_t *ui_Screen5;
+lv_obj_t * ui_bootScreen;
+lv_obj_t * ui_bootLogo;
+lv_obj_t * ui_lockScreen;
+lv_obj_t * ui_lockScreenPanel;
+lv_obj_t * ui_lockScreenTime;
+lv_obj_t * ui_lockScreenDate;
+lv_obj_t * ui_batteryBar;
+lv_obj_t * ui_wifiIcon;
+lv_obj_t * ui_networkIcon;
+lv_obj_t * ui_lockTime;
+lv_obj_t * ui_startScreen;
+lv_obj_t * ui_Panel2;
+lv_obj_t * ui_startButton;
+lv_obj_t * ui_backButton;
+lv_obj_t * ui_searchButton;
+lv_obj_t * ui_startPanel;
+lv_obj_t * ui_batteryIcon;
+lv_obj_t * ui_Image8;
+lv_obj_t * ui_Image9;
+lv_obj_t * ui_Screen5;
 
 lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
 lv_obj_t *ui_tileApps;
+
+lv_obj_t * ui_startButton;
+lv_obj_t * ui_backButton;
+lv_obj_t * ui_searchButton;
 
 lv_obj_t *list1;
 
@@ -351,7 +358,7 @@ void ui_startScreen_screen_init(void)
     ui_tileStart = lv_tileview_add_tile(ui_tileView, 0, 0, LV_DIR_RIGHT);
 
     static lv_coord_t col_dsc[] = {92, 92, 92, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {60, 60, 60, 60, 60, 60, 60, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {70, 70, 70, 70, 70, 70, 70, LV_GRID_TEMPLATE_LAST};
 
     /*Create a container with grid*/
     lv_obj_t *cont = lv_obj_create(ui_tileStart);
@@ -371,23 +378,126 @@ void ui_startScreen_screen_init(void)
     lv_obj_t *label;
     lv_obj_t *obj;
 
-    uint32_t i;
-    for (i = 0; i < 21; i++)
-    {
-        uint8_t col = i % 3;
-        uint8_t row = i / 3;
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Phone");
+    lv_obj_center(label);
+    lv_obj_set_align(label, LV_ALIGN_BOTTOM_LEFT);
+    lv_obj_set_x(label, -10);
+    lv_obj_set_y(label, 5);
+    lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_Image8 = lv_img_create(obj);
+    lv_img_set_src(ui_Image8, &ui_img_1276322231);
+    lv_obj_set_width(ui_Image8, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_Image8, LV_SIZE_CONTENT);
+    lv_obj_set_align(ui_Image8, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Image8, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(ui_Image8, LV_OBJ_FLAG_SCROLLABLE);
 
-        obj = lv_btn_create(cont);
-        /*Stretch the cell horizontally and vertically too
-         *Set span to 1 to make the cell 1 column/row sized*/
-        lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, 1,
-                             LV_GRID_ALIGN_STRETCH, row, 1);
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "People");
+    lv_obj_center(label);
 
-        label = lv_label_create(obj);
-        lv_label_set_text_fmt(label, "c%d, r%d", col, row);
-        lv_obj_center(label);
-    }
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Messaging");
+    lv_obj_center(label);
+    lv_obj_set_align(label, LV_ALIGN_BOTTOM_LEFT);
+    lv_obj_set_x(label, -10);
+    lv_obj_set_y(label, 5);
+    lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_Image9 = lv_img_create(obj);
+    lv_img_set_src(ui_Image9, &ui_img_237043237);
+    lv_obj_set_width(ui_Image9, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_Image9, LV_SIZE_CONTENT);
+    lv_obj_set_align(ui_Image9, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Image9, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(ui_Image9, LV_OBJ_FLAG_SCROLLABLE);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Mail");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Calendar");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Edge");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 2, LV_GRID_ALIGN_STRETCH, 2, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Weather");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 3, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Photos");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 3, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Groove");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 4, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Settings");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 2, LV_GRID_ALIGN_STRETCH, 4, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Maps");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 5, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "OneDrive");
+    lv_obj_center(label);
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 5, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Store");
+    lv_obj_center(label);
+    
+
+    obj = lv_btn_create(cont);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 5, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "Wallet");
+    lv_obj_center(label);
 
     /*Tile2: a button*/
     ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
@@ -454,59 +564,46 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_style_border_width(ui_Panel2, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui_Panel2, LV_BORDER_SIDE_TOP, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_Image5
+    // ui_startButton
 
-    ui_Image5 = lv_img_create(ui_Panel2);
-    lv_img_set_src(ui_Image5, &ui_img_716248923);
+    ui_startButton = lv_imgbtn_create(ui_Panel2);
+    lv_imgbtn_set_src(ui_startButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_716248923, NULL);
 
-    lv_obj_set_width(ui_Image5, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_Image5, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_startButton, 24);
+    lv_obj_set_width(ui_startButton, LV_SIZE_CONTENT);
 
-    lv_obj_set_x(ui_Image5, 0);
-    lv_obj_set_y(ui_Image5, 0);
+    lv_obj_set_x(ui_startButton, 0);
+    lv_obj_set_y(ui_startButton, 0);
 
-    lv_obj_set_align(ui_Image5, LV_ALIGN_CENTER);
+    lv_obj_set_align(ui_startButton, LV_ALIGN_CENTER);
 
-    lv_obj_add_flag(ui_Image5, LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_clear_flag(ui_Image5, LV_OBJ_FLAG_SCROLLABLE);
+    // ui_backButton
 
-    lv_obj_set_style_img_recolor(ui_Image5, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(ui_Image5, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_backButton = lv_imgbtn_create(ui_Panel2);
+    lv_imgbtn_set_src(ui_backButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_back_png, NULL);
 
-    // ui_Image6
+    lv_obj_set_height(ui_backButton, 24);
+    lv_obj_set_width(ui_backButton, LV_SIZE_CONTENT);
 
-    ui_Image6 = lv_img_create(ui_Panel2);
-    lv_img_set_src(ui_Image6, &ui_img_back_png);
+    lv_obj_set_x(ui_backButton, -90);
+    lv_obj_set_y(ui_backButton, 0);
 
-    lv_obj_set_width(ui_Image6, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_Image6, LV_SIZE_CONTENT);
+    lv_obj_set_align(ui_backButton, LV_ALIGN_CENTER);
 
-    lv_obj_set_x(ui_Image6, -90);
-    lv_obj_set_y(ui_Image6, 0);
+    lv_obj_add_event_cb(ui_backButton, ui_event_Image6, LV_EVENT_ALL, NULL);
 
-    lv_obj_set_align(ui_Image6, LV_ALIGN_CENTER);
+    // ui_searchButton
 
-    lv_obj_add_flag(ui_Image6, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_clear_flag(ui_Image6, LV_OBJ_FLAG_SCROLLABLE);
+    ui_searchButton = lv_imgbtn_create(ui_Panel2);
+    lv_imgbtn_set_src(ui_searchButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_1954556228, NULL);
 
-    lv_obj_add_event_cb(ui_Image6, ui_event_Image6, LV_EVENT_ALL, NULL);
+    lv_obj_set_height(ui_searchButton, 24);
+    lv_obj_set_width(ui_searchButton, LV_SIZE_CONTENT);
 
-    // ui_Image7
+    lv_obj_set_x(ui_searchButton, 90);
+    lv_obj_set_y(ui_searchButton, 0);
 
-    ui_Image7 = lv_img_create(ui_Panel2);
-    lv_img_set_src(ui_Image7, &ui_img_1954556228);
-
-    lv_obj_set_width(ui_Image7, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_Image7, LV_SIZE_CONTENT);
-
-    lv_obj_set_x(ui_Image7, 90);
-    lv_obj_set_y(ui_Image7, 0);
-
-    lv_obj_set_align(ui_Image7, LV_ALIGN_CENTER);
-
-    lv_obj_add_flag(ui_Image7, LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_clear_flag(ui_Image7, LV_OBJ_FLAG_SCROLLABLE);
-
+    lv_obj_set_align(ui_searchButton, LV_ALIGN_CENTER);
     // ui_batteryIcon
 
     ui_batteryIcon = lv_img_create(ui_startScreen);
