@@ -8,39 +8,39 @@
 //#include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-lv_obj_t * ui_bootScreen;
-lv_obj_t * ui_bootLogo;
-lv_obj_t * ui_lockScreen;
-lv_obj_t * ui_lockScreenPanel;
-lv_obj_t * ui_lockScreenTime;
-lv_obj_t * ui_lockScreenDate;
-lv_obj_t * ui_batteryBar;
-lv_obj_t * ui_wifiIcon;
-lv_obj_t * ui_networkIcon;
-lv_obj_t * ui_lockTime;
-lv_obj_t * ui_startScreen;
-lv_obj_t * ui_Panel2;
-lv_obj_t * ui_startButton;
-lv_obj_t * ui_backButton;
-lv_obj_t * ui_searchButton;
-lv_obj_t * ui_startPanel;
-lv_obj_t * ui_systemKeyboard;
-lv_obj_t * ui_batteryIcon;
-lv_obj_t * ui_phone;
-lv_obj_t * ui_message;
-lv_obj_t * ui_calendar;
-lv_obj_t * ui_drive;
-lv_obj_t * ui_weather;
-lv_obj_t * ui_mail;
-lv_obj_t * ui_photos;
-lv_obj_t * ui_settings;
-lv_obj_t * ui_maps;
-lv_obj_t * ui_edge;
-lv_obj_t * ui_music;
-lv_obj_t * ui_people;
-lv_obj_t * ui_store;
-lv_obj_t * ui_wallet;
-lv_obj_t * ui_Screen5;
+lv_obj_t *ui_bootScreen;
+lv_obj_t *ui_bootLogo;
+lv_obj_t *ui_lockScreen;
+lv_obj_t *ui_lockScreenPanel;
+lv_obj_t *ui_lockScreenTime;
+lv_obj_t *ui_lockScreenDate;
+lv_obj_t *ui_batteryBar;
+lv_obj_t *ui_wifiIcon;
+lv_obj_t *ui_networkIcon;
+lv_obj_t *ui_lockTime;
+lv_obj_t *ui_startScreen;
+lv_obj_t *ui_Panel2;
+lv_obj_t *ui_startButton;
+lv_obj_t *ui_backButton;
+lv_obj_t *ui_searchButton;
+lv_obj_t *ui_startPanel;
+lv_obj_t *ui_systemKeyboard;
+lv_obj_t *ui_batteryIcon;
+lv_obj_t *ui_phone;
+lv_obj_t *ui_message;
+lv_obj_t *ui_calendar;
+lv_obj_t *ui_drive;
+lv_obj_t *ui_weather;
+lv_obj_t *ui_mail;
+lv_obj_t *ui_photos;
+lv_obj_t *ui_settings;
+lv_obj_t *ui_maps;
+lv_obj_t *ui_edge;
+lv_obj_t *ui_music;
+lv_obj_t *ui_people;
+lv_obj_t *ui_store;
+lv_obj_t *ui_wallet;
+lv_obj_t *ui_Screen5;
 
 lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
@@ -96,7 +96,7 @@ static void ui_event_Image6(lv_event_t *e)
     {
         lv_disp_load_scr(ui_lockScreen);
     }
-    printf("Event code: %d\n", event);
+    // printf("Event code: %d\n", event);
 }
 
 static void ui_event_lockScreenPanel(lv_event_t *e)
@@ -109,7 +109,7 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
         // onDragg(e);
 
         // printf("x:%d, y:%d\n", indev->proc.types.pointer.vect.x, indev->proc.types.pointer.vect.y);
-        printf("Drag\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+        // printf("Drag\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
 
         if (dragging)
         {
@@ -126,7 +126,7 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
     }
     if (event == LV_EVENT_PRESSED)
     {
-        printf("Press\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+        // printf("Press\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
         lastY = indev->proc.types.pointer.act_point.y;
         if (lastY > 150)
         {
@@ -136,11 +136,11 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
     }
     if (event == LV_EVENT_RELEASED)
     {
-        printf("Release\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+        // printf("Release\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
         dragging = false;
 
         int vect = lastY - indev->proc.types.pointer.act_point.y;
-        printf("Drag strength: %d\n", vect);
+        // printf("Drag strength: %d\n", vect);
 
         if (vect > 150)
         {
@@ -163,11 +163,12 @@ void create_tile(lv_obj_t *parent, char *name, const void *src, int col, int row
     obj = lv_btn_create(parent);
     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, size, LV_GRID_ALIGN_STRETCH, row, 1);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
     label = lv_label_create(obj);
     lv_label_set_text(label, name);
     lv_obj_center(label);
     lv_obj_set_align(label, LV_ALIGN_BOTTOM_LEFT);
-    lv_obj_set_x(label, -10);
+    lv_obj_set_x(label, -5);
     lv_obj_set_y(label, 5);
     lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
     icon = lv_img_create(obj);
@@ -177,10 +178,51 @@ void create_tile(lv_obj_t *parent, char *name, const void *src, int col, int row
     lv_obj_set_align(icon, LV_ALIGN_CENTER);
     lv_obj_add_flag(icon, LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
 }
 
-void keyboard(lv_obj_t *parent){
+void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callback)
+{
+
+    lv_obj_t *obj;
+    lv_obj_t *icon;
+    lv_obj_t *label;
+
+    obj = lv_btn_create(parent);
+
+    lv_obj_set_width(obj, lv_pct(100));
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(obj, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(obj, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(obj, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
+
+    label = lv_label_create(obj);
+    lv_label_set_text(label, name);
+    lv_obj_center(label);
+    lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
+    lv_obj_set_x(label, 50);
+    lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    icon = lv_img_create(obj);
+    lv_img_set_src(icon, src);
+    lv_obj_set_width(icon, LV_SIZE_CONTENT);
+    lv_obj_set_height(icon, LV_SIZE_CONTENT);
+    lv_obj_set_x(icon, 5);
+    lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
+    lv_obj_add_flag(icon, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(icon,  lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(icon,  lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(icon, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+}
+
+void keyboard(lv_obj_t *parent)
+{
     // ui_systemKeyboard
     ui_systemKeyboard = lv_keyboard_create(parent);
 
@@ -437,7 +479,7 @@ void ui_startScreen_screen_init(void)
 
     create_tile(cont, "Messaging", &ui_img_237043237, 0, 1, 1, NULL);
     create_tile(cont, "Mail", &ui_img_email_png, 1, 1, 1, NULL);
-    create_tile(cont, "Calendar",&ui_img_calendar_png, 2, 1, 1, NULL);
+    create_tile(cont, "Calendar", &ui_img_calendar_png, 2, 1, 1, NULL);
 
     create_tile(cont, "Edge", &ui_img_microsoft_png, 0, 2, 1, NULL);
     create_tile(cont, "Weather", &ui_img_1127648905, 1, 2, 2, NULL);
@@ -451,7 +493,6 @@ void ui_startScreen_screen_init(void)
     create_tile(cont, "OneDrive", &ui_img_cloud_png, 0, 5, 1, NULL);
     create_tile(cont, "Store", &ui_img_571330079, 1, 5, 1, NULL);
     create_tile(cont, "Wallet", &ui_img_wallet_png, 2, 5, 1, NULL);
-
 
     /*Tile2: a button*/
     ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
@@ -468,35 +509,26 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_scrollbar_mode(list1, LV_SCROLLBAR_MODE_OFF);
 
     /*Add buttons to the list*/
-    lv_obj_t *btn;
 
-    lv_list_add_text(list1, "File");
-    btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, "New");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_DIRECTORY, "Open");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_SAVE, "Save");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Delete");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_EDIT, "Edit");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    add_item(list1, "Phone", &ui_img_1276322231, NULL);
+    add_item(list1, "People", &ui_img_people_png, NULL);
 
-    lv_list_add_text(list1, "Connectivity");
-    btn = lv_list_add_btn(list1, LV_SYMBOL_BLUETOOTH, "Bluetooth");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_GPS, "Navigation");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_USB, "USB");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_BATTERY_FULL, "Battery");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    add_item(list1, "Messaging", &ui_img_237043237, NULL);
+    add_item(list1, "Mail", &ui_img_email_png,  NULL);
+    add_item(list1, "Calendar", &ui_img_calendar_png, NULL);
 
-    lv_list_add_text(list1, "Exit");
-    btn = lv_list_add_btn(list1, LV_SYMBOL_OK, "Apply");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-    btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Close");
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    add_item(list1, "Edge", &ui_img_microsoft_png, NULL);
+    add_item(list1, "Weather", &ui_img_1127648905, NULL);
+
+    add_item(list1, "Photos", &ui_img_gallery_png, NULL);
+    add_item(list1, "Music", &ui_img_359952343, NULL);
+
+    add_item(list1, "Settings", &ui_img_gear_png, NULL);
+    add_item(list1, "Maps", &ui_img_846015263, NULL);
+
+    add_item(list1, "OneDrive", &ui_img_cloud_png, NULL);
+    add_item(list1, "Store", &ui_img_571330079, NULL);
+    add_item(list1, "Wallet", &ui_img_wallet_png, NULL);
 
     // ui_Panel2
 
