@@ -114,7 +114,6 @@ void setup()
   }
 
   ledcSetup(ledChannel, freq, resolution);
-  // attach the channel to the GPIO to be ui_menuListrolled
   ledcAttachPin(ledPin, ledChannel);
   ledcWrite(ledChannel, 100);
   currentMillis = millis();
@@ -122,7 +121,7 @@ void setup()
   {
     lv_timer_handler();
   }
-  lv_disp_load_scr(ui_lockScreen);
+  openLock();
 }
 
 void loop()

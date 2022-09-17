@@ -22,6 +22,7 @@ extern lv_obj_t * ui_lockScreen;
 extern lv_obj_t * ui_lockScreenPanel;
 extern lv_obj_t * ui_lockScreenTime;
 extern lv_obj_t * ui_lockScreenDate;
+extern lv_obj_t * ui_statusBar;
 extern lv_obj_t * ui_batteryBar;
 extern lv_obj_t * ui_wifiIcon;
 extern lv_obj_t * ui_networkIcon;
@@ -41,8 +42,22 @@ extern lv_obj_t * ui_notificationText;
 extern lv_obj_t * ui_dragPanel;
 extern lv_obj_t * ui_Label7;
 extern lv_obj_t * ui_batteryIcon;
-extern lv_obj_t * ui_Screen5;
-extern lv_obj_t * ui_Image22;
+extern lv_obj_t * ui_settingsScreen;
+extern lv_obj_t * ui_settingsScroll;
+extern lv_obj_t * ui_displayLabel;
+extern lv_obj_t * ui_brightnessLabel;
+extern lv_obj_t * ui_brightnessSlider;
+extern lv_obj_t * ui_timeoutLabel;
+extern lv_obj_t * ui_timeoutSelect;
+extern lv_obj_t * ui_storageLabel;
+extern lv_obj_t * ui_deviceLabel;
+extern lv_obj_t * ui_storageBar;
+extern lv_obj_t * ui_storageText;
+extern lv_obj_t * ui_themeLabel;
+extern lv_obj_t * ui_themeWheel;
+extern lv_obj_t * ui_settingPanel;
+extern lv_obj_t * ui_settingsIcon;
+extern lv_obj_t * ui_settingsLabel;
 
 
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
@@ -72,6 +87,10 @@ LV_IMG_DECLARE(ui_img_wallet_png);    // assets\wallet.png
 
 
 void ui_init(void);
+
+void openStart();
+void openSettings();
+void openLock();
 
 #ifdef __cplusplus
 } /*extern "C"*/
