@@ -133,6 +133,10 @@ static void ui_event_notificationPanel(lv_event_t *e)
                     lv_obj_set_y(ui_notificationPanel, -440 + vect);
                     printf("Vector: %d\n", vect);
 
+                    if (vect >= 120){
+                        lv_obj_set_y(ui_actionPanel, 380 - (vect - 120));
+                    }
+
                     // lv_obj_set_style_text_opa(ui_lockScreenTime, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
                     // lv_obj_set_style_text_opa(ui_lockScreenDate, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
                 }
@@ -167,16 +171,18 @@ static void ui_event_notificationPanel(lv_event_t *e)
 
         if (notification.active)
         {
-            if ((vect * -1) > 150)
+            if ((vect * -1) < 150)
             {
                 lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_y(ui_notificationPanel, 0);
+                lv_obj_set_y(ui_actionPanel, 50);
                 notification.active = true;
             }
             else
             {
                 lv_obj_set_y(ui_notificationPanel, -440);
                 lv_obj_set_style_opa(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_y(ui_actionPanel, 380);
                 notification.active = false;
             }
         }
@@ -187,12 +193,14 @@ static void ui_event_notificationPanel(lv_event_t *e)
             {
                 lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_y(ui_notificationPanel, 0);
+                lv_obj_set_y(ui_actionPanel, 50);
                 notification.active = true;
             }
             else
             {
                 lv_obj_set_y(ui_notificationPanel, -440);
                 lv_obj_set_style_opa(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_y(ui_actionPanel, 380);
                 notification.active = false;
             }
         }
@@ -277,6 +285,51 @@ void create_tile(lv_obj_t *parent, char *name, const void *src, int col, int row
     lv_obj_set_x(label, -5);
     lv_obj_set_y(label, 5);
     lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    icon = lv_img_create(obj);
+    lv_img_set_src(icon, src);
+    lv_obj_set_width(icon, LV_SIZE_CONTENT);
+    lv_obj_set_height(icon, LV_SIZE_CONTENT);
+    lv_obj_set_align(icon, LV_ALIGN_CENTER);
+    lv_obj_add_flag(icon, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
+}
+
+void create_action_tile(lv_obj_t *parent, char *name, const void *src, bool checked, int col, int row, int size, lv_event_cb_t callback)
+{
+    lv_obj_t *label;
+    lv_obj_t *obj;
+    lv_obj_t *icon;
+    obj = lv_btn_create(parent);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, size, LV_GRID_ALIGN_STRETCH, row, 1);
+    lv_obj_add_flag(obj, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
+
+    if (checked)
+    {
+        lv_obj_add_state(obj, LV_STATE_CHECKED); /*Make the chekbox checked*/
+    }
+    else
+    {
+        lv_obj_clear_state(obj, LV_STATE_CHECKED); /*MAke the checkbox unchecked*/
+    }
+
+    lv_obj_add_flag(obj, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(obj, lv_color_hex(0x7A7A7A), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_opa(obj, 255, LV_PART_MAIN | LV_STATE_CHECKED);
+
+    label = lv_label_create(obj);
+    lv_label_set_text(label, name);
+    lv_obj_center(label);
+    lv_obj_set_align(label, LV_ALIGN_BOTTOM_LEFT);
+    lv_obj_set_x(label, -10);
+    lv_obj_set_y(label, 5);
+    lv_obj_set_style_text_font(label, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
     icon = lv_img_create(obj);
     lv_img_set_src(icon, src);
     lv_obj_set_width(icon, LV_SIZE_CONTENT);
@@ -385,13 +438,13 @@ void notification_panel(lv_obj_t *parent)
 
     ui_actionPanel = lv_obj_create(ui_notificationPanel);
 
-    static lv_coord_t col_dsc[] = {92, 92, 92, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {70, 70, 70, 70, 70, 70, 70, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t col_dsc[] = {51, 51, 51, 51, 51, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {40, 40, 40, LV_GRID_TEMPLATE_LAST};
 
     lv_obj_set_style_grid_column_dsc_array(ui_actionPanel, col_dsc, 0);
     lv_obj_set_style_grid_row_dsc_array(ui_actionPanel, row_dsc, 0);
     lv_obj_set_width(ui_actionPanel, 320);
-    lv_obj_set_height(ui_actionPanel, 50);
+    lv_obj_set_height(ui_actionPanel, LV_SIZE_CONTENT);
 
     lv_obj_set_x(ui_actionPanel, 0);
     lv_obj_set_y(ui_actionPanel, 50);
@@ -404,11 +457,14 @@ void notification_panel(lv_obj_t *parent)
 
     lv_obj_set_style_radius(ui_actionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_actionPanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_actionPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_actionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_actionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    create_tile(ui_actionPanel, "Phone", &ui_img_1276322231, 0, 0, 1, NULL);
-    create_tile(ui_actionPanel, "People", &ui_img_people_png, 1, 0, 2, NULL);
+    create_action_tile(ui_actionPanel, "WiFi", NULL, true, 0, 0, 1, NULL);
+    create_action_tile(ui_actionPanel, "Buetooth", NULL, true, 1, 0, 1, NULL);
+    create_action_tile(ui_actionPanel, "Screen", NULL, false, 2, 0, 1, NULL);
+    create_action_tile(ui_actionPanel, "Cellular", NULL, false, 3, 0, 1, NULL);
+    create_action_tile(ui_actionPanel, "Location", NULL, true, 4, 0, 1, NULL);
 
     // ui_actionDate
 
@@ -438,7 +494,7 @@ void notification_panel(lv_obj_t *parent)
 
     lv_obj_set_align(ui_actionBattery, LV_ALIGN_TOP_RIGHT);
 
-    lv_label_set_text(ui_actionBattery, "35%%");
+    lv_label_set_text(ui_actionBattery, "35%");
 
     lv_obj_set_style_text_font(ui_actionBattery, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_actionBattery, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
