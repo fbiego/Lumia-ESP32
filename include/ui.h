@@ -33,22 +33,16 @@ extern lv_obj_t * ui_backButton;
 extern lv_obj_t * ui_searchButton;
 extern lv_obj_t * ui_startPanel;
 extern lv_obj_t * ui_systemKeyboard;
+extern lv_obj_t * ui_notificationPanel;
+extern lv_obj_t * ui_actionPanel;
+extern lv_obj_t * ui_actionDate;
+extern lv_obj_t * ui_actionBattery;
+extern lv_obj_t * ui_notificationText;
+extern lv_obj_t * ui_dragPanel;
+extern lv_obj_t * ui_Label7;
 extern lv_obj_t * ui_batteryIcon;
-extern lv_obj_t * ui_phone;
-extern lv_obj_t * ui_message;
-extern lv_obj_t * ui_calendar;
-extern lv_obj_t * ui_drive;
-extern lv_obj_t * ui_weather;
-extern lv_obj_t * ui_mail;
-extern lv_obj_t * ui_photos;
-extern lv_obj_t * ui_settings;
-extern lv_obj_t * ui_maps;
-extern lv_obj_t * ui_edge;
-extern lv_obj_t * ui_music;
-extern lv_obj_t * ui_people;
-extern lv_obj_t * ui_store;
-extern lv_obj_t * ui_wallet;
 extern lv_obj_t * ui_Screen5;
+extern lv_obj_t * ui_Image22;
 
 
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png

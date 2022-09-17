@@ -8,39 +8,33 @@
 //#include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-lv_obj_t *ui_bootScreen;
-lv_obj_t *ui_bootLogo;
-lv_obj_t *ui_lockScreen;
-lv_obj_t *ui_lockScreenPanel;
-lv_obj_t *ui_lockScreenTime;
-lv_obj_t *ui_lockScreenDate;
-lv_obj_t *ui_batteryBar;
-lv_obj_t *ui_wifiIcon;
-lv_obj_t *ui_networkIcon;
-lv_obj_t *ui_lockTime;
-lv_obj_t *ui_startScreen;
-lv_obj_t *ui_Panel2;
-lv_obj_t *ui_startButton;
-lv_obj_t *ui_backButton;
-lv_obj_t *ui_searchButton;
-lv_obj_t *ui_startPanel;
-lv_obj_t *ui_systemKeyboard;
-lv_obj_t *ui_batteryIcon;
-lv_obj_t *ui_phone;
-lv_obj_t *ui_message;
-lv_obj_t *ui_calendar;
-lv_obj_t *ui_drive;
-lv_obj_t *ui_weather;
-lv_obj_t *ui_mail;
-lv_obj_t *ui_photos;
-lv_obj_t *ui_settings;
-lv_obj_t *ui_maps;
-lv_obj_t *ui_edge;
-lv_obj_t *ui_music;
-lv_obj_t *ui_people;
-lv_obj_t *ui_store;
-lv_obj_t *ui_wallet;
-lv_obj_t *ui_Screen5;
+lv_obj_t * ui_bootScreen;
+lv_obj_t * ui_bootLogo;
+lv_obj_t * ui_lockScreen;
+lv_obj_t * ui_lockScreenPanel;
+lv_obj_t * ui_lockScreenTime;
+lv_obj_t * ui_lockScreenDate;
+lv_obj_t * ui_batteryBar;
+lv_obj_t * ui_wifiIcon;
+lv_obj_t * ui_networkIcon;
+lv_obj_t * ui_lockTime;
+lv_obj_t * ui_startScreen;
+lv_obj_t * ui_Panel2;
+lv_obj_t * ui_startButton;
+lv_obj_t * ui_backButton;
+lv_obj_t * ui_searchButton;
+lv_obj_t * ui_startPanel;
+lv_obj_t * ui_systemKeyboard;
+lv_obj_t * ui_notificationPanel;
+lv_obj_t * ui_actionPanel;
+lv_obj_t * ui_actionDate;
+lv_obj_t * ui_actionBattery;
+lv_obj_t * ui_notificationText;
+lv_obj_t * ui_dragPanel;
+lv_obj_t * ui_Label7;
+lv_obj_t * ui_batteryIcon;
+lv_obj_t * ui_Screen5;
+lv_obj_t * ui_Image22;
 
 lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
@@ -60,8 +54,14 @@ lv_obj_t *list1;
 #error "#error LV_COLOR_16_SWAP should be 1 to match SquareLine Studio's settings"
 #endif
 
-bool dragging = false;
-int lastY;
+typedef struct Drag{
+    bool dragging;
+    bool active;
+    int y;
+} drag;
+
+drag lockscreen;
+drag notification;
 
 ///////////////////// ANIMATIONS ////////////////////
 
@@ -75,6 +75,7 @@ static void slider_event_cb(lv_event_t *e)
     //    int brightness = (int)lv_slider_get_value(slider);
     //    ledcWrite(ledChannel, brightness);
     //  }
+    
 }
 
 static void event_handler(lv_event_t *e)
@@ -99,6 +100,75 @@ static void ui_event_Image6(lv_event_t *e)
     // printf("Event code: %d\n", event);
 }
 
+static void ui_event_notificationPanel(lv_event_t *e)
+{
+    lv_event_code_t event = lv_event_get_code(e);
+    lv_obj_t *ta = lv_event_get_target(e);
+    lv_indev_t *indev = lv_indev_get_act();
+    if (event == LV_EVENT_PRESSING)
+    {
+        // onDragg(e);
+
+        // printf("x:%d, y:%d\n", indev->proc.types.pointer.vect.x, indev->proc.types.pointer.vect.y);
+        //printf("Drag\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+
+        if (notification.dragging)
+        {
+            int vect = indev->proc.types.pointer.act_point.y - notification.y;
+            if (vect >= 0 && vect <= 440)
+            {
+                
+                lv_obj_set_y(ui_notificationPanel, -440 + vect);
+                printf("Vector: %d\n", vect);
+
+                // lv_obj_set_style_text_opa(ui_lockScreenTime, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
+                // lv_obj_set_style_text_opa(ui_lockScreenDate, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
+    }
+    if (event == LV_EVENT_PRESSED)
+    {
+        printf("Press\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+
+        
+        notification.y = indev->proc.types.pointer.act_point.y;
+        // 0 - 30
+        if (notification.y < 30)
+        {
+            // dragging = true;
+            lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        }
+        notification.dragging = true;
+        //lv_obj_set_y(ui_notificationPanel, -440);
+    }
+    if (event == LV_EVENT_RELEASED)
+    {
+        printf("Release\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+        notification.dragging = false;
+
+        int vect = indev->proc.types.pointer.act_point.y - notification.y;
+        printf("Drag strength: %d\n", vect);
+
+        
+
+        if (vect > 150)
+        {
+            //lv_disp_load_scr(ui_startScreen);
+            lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_y(ui_notificationPanel, 0);
+        } else {
+            lv_obj_set_y(ui_notificationPanel, -440);
+            lv_obj_set_style_opa(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        }
+        
+        // lv_obj_set_y(ui_lockScreenTime, 138);
+        // lv_obj_set_y(ui_lockScreenDate, 178);
+
+        // lv_obj_set_style_text_opa(ui_lockScreenTime, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        // lv_obj_set_style_text_opa(ui_lockScreenDate, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+}
+
 static void ui_event_lockScreenPanel(lv_event_t *e)
 {
     lv_event_code_t event = lv_event_get_code(e);
@@ -111,9 +181,9 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
         // printf("x:%d, y:%d\n", indev->proc.types.pointer.vect.x, indev->proc.types.pointer.vect.y);
         // printf("Drag\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
 
-        if (dragging)
+        if (lockscreen.dragging)
         {
-            int vect = lastY - indev->proc.types.pointer.act_point.y;
+            int vect = lockscreen.y - indev->proc.types.pointer.act_point.y;
             if (vect >= 0)
             {
                 lv_obj_set_y(ui_lockScreenTime, 138 - vect);
@@ -127,19 +197,19 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
     if (event == LV_EVENT_PRESSED)
     {
         // printf("Press\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
-        lastY = indev->proc.types.pointer.act_point.y;
-        if (lastY > 150)
+        lockscreen.y = indev->proc.types.pointer.act_point.y;
+        if (lockscreen.y > 150)
         {
             // dragging = true;
         }
-        dragging = true;
+        lockscreen.dragging = true;
     }
     if (event == LV_EVENT_RELEASED)
     {
         // printf("Release\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
-        dragging = false;
+        lockscreen.dragging = false;
 
-        int vect = lastY - indev->proc.types.pointer.act_point.y;
+        int vect = lockscreen.y- indev->proc.types.pointer.act_point.y;
         // printf("Drag strength: %d\n", vect);
 
         if (vect > 150)
@@ -196,6 +266,7 @@ void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callb
 
     lv_obj_set_style_bg_color(obj, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(obj, 100, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
 
@@ -240,6 +311,154 @@ void keyboard(lv_obj_t *parent)
     lv_obj_set_style_border_width(ui_systemKeyboard, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_set_style_radius(ui_systemKeyboard, 0, LV_PART_ITEMS | LV_STATE_DEFAULT);
+}
+
+void notification_panel(lv_obj_t *parent){
+
+    // ui_notificationPanel
+
+    ui_notificationPanel = lv_obj_create(parent);
+
+    lv_obj_set_width(ui_notificationPanel, 320);
+    lv_obj_set_height(ui_notificationPanel, 480);
+
+    lv_obj_set_x(ui_notificationPanel, 0);
+    lv_obj_set_y(ui_notificationPanel, -440);
+
+    lv_obj_set_align(ui_notificationPanel, LV_ALIGN_TOP_MID);
+
+    lv_obj_add_flag(ui_notificationPanel, LV_OBJ_FLAG_CHECKABLE);
+    lv_obj_clear_flag(ui_notificationPanel, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_set_scrollbar_mode(ui_notificationPanel, LV_SCROLLBAR_MODE_OFF);
+
+    lv_obj_set_style_radius(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_notificationPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_opa(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_notificationPanel, ui_event_notificationPanel, LV_EVENT_ALL, NULL);
+
+    // ui_actionPanel
+
+    ui_actionPanel = lv_obj_create(ui_notificationPanel);
+
+    static lv_coord_t col_dsc[] = {92, 92, 92, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {70, 70, 70, 70, 70, 70, 70, LV_GRID_TEMPLATE_LAST};
+
+    lv_obj_set_style_grid_column_dsc_array(ui_actionPanel, col_dsc, 0);
+    lv_obj_set_style_grid_row_dsc_array(ui_actionPanel, row_dsc, 0);
+    lv_obj_set_width(ui_actionPanel, 320);
+    lv_obj_set_height(ui_actionPanel, 50);
+
+    lv_obj_set_x(ui_actionPanel, 0);
+    lv_obj_set_y(ui_actionPanel, 50);
+
+    lv_obj_set_align(ui_actionPanel, LV_ALIGN_TOP_MID);
+    lv_obj_clear_flag(ui_actionPanel, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scrollbar_mode(ui_actionPanel, LV_SCROLLBAR_MODE_OFF);
+
+    lv_obj_set_layout(ui_actionPanel, LV_LAYOUT_GRID);
+
+    lv_obj_set_style_radius(ui_actionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_actionPanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_actionPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_actionPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    create_tile(ui_actionPanel, "Phone", &ui_img_1276322231, 0, 0, 1, NULL);
+    create_tile(ui_actionPanel, "People", &ui_img_people_png, 1, 0, 2, NULL);
+
+    // ui_actionDate
+
+    ui_actionDate = lv_label_create(ui_notificationPanel);
+
+    lv_obj_set_width(ui_actionDate, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_actionDate, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_actionDate, -11);
+    lv_obj_set_y(ui_actionDate, 30);
+
+    lv_obj_set_align(ui_actionDate, LV_ALIGN_TOP_RIGHT);
+
+    lv_label_set_text(ui_actionDate, "9/17");
+
+    lv_obj_set_style_text_font(ui_actionDate, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_actionBattery
+
+    ui_actionBattery = lv_label_create(ui_notificationPanel);
+
+    lv_obj_set_width(ui_actionBattery, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_actionBattery, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_actionBattery, -45);
+    lv_obj_set_y(ui_actionBattery, 30);
+
+    lv_obj_set_align(ui_actionBattery, LV_ALIGN_TOP_RIGHT);
+
+    lv_label_set_text(ui_actionBattery, "35%%");
+
+    lv_obj_set_style_text_font(ui_actionBattery, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_actionBattery, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_actionBattery, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_actionBattery, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_actionBattery, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_notificationText
+
+    ui_notificationText = lv_label_create(ui_notificationPanel);
+
+    lv_obj_set_width(ui_notificationText, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_notificationText, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_notificationText, 10);
+    lv_obj_set_y(ui_notificationText, 120);
+
+    lv_label_set_text(ui_notificationText, "No notifications");
+
+    lv_obj_set_style_text_font(ui_notificationText, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_dragPanel
+
+    ui_dragPanel = lv_obj_create(ui_notificationPanel);
+
+    lv_obj_set_width(ui_dragPanel, 320);
+    lv_obj_set_height(ui_dragPanel, 10);
+
+    lv_obj_set_x(ui_dragPanel, 0);
+    lv_obj_set_y(ui_dragPanel, 0);
+
+    lv_obj_set_align(ui_dragPanel, LV_ALIGN_BOTTOM_MID);
+
+    lv_obj_clear_flag(ui_dragPanel, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_set_scrollbar_mode(ui_dragPanel, LV_SCROLLBAR_MODE_OFF);
+
+    //lv_obj_add_event_cb(ui_dragPanel, ui_event_dragPanel, LV_EVENT_ALL, NULL);
+    lv_obj_set_style_radius(ui_dragPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_dragPanel, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_dragPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_dragPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_Label7
+
+    ui_Label7 = lv_label_create(ui_dragPanel);
+
+    lv_obj_set_width(ui_Label7, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_Label7, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_Label7, 0);
+    lv_obj_set_y(ui_Label7, -5);
+
+    lv_obj_set_align(ui_Label7, LV_ALIGN_CENTER);
+
+    lv_label_set_text(ui_Label7, "_____");
+
 }
 ///////////////////// SCREENS ////////////////////
 void ui_bootScreen_screen_init(void)
@@ -590,6 +809,8 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_y(ui_searchButton, 0);
 
     lv_obj_set_align(ui_searchButton, LV_ALIGN_CENTER);
+
+    notification_panel(ui_startScreen);
     // ui_batteryIcon
 
     ui_batteryIcon = lv_img_create(ui_startScreen);
