@@ -51,6 +51,23 @@ lv_obj_t *ui_themeWheel;
 lv_obj_t *ui_settingPanel;
 lv_obj_t *ui_settingsIcon;
 lv_obj_t *ui_settingsLabel;
+lv_obj_t *ui_aboutLabel;
+lv_obj_t *ui_aboutText;
+lv_obj_t *ui_appLedControl;
+lv_obj_t *ui_appLedPanel;
+lv_obj_t *ui_appLedStatusLabel;
+lv_obj_t *ui_appLedSwitch;
+lv_obj_t *ui_appLedBrightnessLabel;
+lv_obj_t *ui_appLedBrightnessSlider;
+lv_obj_t *ui_appLedColorLabel;
+lv_obj_t *ui_appLedColorWheel;
+lv_obj_t *ui_appLedModeLabel;
+lv_obj_t *ui_appLedModeDropdown;
+lv_obj_t *ui_appLedSpeedLabel;
+lv_obj_t *ui_appLedSpeedSlider;
+lv_obj_t *ui_appLedTitle;
+lv_obj_t *ui_ledAppIcon;
+lv_obj_t *ui_ledAppLabel;
 
 lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
@@ -115,21 +132,15 @@ void theme_change(lv_event_t *e)
     //   lv_obj_set_style_img_recolor(ui_dragPanel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_dragPanel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_deviceLabel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
-    //   lv_obj_set_style_img_recolor(ui_minuteIcon1, c, LV_PART_MAIN | LV_STATE_DEFAULT);
-    //   lv_obj_set_style_img_recolor(ui_minuteIcon2, c, LV_PART_MAIN | LV_STATE_DEFAULT);
-    //   lv_obj_set_style_text_color(ui_timeSeparator, c, LV_PART_MAIN | LV_STATE_DEFAULT);
-    //   lv_obj_set_style_text_color(ui_dateText, c, LV_PART_MAIN | LV_STATE_DEFAULT);
-    //   lv_obj_set_style_bg_color(ui_stepsProgress, c, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     uint32_t i;
     for (i = 0; i < lv_obj_get_child_cnt(list1); i++)
     {
         lv_obj_t *child = lv_obj_get_child(list1, i);
-        lv_obj_t *icon =  lv_obj_get_child(child, 1);
+        lv_obj_t *icon = lv_obj_get_child(child, 1);
 
         lv_obj_set_style_bg_color(icon, c, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_border_color(icon, c, LV_PART_MAIN | LV_STATE_DEFAULT);
-
     }
 }
 
@@ -143,7 +154,17 @@ static void event_settings(lv_event_t *e)
     }
 }
 
-static void navigate(lv_event_t *e)
+static void event_appLed(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+    if (code == LV_EVENT_CLICKED)
+    {
+        openAppLed();
+    }
+}
+
+static void event_navigate(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *obj = lv_event_get_target(e);
@@ -156,6 +177,7 @@ static void navigate(lv_event_t *e)
         if (obj == ui_backButton)
         {
             printf("Back\n");
+            vibrate(100);
             if (actScr == ui_startScreen)
             {
                 openLock();
@@ -172,6 +194,7 @@ static void navigate(lv_event_t *e)
         if (obj == ui_startButton)
         {
             printf("Start\n");
+            vibrate(100);
             if (actScr != ui_startScreen)
             {
                 openStart();
@@ -184,6 +207,7 @@ static void navigate(lv_event_t *e)
         if (obj == ui_searchButton)
         {
             printf("Search\n");
+            vibrate(100);
         }
     }
 }
@@ -398,6 +422,55 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
     }
 }
 
+static void ui_event_appLed(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+
+    // if (obj == ui_appLedSwitch){
+    //     lv_obj_get_state(obj) & LV_STATE_CHECKED ? "Checked" : "Unchecked";
+
+    // }
+
+    if (obj == ui_appLedBrightnessSlider)
+    {
+        led.brightness = (uint8_t)lv_slider_get_value(obj);
+        if (led.brightness > 0)
+        {
+            lv_label_set_text(ui_appLedStatusLabel, "LED status: ON");
+        }
+        else
+        {
+            lv_label_set_text(ui_appLedStatusLabel, "LED status: OFF");
+        }
+        lv_label_set_text_fmt(ui_appLedBrightnessLabel, "Brightness: %d", led.brightness);
+    }
+
+    if (obj == ui_appLedColorWheel)
+    {
+        lv_color_t c = lv_colorwheel_get_rgb(obj);
+        led.color = lv_color_to32(c);
+    }
+    if (obj == ui_appLedModeDropdown)
+    {
+        int index = lv_dropdown_get_selected(obj);
+        if (index >= 0 && index < 11)
+        {
+            led.mode = index;
+        }
+        else
+        {
+            led.mode = 0;
+        }
+    }
+    if (obj == ui_appLedSpeedSlider)
+    {
+        led.speed = (uint16_t)lv_slider_get_value(obj) * 500;
+        lv_label_set_text_fmt(ui_appLedSpeedLabel, "Speed: %dms", led.speed);
+    }
+
+    setLed();
+}
 ///////////////////// FUNCTIONS ////////////////////
 
 void create_tile(lv_obj_t *parent, char *name, const void *src, int col, int row, int size, lv_event_cb_t callback)
@@ -505,9 +578,9 @@ void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callb
     lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
     lv_obj_add_flag(icon, LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
-    // lv_obj_set_style_bg_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_border_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(icon, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
@@ -545,7 +618,7 @@ void navigation(lv_obj_t *parent)
     lv_obj_set_x(ui_startButton, 0);
     lv_obj_set_y(ui_startButton, 0);
     lv_obj_set_align(ui_startButton, LV_ALIGN_CENTER);
-    lv_obj_add_event_cb(ui_startButton, navigate, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_startButton, event_navigate, LV_EVENT_ALL, NULL);
 
     // ui_backButton
 
@@ -556,7 +629,7 @@ void navigation(lv_obj_t *parent)
     lv_obj_set_x(ui_backButton, -90);
     lv_obj_set_y(ui_backButton, 0);
     lv_obj_set_align(ui_backButton, LV_ALIGN_CENTER);
-    lv_obj_add_event_cb(ui_backButton, navigate, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_backButton, event_navigate, LV_EVENT_ALL, NULL);
 
     // ui_searchButton
 
@@ -567,7 +640,7 @@ void navigation(lv_obj_t *parent)
     lv_obj_set_x(ui_searchButton, 90);
     lv_obj_set_y(ui_searchButton, 0);
     lv_obj_set_align(ui_searchButton, LV_ALIGN_CENTER);
-    lv_obj_add_event_cb(ui_searchButton, navigate, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_searchButton, event_navigate, LV_EVENT_ALL, NULL);
 }
 
 void status_bar(lv_obj_t *parent)
@@ -879,6 +952,7 @@ void ui_bootScreen_screen_init(void)
     lv_obj_add_flag(ui_bootLogo, LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(ui_bootLogo, LV_OBJ_FLAG_SCROLLABLE);
 }
+
 void ui_lockScreen_screen_init(void)
 {
 
@@ -1018,7 +1092,7 @@ void ui_startScreen_screen_init(void)
     create_tile(cont, "Maps", &ui_img_846015263, 1, 4, 2, NULL);
 
     create_tile(cont, "OneDrive", &ui_img_cloud_png, 0, 5, 1, NULL);
-    create_tile(cont, "Store", &ui_img_571330079, 1, 5, 1, NULL);
+    create_tile(cont, "LED", &ui_img_led_control_png, 1, 5, 1, event_appLed);
     create_tile(cont, "Wallet", &ui_img_wallet_png, 2, 5, 1, NULL);
 
     /*Tile2: appList*/
@@ -1037,29 +1111,26 @@ void ui_startScreen_screen_init(void)
 
     /*Add apps to the list*/
 
-    add_item(list1, "Phone", &ui_img_1276322231, NULL);
-    add_item(list1, "People", &ui_img_people_png, NULL);
-
-    add_item(list1, "Messaging", &ui_img_237043237, NULL);
-    add_item(list1, "Mail", &ui_img_email_png, NULL);
     add_item(list1, "Calendar", &ui_img_calendar_png, NULL);
-
     add_item(list1, "Edge", &ui_img_microsoft_png, NULL);
-    add_item(list1, "Weather", &ui_img_1127648905, NULL);
-
-    add_item(list1, "Photos", &ui_img_gallery_png, NULL);
-    add_item(list1, "Music", &ui_img_359952343, NULL);
-
-    add_item(list1, "Settings", &ui_img_gear_png, event_settings);
+    add_item(list1, "LED Control", &ui_img_led_control_png, event_appLed);
+    add_item(list1, "Mail", &ui_img_email_png, NULL);
     add_item(list1, "Maps", &ui_img_846015263, NULL);
-
+    add_item(list1, "Messaging", &ui_img_237043237, NULL);
+    add_item(list1, "Music", &ui_img_359952343, NULL);
     add_item(list1, "OneDrive", &ui_img_cloud_png, NULL);
+    add_item(list1, "People", &ui_img_people_png, NULL);
+    add_item(list1, "Phone", &ui_img_1276322231, NULL);
+    add_item(list1, "Photos", &ui_img_gallery_png, NULL);
+    add_item(list1, "Settings", &ui_img_gear_png, event_settings);
     add_item(list1, "Store", &ui_img_571330079, NULL);
     add_item(list1, "Wallet", &ui_img_wallet_png, NULL);
+    add_item(list1, "Weather", &ui_img_1127648905, NULL);
 
     navigation(ui_startScreen);
     notification_panel(ui_startScreen);
 }
+
 void ui_settingsScreen_screen_init(void)
 {
 
@@ -1259,6 +1330,32 @@ void ui_settingsScreen_screen_init(void)
 
     lv_obj_add_event_cb(ui_themeWheel, theme_change, LV_EVENT_VALUE_CHANGED, NULL);
 
+    lv_obj_clear_flag(ui_themeWheel, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE);
+
+    // ui_aboutLabel
+
+    ui_aboutLabel = lv_label_create(ui_settingsScroll);
+
+    lv_obj_set_width(ui_aboutLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_aboutLabel, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_aboutLabel, 20);
+    lv_obj_set_y(ui_aboutLabel, 510);
+
+    lv_label_set_text(ui_aboutLabel, "About");
+
+    // ui_aboutText
+
+    ui_aboutText = lv_label_create(ui_settingsScroll);
+
+    lv_obj_set_width(ui_aboutText, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_aboutText, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_aboutText, 25);
+    lv_obj_set_y(ui_aboutText, 540);
+
+    lv_label_set_text(ui_aboutText, "Text");
+
     // ui_settingPanel
 
     ui_settingPanel = lv_obj_create(ui_settingsScreen);
@@ -1311,6 +1408,244 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_style_text_font(ui_settingsLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
+void ui_appLedControl_screen_init(void)
+{
+
+    // ui_appLedControl
+
+    ui_appLedControl = lv_obj_create(NULL);
+
+    lv_obj_clear_flag(ui_appLedControl, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_set_style_bg_color(ui_appLedControl, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appLedControl, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_appLedPanel
+
+    ui_appLedPanel = lv_obj_create(ui_appLedControl);
+
+    lv_obj_set_width(ui_appLedPanel, 320);
+    lv_obj_set_height(ui_appLedPanel, 480);
+
+    lv_obj_set_x(ui_appLedPanel, 0);
+    lv_obj_set_y(ui_appLedPanel, 0);
+
+    lv_obj_set_align(ui_appLedPanel, LV_ALIGN_TOP_MID);
+
+    lv_obj_set_scrollbar_mode(ui_appLedPanel, LV_SCROLLBAR_MODE_ACTIVE);
+
+    lv_obj_set_style_radius(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appLedPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appLedPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_appLedPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_appLedStatusLabel
+
+    ui_appLedStatusLabel = lv_label_create(ui_appLedPanel);
+
+    lv_obj_set_width(ui_appLedStatusLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_appLedStatusLabel, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_appLedStatusLabel, 30);
+    lv_obj_set_y(ui_appLedStatusLabel, 100);
+
+    lv_label_set_text(ui_appLedStatusLabel, "LED status: OFF");
+
+    lv_obj_set_style_text_font(ui_appLedStatusLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_appLedSwitch
+
+    // ui_appLedSwitch = lv_switch_create(ui_appLedPanel);
+
+    // lv_obj_set_width(ui_appLedSwitch, 50);
+    // lv_obj_set_height(ui_appLedSwitch, 25);
+
+    // lv_obj_set_x(ui_appLedSwitch, 177);
+    // lv_obj_set_y(ui_appLedSwitch, 96);
+
+    // ui_appLedBrightnessLabel
+
+    ui_appLedBrightnessLabel = lv_label_create(ui_appLedPanel);
+
+    lv_obj_set_width(ui_appLedBrightnessLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_appLedBrightnessLabel, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_appLedBrightnessLabel, 30);
+    lv_obj_set_y(ui_appLedBrightnessLabel, 143);
+
+    lv_label_set_text(ui_appLedBrightnessLabel, "Brightness");
+
+    lv_obj_set_style_text_font(ui_appLedBrightnessLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_appLedBrightnessSlider
+
+    ui_appLedBrightnessSlider = lv_slider_create(ui_appLedPanel);
+    lv_slider_set_range(ui_appLedBrightnessSlider, 0, 255);
+
+    lv_obj_set_width(ui_appLedBrightnessSlider, 250);
+    lv_obj_set_height(ui_appLedBrightnessSlider, 10);
+
+    lv_obj_set_x(ui_appLedBrightnessSlider, 37);
+    lv_obj_set_y(ui_appLedBrightnessSlider, 175);
+
+    lv_obj_add_event_cb(ui_appLedBrightnessSlider, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
+
+    // ui_appLedColorLabel
+
+    ui_appLedColorLabel = lv_label_create(ui_appLedPanel);
+
+    lv_obj_set_width(ui_appLedColorLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_appLedColorLabel, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_appLedColorLabel, 30);
+    lv_obj_set_y(ui_appLedColorLabel, 215);
+
+    lv_label_set_text(ui_appLedColorLabel, "Color");
+
+    lv_obj_set_style_text_font(ui_appLedColorLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_appLedColorWheel
+
+    ui_appLedColorWheel = lv_colorwheel_create(ui_appLedPanel, true);
+
+    lv_obj_set_width(ui_appLedColorWheel, 150);
+    lv_obj_set_height(ui_appLedColorWheel, 150);
+
+    lv_obj_set_x(ui_appLedColorWheel, 0);
+    lv_obj_set_y(ui_appLedColorWheel, 218);
+
+    lv_obj_set_align(ui_appLedColorWheel, LV_ALIGN_TOP_MID);
+
+    lv_obj_add_event_cb(ui_appLedColorWheel, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
+
+    // ui_appLedModeLabel
+
+    ui_appLedModeLabel = lv_label_create(ui_appLedPanel);
+
+    lv_obj_set_width(ui_appLedModeLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_appLedModeLabel, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_appLedModeLabel, 30);
+    lv_obj_set_y(ui_appLedModeLabel, 420);
+
+    lv_label_set_text(ui_appLedModeLabel, "Mode");
+
+    lv_obj_set_style_text_font(ui_appLedModeLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_appLedModeDropdown
+
+    ui_appLedModeDropdown = lv_dropdown_create(ui_appLedPanel);
+    lv_dropdown_set_options(ui_appLedModeDropdown, "Static\nBlink\nBreath\nRainbow\nScan\nFade\nTwinkle\nStrobe\nLarson\nComet\nFireworks");
+    // lv_dropdown_set_text(ui_appLedModeDropdown, "");
+
+    lv_obj_set_width(ui_appLedModeDropdown, 150);
+    lv_obj_set_height(ui_appLedModeDropdown, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_appLedModeDropdown, 110);
+    lv_obj_set_y(ui_appLedModeDropdown, 411);
+
+    lv_obj_add_flag(ui_appLedModeDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+
+    lv_obj_add_event_cb(ui_appLedModeDropdown, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_set_style_radius(ui_appLedModeDropdown, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appLedModeDropdown, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appLedModeDropdown, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_appLedModeDropdown, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_appLedModeDropdown, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_appLedModeDropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t *list = lv_dropdown_get_list(ui_appLedModeDropdown); /*Get the list*/
+    lv_obj_set_style_radius(list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(list, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(list, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(list, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(list, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(list, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_appLedSpeedLabel
+
+    ui_appLedSpeedLabel = lv_label_create(ui_appLedPanel);
+
+    lv_obj_set_width(ui_appLedSpeedLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_appLedSpeedLabel, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_appLedSpeedLabel, 30);
+    lv_obj_set_y(ui_appLedSpeedLabel, 463);
+
+    lv_label_set_text(ui_appLedSpeedLabel, "Speed:  500ms");
+
+    lv_obj_set_style_text_font(ui_appLedSpeedLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_appLedSpeedSlider
+
+    ui_appLedSpeedSlider = lv_slider_create(ui_appLedPanel);
+    lv_slider_set_range(ui_appLedSpeedSlider, 1, 10);
+
+    lv_obj_set_width(ui_appLedSpeedSlider, 250);
+    lv_obj_set_height(ui_appLedSpeedSlider, 10);
+
+    lv_obj_set_x(ui_appLedSpeedSlider, 30);
+    lv_obj_set_y(ui_appLedSpeedSlider, 500);
+
+    lv_obj_add_event_cb(ui_appLedSpeedSlider, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
+
+    // ui_appLedTitle
+
+    ui_appLedTitle = lv_obj_create(ui_appLedControl);
+
+    lv_obj_set_width(ui_appLedTitle, 320);
+    lv_obj_set_height(ui_appLedTitle, 69);
+
+    lv_obj_set_x(ui_appLedTitle, 0);
+    lv_obj_set_y(ui_appLedTitle, 0);
+
+    lv_obj_set_align(ui_appLedTitle, LV_ALIGN_TOP_MID);
+
+    lv_obj_clear_flag(ui_appLedTitle, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_set_style_radius(ui_appLedTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appLedTitle, lv_color_hex(0x323232), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appLedTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_appLedTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_ledAppIcon
+
+    ui_ledAppIcon = lv_img_create(ui_appLedTitle);
+    lv_img_set_src(ui_ledAppIcon, &ui_img_led_control_png);
+
+    lv_obj_set_width(ui_ledAppIcon, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_ledAppIcon, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_ledAppIcon, 10);
+    lv_obj_set_y(ui_ledAppIcon, 5);
+
+    lv_obj_set_align(ui_ledAppIcon, LV_ALIGN_BOTTOM_LEFT);
+
+    lv_obj_add_flag(ui_ledAppIcon, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(ui_ledAppIcon, LV_OBJ_FLAG_SCROLLABLE);
+
+    // ui_ledAppLabel
+
+    ui_ledAppLabel = lv_label_create(ui_appLedTitle);
+
+    lv_obj_set_width(ui_ledAppLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_ledAppLabel, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_ledAppLabel, 50);
+    lv_obj_set_y(ui_ledAppLabel, 4);
+
+    lv_obj_set_align(ui_ledAppLabel, LV_ALIGN_BOTTOM_LEFT);
+
+    lv_label_set_text(ui_ledAppLabel, "LED Control");
+
+    lv_obj_set_style_text_font(ui_ledAppLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+}
+
 void ui_init(void)
 {
     lv_disp_t *dispp = lv_disp_get_default();
@@ -1321,6 +1656,7 @@ void ui_init(void)
     ui_lockScreen_screen_init();
     ui_startScreen_screen_init();
     ui_settingsScreen_screen_init();
+    ui_appLedControl_screen_init();
     lv_disp_load_scr(ui_bootScreen);
 }
 
@@ -1346,4 +1682,20 @@ void openLock()
 {
     lv_obj_set_parent(ui_statusBar, ui_lockScreen);
     lv_disp_load_scr(ui_lockScreen);
+}
+
+void openAppLed()
+{
+    lv_obj_set_parent(ui_Panel2, ui_appLedControl); // navigation
+    lv_obj_set_parent(ui_notificationPanel, ui_appLedControl);
+    lv_obj_set_parent(ui_statusBar, ui_appLedControl);
+    lv_disp_load_scr(ui_appLedControl);
+}
+
+void vibrate(long time)
+{
+    digitalWrite(MOTOR, HIGH);
+    printf("Vibrate %d\n", time);
+    delay(time);
+    digitalWrite(MOTOR, LOW);
 }

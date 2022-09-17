@@ -30,6 +30,14 @@
 #define RST_N_PIN -1
 #define INT_N_PIN 36
 
+#define MOTOR 4
+
+#define LED_COUNT 16
+#define LED_PIN 5
+
+#define FORMAT_SPIFFS_IF_FAILED true
+
+
 struct TouchData{
     int xpos;
   int ypos;
@@ -54,5 +62,11 @@ static lv_disp_draw_buf_t draw_buf;
 static lv_color_t *disp_draw_buf;
 static lv_disp_drv_t disp_drv;
 
+struct LED{
+  uint8_t mode;
+  uint8_t brightness;
+  uint16_t speed;
+  uint32_t color;
+} led;
 
-
+void setLed();

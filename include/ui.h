@@ -58,7 +58,23 @@ extern lv_obj_t * ui_themeWheel;
 extern lv_obj_t * ui_settingPanel;
 extern lv_obj_t * ui_settingsIcon;
 extern lv_obj_t * ui_settingsLabel;
-
+extern lv_obj_t * ui_aboutLabel;
+extern lv_obj_t * ui_aboutText;
+extern lv_obj_t * ui_appLedControl;
+extern lv_obj_t * ui_appLedPanel;
+extern lv_obj_t * ui_appLedStatusLabel;
+extern lv_obj_t * ui_appLedSwitch;
+extern lv_obj_t * ui_appLedBrightnessLabel;
+extern lv_obj_t * ui_appLedBrightnessSlider;
+extern lv_obj_t * ui_appLedColorLabel;
+extern lv_obj_t * ui_appLedColorWheel;
+extern lv_obj_t * ui_appLedModeLabel;
+extern lv_obj_t * ui_appLedModeDropdown;
+extern lv_obj_t * ui_appLedSpeedLabel;
+extern lv_obj_t * ui_appLedSpeedSlider;
+extern lv_obj_t * ui_appLedTitle;
+extern lv_obj_t * ui_ledAppIcon;
+extern lv_obj_t * ui_ledAppLabel;
 
 
 
@@ -84,15 +100,18 @@ LV_IMG_DECLARE(ui_img_359952343);    // assets\music (1).png
 LV_IMG_DECLARE(ui_img_people_png);    // assets\people.png
 LV_IMG_DECLARE(ui_img_571330079);    // assets\shopping-bag.png
 LV_IMG_DECLARE(ui_img_wallet_png);    // assets\wallet.png
-
+LV_IMG_DECLARE(ui_img_led_control_png);    // assets\led_control.png
 
 
 
 void ui_init(void);
 
+void vibrate(long time);
+
 void openStart();
 void openSettings();
 void openLock();
+void openAppLed();
 
 #ifdef __cplusplus
 } /*extern "C"*/
