@@ -1051,7 +1051,7 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_style_pad_left(ui_settingsScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_settingsScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_settingsScroll, 40, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_settingsScroll, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_settingsScroll, 80, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_displayLabel
 
