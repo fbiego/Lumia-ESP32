@@ -8,33 +8,33 @@
 //#include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-lv_obj_t * ui_bootScreen;
-lv_obj_t * ui_bootLogo;
-lv_obj_t * ui_lockScreen;
-lv_obj_t * ui_lockScreenPanel;
-lv_obj_t * ui_lockScreenTime;
-lv_obj_t * ui_lockScreenDate;
-lv_obj_t * ui_batteryBar;
-lv_obj_t * ui_wifiIcon;
-lv_obj_t * ui_networkIcon;
-lv_obj_t * ui_lockTime;
-lv_obj_t * ui_startScreen;
-lv_obj_t * ui_Panel2;
-lv_obj_t * ui_startButton;
-lv_obj_t * ui_backButton;
-lv_obj_t * ui_searchButton;
-lv_obj_t * ui_startPanel;
-lv_obj_t * ui_systemKeyboard;
-lv_obj_t * ui_notificationPanel;
-lv_obj_t * ui_actionPanel;
-lv_obj_t * ui_actionDate;
-lv_obj_t * ui_actionBattery;
-lv_obj_t * ui_notificationText;
-lv_obj_t * ui_dragPanel;
-lv_obj_t * ui_Label7;
-lv_obj_t * ui_batteryIcon;
-lv_obj_t * ui_Screen5;
-lv_obj_t * ui_Image22;
+lv_obj_t *ui_bootScreen;
+lv_obj_t *ui_bootLogo;
+lv_obj_t *ui_lockScreen;
+lv_obj_t *ui_lockScreenPanel;
+lv_obj_t *ui_lockScreenTime;
+lv_obj_t *ui_lockScreenDate;
+lv_obj_t *ui_batteryBar;
+lv_obj_t *ui_wifiIcon;
+lv_obj_t *ui_networkIcon;
+lv_obj_t *ui_lockTime;
+lv_obj_t *ui_startScreen;
+lv_obj_t *ui_Panel2;
+lv_obj_t *ui_startButton;
+lv_obj_t *ui_backButton;
+lv_obj_t *ui_searchButton;
+lv_obj_t *ui_startPanel;
+lv_obj_t *ui_systemKeyboard;
+lv_obj_t *ui_notificationPanel;
+lv_obj_t *ui_actionPanel;
+lv_obj_t *ui_actionDate;
+lv_obj_t *ui_actionBattery;
+lv_obj_t *ui_notificationText;
+lv_obj_t *ui_dragPanel;
+lv_obj_t *ui_Label7;
+lv_obj_t *ui_batteryIcon;
+lv_obj_t *ui_Screen5;
+lv_obj_t *ui_Image22;
 
 lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
@@ -54,7 +54,8 @@ lv_obj_t *list1;
 #error "#error LV_COLOR_16_SWAP should be 1 to match SquareLine Studio's settings"
 #endif
 
-typedef struct Drag{
+typedef struct Drag
+{
     bool dragging;
     bool active;
     int y;
@@ -75,7 +76,6 @@ static void slider_event_cb(lv_event_t *e)
     //    int brightness = (int)lv_slider_get_value(slider);
     //    ledcWrite(ledChannel, brightness);
     //  }
-    
 }
 
 static void event_handler(lv_event_t *e)
@@ -110,19 +110,32 @@ static void ui_event_notificationPanel(lv_event_t *e)
         // onDragg(e);
 
         // printf("x:%d, y:%d\n", indev->proc.types.pointer.vect.x, indev->proc.types.pointer.vect.y);
-        //printf("Drag\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+        // printf("Drag\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
 
         if (notification.dragging)
         {
             int vect = indev->proc.types.pointer.act_point.y - notification.y;
-            if (vect >= 0 && vect <= 440)
+            if (notification.active)
             {
-                
-                lv_obj_set_y(ui_notificationPanel, -440 + vect);
-                printf("Vector: %d\n", vect);
 
-                // lv_obj_set_style_text_opa(ui_lockScreenTime, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
-                // lv_obj_set_style_text_opa(ui_lockScreenDate, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
+                if (vect <= 0 && vect >= -480)
+                {
+
+                    lv_obj_set_y(ui_notificationPanel, vect);
+                    printf("Vector: %d\n", vect);
+                }
+            }
+            else
+            {
+                if (vect >= 0 && vect <= 440)
+                {
+
+                    lv_obj_set_y(ui_notificationPanel, -440 + vect);
+                    printf("Vector: %d\n", vect);
+
+                    // lv_obj_set_style_text_opa(ui_lockScreenTime, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
+                    // lv_obj_set_style_text_opa(ui_lockScreenDate, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
+                }
             }
         }
     }
@@ -130,16 +143,19 @@ static void ui_event_notificationPanel(lv_event_t *e)
     {
         printf("Press\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
 
-        
         notification.y = indev->proc.types.pointer.act_point.y;
-        // 0 - 30
-        if (notification.y < 30)
+        if (!notification.active)
         {
-            // dragging = true;
-            lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+            // 0 - 30
+            if (notification.y < 30)
+            {
+                // dragging = true;
+                lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
         }
+
         notification.dragging = true;
-        //lv_obj_set_y(ui_notificationPanel, -440);
+        // lv_obj_set_y(ui_notificationPanel, -440);
     }
     if (event == LV_EVENT_RELEASED)
     {
@@ -149,18 +165,38 @@ static void ui_event_notificationPanel(lv_event_t *e)
         int vect = indev->proc.types.pointer.act_point.y - notification.y;
         printf("Drag strength: %d\n", vect);
 
-        
-
-        if (vect > 150)
+        if (notification.active)
         {
-            //lv_disp_load_scr(ui_startScreen);
-            lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_y(ui_notificationPanel, 0);
-        } else {
-            lv_obj_set_y(ui_notificationPanel, -440);
-            lv_obj_set_style_opa(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            if ((vect * -1) > 150)
+            {
+                lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_y(ui_notificationPanel, 0);
+                notification.active = true;
+            }
+            else
+            {
+                lv_obj_set_y(ui_notificationPanel, -440);
+                lv_obj_set_style_opa(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                notification.active = false;
+            }
         }
-        
+        else
+        {
+
+            if (vect > 150)
+            {
+                lv_obj_set_style_opa(ui_notificationPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_y(ui_notificationPanel, 0);
+                notification.active = true;
+            }
+            else
+            {
+                lv_obj_set_y(ui_notificationPanel, -440);
+                lv_obj_set_style_opa(ui_notificationPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                notification.active = false;
+            }
+        }
+
         // lv_obj_set_y(ui_lockScreenTime, 138);
         // lv_obj_set_y(ui_lockScreenDate, 178);
 
@@ -209,7 +245,7 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
         // printf("Release\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
         lockscreen.dragging = false;
 
-        int vect = lockscreen.y- indev->proc.types.pointer.act_point.y;
+        int vect = lockscreen.y - indev->proc.types.pointer.act_point.y;
         // printf("Drag strength: %d\n", vect);
 
         if (vect > 150)
@@ -285,9 +321,9 @@ void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callb
     lv_obj_set_align(label, LV_ALIGN_LEFT_MID);
     lv_obj_add_flag(icon, LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color(icon,  lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(icon,  lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(icon, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(icon, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(icon, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
@@ -313,7 +349,8 @@ void keyboard(lv_obj_t *parent)
     lv_obj_set_style_radius(ui_systemKeyboard, 0, LV_PART_ITEMS | LV_STATE_DEFAULT);
 }
 
-void notification_panel(lv_obj_t *parent){
+void notification_panel(lv_obj_t *parent)
+{
 
     // ui_notificationPanel
 
@@ -439,7 +476,7 @@ void notification_panel(lv_obj_t *parent){
 
     lv_obj_set_scrollbar_mode(ui_dragPanel, LV_SCROLLBAR_MODE_OFF);
 
-    //lv_obj_add_event_cb(ui_dragPanel, ui_event_dragPanel, LV_EVENT_ALL, NULL);
+    // lv_obj_add_event_cb(ui_dragPanel, ui_event_dragPanel, LV_EVENT_ALL, NULL);
     lv_obj_set_style_radius(ui_dragPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_dragPanel, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_dragPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -458,7 +495,6 @@ void notification_panel(lv_obj_t *parent){
     lv_obj_set_align(ui_Label7, LV_ALIGN_CENTER);
 
     lv_label_set_text(ui_Label7, "_____");
-
 }
 ///////////////////// SCREENS ////////////////////
 void ui_bootScreen_screen_init(void)
@@ -733,7 +769,7 @@ void ui_startScreen_screen_init(void)
     add_item(list1, "People", &ui_img_people_png, NULL);
 
     add_item(list1, "Messaging", &ui_img_237043237, NULL);
-    add_item(list1, "Mail", &ui_img_email_png,  NULL);
+    add_item(list1, "Mail", &ui_img_email_png, NULL);
     add_item(list1, "Calendar", &ui_img_calendar_png, NULL);
 
     add_item(list1, "Edge", &ui_img_microsoft_png, NULL);
