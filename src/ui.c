@@ -123,6 +123,10 @@ static void ui_event_notificationPanel(lv_event_t *e)
 
                     lv_obj_set_y(ui_notificationPanel, vect);
                     printf("Vector: %d\n", vect);
+
+                    if (vect <= -105){
+                        lv_obj_set_y(ui_actionPanel, 380 - (vect + 105));
+                    }
                 }
             }
             else
@@ -133,8 +137,8 @@ static void ui_event_notificationPanel(lv_event_t *e)
                     lv_obj_set_y(ui_notificationPanel, -440 + vect);
                     printf("Vector: %d\n", vect);
 
-                    if (vect >= 120){
-                        lv_obj_set_y(ui_actionPanel, 380 - (vect - 120));
+                    if (vect >= 105){
+                        lv_obj_set_y(ui_actionPanel, 380 - (vect - 105));
                     }
 
                     // lv_obj_set_style_text_opa(ui_lockScreenTime, 255 - (vect / 2), LV_PART_MAIN | LV_STATE_DEFAULT);
