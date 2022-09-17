@@ -1522,6 +1522,8 @@ void ui_appLedControl_screen_init(void)
 
     lv_obj_add_event_cb(ui_appLedColorWheel, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
 
+    lv_obj_clear_flag(ui_appLedColorWheel, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE);
+
     // ui_appLedModeLabel
 
     ui_appLedModeLabel = lv_label_create(ui_appLedPanel);
