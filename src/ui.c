@@ -1512,6 +1512,8 @@ void ui_appLedControl_screen_init(void)
 
     ui_appLedColorWheel = lv_colorwheel_create(ui_appLedPanel, true);
 
+    lv_colorwheel_set_mode_fixed(ui_appLedColorWheel, true);
+
     lv_obj_set_width(ui_appLedColorWheel, 150);
     lv_obj_set_height(ui_appLedColorWheel, 150);
 
