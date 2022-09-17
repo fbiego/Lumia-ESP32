@@ -32,15 +32,24 @@ extern lv_obj_t * ui_startButton;
 extern lv_obj_t * ui_backButton;
 extern lv_obj_t * ui_searchButton;
 extern lv_obj_t * ui_startPanel;
+extern lv_obj_t * ui_systemKeyboard;
 extern lv_obj_t * ui_batteryIcon;
-extern lv_obj_t * ui_Image8;
-extern lv_obj_t * ui_Image9;
+extern lv_obj_t * ui_phone;
+extern lv_obj_t * ui_message;
+extern lv_obj_t * ui_calendar;
+extern lv_obj_t * ui_drive;
+extern lv_obj_t * ui_weather;
+extern lv_obj_t * ui_mail;
+extern lv_obj_t * ui_photos;
+extern lv_obj_t * ui_settings;
+extern lv_obj_t * ui_maps;
+extern lv_obj_t * ui_edge;
+extern lv_obj_t * ui_music;
+extern lv_obj_t * ui_people;
+extern lv_obj_t * ui_store;
+extern lv_obj_t * ui_wallet;
 extern lv_obj_t * ui_Screen5;
 
-extern lv_obj_t *ui_tileView;
-extern lv_obj_t *ui_tileStart;
-extern lv_obj_t *ui_tileApps;
-extern lv_obj_t * list1;
 
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
 LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
@@ -52,6 +61,18 @@ LV_IMG_DECLARE(ui_img_1954556228);    // assets\search-icon.png
 LV_IMG_DECLARE(ui_img_1947241130);    // assets\battery-level (1).png
 LV_IMG_DECLARE(ui_img_1276322231);    // assets\phone-call.png
 LV_IMG_DECLARE(ui_img_237043237);    // assets\message (1).png
+LV_IMG_DECLARE(ui_img_calendar_png);    // assets\calendar.png
+LV_IMG_DECLARE(ui_img_cloud_png);    // assets\cloud.png
+LV_IMG_DECLARE(ui_img_1127648905);    // assets\cloudy-day.png
+LV_IMG_DECLARE(ui_img_email_png);    // assets\email.png
+LV_IMG_DECLARE(ui_img_gallery_png);    // assets\gallery.png
+LV_IMG_DECLARE(ui_img_gear_png);    // assets\gear.png
+LV_IMG_DECLARE(ui_img_846015263);    // assets\map (4).png
+LV_IMG_DECLARE(ui_img_microsoft_png);    // assets\microsoft.png
+LV_IMG_DECLARE(ui_img_359952343);    // assets\music (1).png
+LV_IMG_DECLARE(ui_img_people_png);    // assets\people.png
+LV_IMG_DECLARE(ui_img_571330079);    // assets\shopping-bag.png
+LV_IMG_DECLARE(ui_img_wallet_png);    // assets\wallet.png
 
 
 

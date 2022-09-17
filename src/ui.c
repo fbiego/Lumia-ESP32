@@ -24,18 +24,31 @@ lv_obj_t * ui_startButton;
 lv_obj_t * ui_backButton;
 lv_obj_t * ui_searchButton;
 lv_obj_t * ui_startPanel;
+lv_obj_t * ui_systemKeyboard;
 lv_obj_t * ui_batteryIcon;
-lv_obj_t * ui_Image8;
-lv_obj_t * ui_Image9;
+lv_obj_t * ui_phone;
+lv_obj_t * ui_message;
+lv_obj_t * ui_calendar;
+lv_obj_t * ui_drive;
+lv_obj_t * ui_weather;
+lv_obj_t * ui_mail;
+lv_obj_t * ui_photos;
+lv_obj_t * ui_settings;
+lv_obj_t * ui_maps;
+lv_obj_t * ui_edge;
+lv_obj_t * ui_music;
+lv_obj_t * ui_people;
+lv_obj_t * ui_store;
+lv_obj_t * ui_wallet;
 lv_obj_t * ui_Screen5;
 
 lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
 lv_obj_t *ui_tileApps;
 
-lv_obj_t * ui_startButton;
-lv_obj_t * ui_backButton;
-lv_obj_t * ui_searchButton;
+lv_obj_t *ui_startButton;
+lv_obj_t *ui_backButton;
+lv_obj_t *ui_searchButton;
 
 lv_obj_t *list1;
 
@@ -142,6 +155,50 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
     }
 }
 
+void create_tile(lv_obj_t *parent, char *name, const void *src, int col, int row, int size, lv_event_cb_t callback)
+{
+    lv_obj_t *label;
+    lv_obj_t *obj;
+    lv_obj_t *icon;
+    obj = lv_btn_create(parent);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, size, LV_GRID_ALIGN_STRETCH, row, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, name);
+    lv_obj_center(label);
+    lv_obj_set_align(label, LV_ALIGN_BOTTOM_LEFT);
+    lv_obj_set_x(label, -10);
+    lv_obj_set_y(label, 5);
+    lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    icon = lv_img_create(obj);
+    lv_img_set_src(icon, src);
+    lv_obj_set_width(icon, LV_SIZE_CONTENT);
+    lv_obj_set_height(icon, LV_SIZE_CONTENT);
+    lv_obj_set_align(icon, LV_ALIGN_CENTER);
+    lv_obj_add_flag(icon, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
+}
+
+void keyboard(lv_obj_t *parent){
+    // ui_systemKeyboard
+    ui_systemKeyboard = lv_keyboard_create(parent);
+
+    lv_obj_set_width(ui_systemKeyboard, 320);
+    lv_obj_set_height(ui_systemKeyboard, 150);
+
+    lv_obj_set_x(ui_systemKeyboard, 0);
+    lv_obj_set_y(ui_systemKeyboard, -40);
+
+    lv_obj_set_align(ui_systemKeyboard, LV_ALIGN_BOTTOM_MID);
+
+    lv_obj_set_style_radius(ui_systemKeyboard, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_systemKeyboard, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_systemKeyboard, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_systemKeyboard, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_radius(ui_systemKeyboard, 0, LV_PART_ITEMS | LV_STATE_DEFAULT);
+}
 ///////////////////// SCREENS ////////////////////
 void ui_bootScreen_screen_init(void)
 {
@@ -375,129 +432,26 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_style_border_width(cont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(cont, LV_SCROLLBAR_MODE_OFF);
 
-    lv_obj_t *label;
-    lv_obj_t *obj;
+    create_tile(cont, "Phone", &ui_img_1276322231, 0, 0, 1, NULL);
+    create_tile(cont, "People", &ui_img_people_png, 1, 0, 2, NULL);
 
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Phone");
-    lv_obj_center(label);
-    lv_obj_set_align(label, LV_ALIGN_BOTTOM_LEFT);
-    lv_obj_set_x(label, -10);
-    lv_obj_set_y(label, 5);
-    lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-    ui_Image8 = lv_img_create(obj);
-    lv_img_set_src(ui_Image8, &ui_img_1276322231);
-    lv_obj_set_width(ui_Image8, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_Image8, LV_SIZE_CONTENT);
-    lv_obj_set_align(ui_Image8, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Image8, LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_clear_flag(ui_Image8, LV_OBJ_FLAG_SCROLLABLE);
+    create_tile(cont, "Messaging", &ui_img_237043237, 0, 1, 1, NULL);
+    create_tile(cont, "Mail", &ui_img_email_png, 1, 1, 1, NULL);
+    create_tile(cont, "Calendar",&ui_img_calendar_png, 2, 1, 1, NULL);
 
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "People");
-    lv_obj_center(label);
+    create_tile(cont, "Edge", &ui_img_microsoft_png, 0, 2, 1, NULL);
+    create_tile(cont, "Weather", &ui_img_1127648905, 1, 2, 2, NULL);
 
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Messaging");
-    lv_obj_center(label);
-    lv_obj_set_align(label, LV_ALIGN_BOTTOM_LEFT);
-    lv_obj_set_x(label, -10);
-    lv_obj_set_y(label, 5);
-    lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-    ui_Image9 = lv_img_create(obj);
-    lv_img_set_src(ui_Image9, &ui_img_237043237);
-    lv_obj_set_width(ui_Image9, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_Image9, LV_SIZE_CONTENT);
-    lv_obj_set_align(ui_Image9, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Image9, LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_clear_flag(ui_Image9, LV_OBJ_FLAG_SCROLLABLE);
+    create_tile(cont, "Photos", &ui_img_gallery_png, 0, 3, 2, NULL);
+    create_tile(cont, "Music", &ui_img_359952343, 2, 3, 1, NULL);
 
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Mail");
-    lv_obj_center(label);
+    create_tile(cont, "Settings", &ui_img_gear_png, 0, 4, 1, NULL);
+    create_tile(cont, "Maps", &ui_img_846015263, 1, 4, 2, NULL);
 
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Calendar");
-    lv_obj_center(label);
+    create_tile(cont, "OneDrive", &ui_img_cloud_png, 0, 5, 1, NULL);
+    create_tile(cont, "Store", &ui_img_571330079, 1, 5, 1, NULL);
+    create_tile(cont, "Wallet", &ui_img_wallet_png, 2, 5, 1, NULL);
 
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Edge");
-    lv_obj_center(label);
-
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 2, LV_GRID_ALIGN_STRETCH, 2, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Weather");
-    lv_obj_center(label);
-
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 3, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Photos");
-    lv_obj_center(label);
-
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 3, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Groove");
-    lv_obj_center(label);
-
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 4, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Settings");
-    lv_obj_center(label);
-
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 2, LV_GRID_ALIGN_STRETCH, 4, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Maps");
-    lv_obj_center(label);
-
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 5, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "OneDrive");
-    lv_obj_center(label);
-
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 5, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Store");
-    lv_obj_center(label);
-    
-
-    obj = lv_btn_create(cont);
-    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 5, 1);
-    label = lv_label_create(obj);
-    lv_label_set_text(label, "Wallet");
-    lv_obj_center(label);
 
     /*Tile2: a button*/
     ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
