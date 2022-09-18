@@ -1,6 +1,11 @@
 # Lumia-ESP32
 This demo project for the WT32-SC01 module.
 
+
+![1](1.png?raw=true "1")
+
+![2](2.png?raw=true "2")
+
 These are the current features
 ### Screens
 - Boot Screen
