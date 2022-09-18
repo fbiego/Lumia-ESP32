@@ -101,7 +101,7 @@ void setup()
     ESP.restart();
   }
 
-  rtc.setTime(1663352526); // GMT: Friday, September 16, 2022 6:22:06 PM
+  rtc.setTime(1663491331); // Sunday, September 18, 2022 8:55:31 AM
 
   lv_init();
 
@@ -183,12 +183,12 @@ void setup()
   info += "\nRAM size: " + String((ESP.getHeapSize() / 1024.0), 0) + "kB";
   info += "\nPSRAM size: " + String((ESP.getPsramSize() / (1024.0 * 1024.0)), 0) + "MB";
 
-  info += "\nFlash size: " + String((ESP.getFlashChipSize() / (1024.0 * 1024.0)), 0) + "MB";
+  // info += "\nFlash size: " + String((ESP.getFlashChipSize() / (1024.0 * 1024.0)), 0) + "MB";
   info += "\nFlash speed: " + String((ESP.getFlashChipSpeed() / 1000000.0), 0) + "Mhz";
 
   info += "\nSDK version: " + String(ESP.getSdkVersion());
   info += "\nFirmware size: " + String((ESP.getSketchSize() / (1024.0 * 1024.0)), 0) + "MB";
-  info += "\nStorage space: " + String((SPIFFS.totalBytes() / (1024.0 * 1024.0)), 0) + "MB";
+  // info += "\nStorage space: " + String((SPIFFS.totalBytes() / (1024.0 * 1024.0)), 0) + "MB";
   info += "\nMAC address: ";
 
   for (int i = 0; i < 6; i++)
@@ -199,7 +199,9 @@ void setup()
     }
     info += String(byte(mac >> (i * 8) & 0xFF), HEX);
   }
-  info += "\nScreen resolution: " + String(screenWidth) + "x" + String(screenHeight);
+  // info += "\nScreen resolution: " + String(screenWidth) + "x" + String(screenHeight);
+  // info += "\nScreen model: " ;
+  // info += "\nTouch model: FT6336U" ;
 
   Serial.println(info);
 

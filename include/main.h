@@ -68,5 +68,3 @@ struct LED{
   uint16_t speed;
   uint32_t color;
 } led;
-
-

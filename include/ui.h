@@ -75,6 +75,14 @@ extern lv_obj_t * ui_appLedSpeedSlider;
 extern lv_obj_t * ui_appLedTitle;
 extern lv_obj_t * ui_ledAppIcon;
 extern lv_obj_t * ui_ledAppLabel;
+extern lv_obj_t * ui_alertPanel;
+extern lv_obj_t * ui_alertPanelDialog;
+extern lv_obj_t * ui_alertIcon;
+extern lv_obj_t * ui_alertTitle;
+extern lv_obj_t * ui_alertScroll;
+extern lv_obj_t * ui_alertMessage;
+extern lv_obj_t * ui_alertButton;
+extern lv_obj_t * ui_alertButtonText;
 
 
 
@@ -113,6 +121,9 @@ void openSettings();
 void openLock();
 void openAppLed();
 void setLed();
+void showAlert(const void *src, bool state, int size);
+
+
 
 #ifdef __cplusplus
 } /*extern "C"*/

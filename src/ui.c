@@ -68,6 +68,14 @@ lv_obj_t *ui_appLedSpeedSlider;
 lv_obj_t *ui_appLedTitle;
 lv_obj_t *ui_ledAppIcon;
 lv_obj_t *ui_ledAppLabel;
+lv_obj_t *ui_alertPanel;
+lv_obj_t *ui_alertPanelDialog;
+lv_obj_t *ui_alertIcon;
+lv_obj_t *ui_alertTitle;
+lv_obj_t *ui_alertScroll;
+lv_obj_t *ui_alertMessage;
+lv_obj_t *ui_alertButton;
+lv_obj_t *ui_alertButtonText;
 
 lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
@@ -78,6 +86,33 @@ lv_obj_t *ui_backButton;
 lv_obj_t *ui_searchButton;
 
 lv_obj_t *list1;
+lv_obj_t *alertBox;
+
+char aboutText[740] = {
+  0x4c, 0x75, 0x6d, 0x69, 0x61, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x0a, 0x41, 0x20, 0x55, 0x49, 0x20, 0x62, 
+0x61, 0x73, 0x65, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x4c, 0x56, 0x47, 0x4c, 0x20, 0x72, 0x75, 0x6e, 0x6e, 0x69, 
+0x6e, 0x67, 0x20, 0x6f, 0x6e, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x20, 0x73, 0x69, 0x6d, 0x75, 0x6c, 0x61, 
+0x74, 0x69, 0x6e, 0x67, 0x20, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x73, 0x20, 0x4d, 0x6f, 0x62, 0x69, 0x6c, 
+0x65, 0x2e, 0x0a, 0x5b, 0x52, 0x49, 0x50, 0x20, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x73, 0x20, 0x50, 0x68, 
+0x6f, 0x6e, 0x65, 0x5d, 0x20, 0x3a, 0x28, 0x0a, 0x54, 0x68, 0x69, 0x73, 0x20, 0x64, 0x65, 0x6d, 0x6f, 0x20, 
+0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x74, 0x68, 0x65, 0x20, 0x57, 0x54, 
+0x33, 0x32, 0x2d, 0x53, 0x43, 0x30, 0x31, 0x20, 0x6d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x2e, 0x0a, 0x0a, 0x4d, 
+0x61, 0x64, 0x65, 0x20, 0x62, 0x79, 0x20, 0x66, 0x62, 0x69, 0x65, 0x67, 0x6f, 0x2e, 0x0a, 0x2d, 0x2d, 0x2d, 
+0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x0a, 
+0x54, 0x68, 0x61, 0x6e, 0x6b, 0x73, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x79, 0x6f, 0x75, 0x72, 0x20, 0x69, 0x6e, 
+0x74, 0x65, 0x72, 0x65, 0x73, 0x74, 0x20, 0x69, 0x6e, 0x20, 0x74, 0x68, 0x69, 0x73, 0x20, 0x70, 0x72, 0x6f, 
+0x6a, 0x65, 0x63, 0x74, 0x2e, 0x0a, 0x53, 0x68, 0x6f, 0x77, 0x20, 0x79, 0x6f, 0x75, 0x72, 0x20, 0x73, 0x75, 
+0x70, 0x70, 0x6f, 0x72, 0x74, 0x20, 0x62, 0x79, 0x20, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 
+0x69, 0x6e, 0x67, 0x2c, 0x20, 0x73, 0x68, 0x61, 0x72, 0x69, 0x6e, 0x67, 0x20, 0x61, 0x64, 0x64, 0x2f, 0x6f, 
+0x72, 0x20, 0x64, 0x6f, 0x6e, 0x61, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x0a, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 
+0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x0a, 0x50, 0x61, 0x79, 
+0x70, 0x61, 0x6c, 0x3a, 0x20, 0x66, 0x62, 0x69, 0x65, 0x67, 0x6f, 0x2e, 0x66, 0x62, 0x40, 0x67, 0x6d, 0x61, 
+0x69, 0x6c, 0x2e, 0x63, 0x6f, 0x6d, 0x0a, 0x54, 0x77, 0x69, 0x74, 0x74, 0x65, 0x72, 0x3a, 0x20, 0x40, 0x66, 
+0x62, 0x69, 0x65, 0x67, 0x6f, 0x5f, 0x0a, 0x59, 0x6f, 0x75, 0x74, 0x75, 0x62, 0x65, 0x3a, 0x20, 0x68, 0x74, 
+0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x77, 0x77, 0x77, 0x2e, 0x79, 0x6f, 0x75, 0x74, 0x75, 0x62, 0x65, 0x2e, 
+0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x2f, 0x66, 0x62, 0x69, 0x65, 0x67, 0x6f, 0x0a, 0x00
+  };
+
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -96,6 +131,14 @@ typedef struct Drag
 
 drag lockscreen;
 drag notification;
+
+typedef struct AlertDialog
+{
+    char *title;
+    char *message;
+} Alert;
+
+Alert alert;
 
 ///////////////////// ANIMATIONS ////////////////////
 
@@ -426,6 +469,7 @@ static void ui_event_appLed(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *obj = lv_event_get_target(e);
+    int data = (int)lv_event_get_user_data(e);
 
     // if (obj == ui_appLedSwitch){
     //     lv_obj_get_state(obj) & LV_STATE_CHECKED ? "Checked" : "Unchecked";
@@ -469,7 +513,64 @@ static void ui_event_appLed(lv_event_t *e)
         lv_label_set_text_fmt(ui_appLedSpeedLabel, "Speed: %dms", led.speed);
     }
 
+    if (data == 10)
+    {
+        if (!(lv_obj_get_state(obj) & LV_STATE_CHECKED))
+        {
+            led.brightness = 255;
+            led.mode = 0;
+            led.color = 0xFFFFFFFF;
+            // alert.title = "LED";
+            // alert.message = "Led turned ON";
+            // showAlert(&ui_img_led_control_png, true, 200);
+        }
+        else
+        {
+            led.brightness = 0;
+        }
+    }
+
     setLed();
+}
+
+static void event_alert(lv_event_t *e)
+{
+    lv_obj_t *obj = lv_event_get_current_target(e);
+    showAlert(NULL, false, 0);
+}
+
+static void event_install(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+    if (code == LV_EVENT_CLICKED)
+    {
+
+        char buf[150];
+        char *data = (char*)lv_event_get_user_data(e);
+
+        printf("App name: %s\n", data);
+        alert.title = "App not installed";
+        char *msg =  " is not currently available\nOn the app list, click on \"About\" for more info.";
+        strncpy(buf, data, strlen(data));
+        strncpy(buf + strlen(data), msg, strlen(msg) + 1);
+        alert.message = buf;
+
+        showAlert(&ui_img_gear_png, true, 200);
+    }
+}
+
+static void event_about(lv_event_t *e){
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+    if (code == LV_EVENT_CLICKED)
+    {
+        
+        alert.title = "About";
+        alert.message = aboutText;
+
+        showAlert(&ui_img_gear_png, true, 400);
+    }
 }
 ///////////////////// FUNCTIONS ////////////////////
 
@@ -481,7 +582,7 @@ void create_tile(lv_obj_t *parent, char *name, const void *src, int col, int row
     obj = lv_btn_create(parent);
     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, size, LV_GRID_ALIGN_STRETCH, row, 1);
-    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, name);
     label = lv_label_create(obj);
     lv_label_set_text(label, name);
     lv_obj_center(label);
@@ -507,9 +608,9 @@ void create_action_tile(lv_obj_t *parent, char *name, const void *src, bool chec
     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, size, LV_GRID_ALIGN_STRETCH, row, 1);
     lv_obj_add_flag(obj, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_VALUE_CHANGED, 10);
 
-    if (checked)
+    if (!checked)
     {
         lv_obj_add_state(obj, LV_STATE_CHECKED); /*Make the chekbox checked*/
     }
@@ -561,7 +662,7 @@ void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callb
     lv_obj_set_style_bg_color(obj, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_bg_opa(obj, 50, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_ALL, name);
 
     label = lv_label_create(obj);
     lv_label_set_text(label, name);
@@ -586,6 +687,154 @@ void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callb
 }
 
 ///////////////////// MODULES ////////////////////
+void alert_box(lv_obj_t *parent)
+{
+    // ui_alertPanel
+
+    ui_alertPanel = lv_obj_create(parent);
+
+    lv_obj_set_width(ui_alertPanel, 320);
+    lv_obj_set_height(ui_alertPanel, 480);
+
+    lv_obj_set_x(ui_alertPanel, 0);
+    lv_obj_set_y(ui_alertPanel, 0);
+
+    lv_obj_set_align(ui_alertPanel, LV_ALIGN_CENTER);
+
+    lv_obj_clear_flag(ui_alertPanel, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(ui_alertPanel, LV_OBJ_FLAG_HIDDEN);
+
+    lv_obj_set_style_radius(ui_alertPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_alertPanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_alertPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_alertPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
+    // ui_alertPanelDialog
+
+    ui_alertPanelDialog = lv_obj_create(ui_alertPanel);
+
+    lv_obj_set_width(ui_alertPanelDialog, 300);
+    lv_obj_set_height(ui_alertPanelDialog, 200);
+
+    lv_obj_set_x(ui_alertPanelDialog, 0);
+    lv_obj_set_y(ui_alertPanelDialog, 0);
+
+    lv_obj_set_align(ui_alertPanelDialog, LV_ALIGN_CENTER);
+
+    lv_obj_clear_flag(ui_alertPanelDialog, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_set_scrollbar_mode(ui_alertPanelDialog, LV_SCROLLBAR_MODE_OFF);
+
+    lv_obj_set_style_radius(ui_alertPanelDialog, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_alertPanelDialog, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_alertPanelDialog, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_alertPanelDialog, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_alertPanelDialog, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_alertPanelDialog, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_alertPanelDialog, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_alertPanelDialog, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_alertPanelDialog, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_alertPanelDialog, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_alertIcon
+
+    ui_alertIcon = lv_img_create(ui_alertPanelDialog);
+    lv_img_set_src(ui_alertIcon, &ui_img_led_control_png);
+
+    lv_obj_set_width(ui_alertIcon, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_alertIcon, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_alertIcon, 24);
+    lv_obj_set_y(ui_alertIcon, -5);
+
+    lv_obj_add_flag(ui_alertIcon, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(ui_alertIcon, LV_OBJ_FLAG_SCROLLABLE);
+
+    // ui_alertTitle
+
+    ui_alertTitle = lv_label_create(ui_alertPanelDialog);
+
+    lv_obj_set_width(ui_alertTitle, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_alertTitle, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_alertTitle, 57);
+    lv_obj_set_y(ui_alertTitle, -2);
+
+    lv_label_set_text(ui_alertTitle, "Alert Title");
+
+    lv_obj_set_style_text_font(ui_alertTitle, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_alertScroll
+
+    ui_alertScroll = lv_obj_create(ui_alertPanelDialog);
+
+    lv_obj_set_width(ui_alertScroll, 300);
+    lv_obj_set_height(ui_alertScroll, 100);
+
+    lv_obj_set_x(ui_alertScroll, 0);
+    lv_obj_set_y(ui_alertScroll, 29);
+
+    lv_obj_set_align(ui_alertScroll, LV_ALIGN_TOP_MID);
+
+    lv_obj_set_scrollbar_mode(ui_alertScroll, LV_SCROLLBAR_MODE_ACTIVE);
+
+    lv_obj_set_style_radius(ui_alertScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_alertScroll, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_alertScroll, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_alertScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_alertScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_alertScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_alertScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_alertScroll, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_alertMessage
+
+    ui_alertMessage = lv_label_create(ui_alertScroll);
+
+    lv_obj_set_width(ui_alertMessage, 260);
+    lv_obj_set_height(ui_alertMessage, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_alertMessage, 20);
+    lv_obj_set_y(ui_alertMessage, 0);
+
+    lv_label_set_text(ui_alertMessage,
+                      "Flash size: 4194304Flash speed: 40000000\nRAM size: 322216\nPSRAM size: 4194252\nCPU freq: 240\nChip model: ESP32-D0WDQ5\nChip cores: 2\nChip version: 1\nCode size: 1221088\nMac: e8:31:cd:1a:19:94");
+
+    lv_obj_set_style_text_font(ui_alertMessage, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // ui_alertButton
+
+    ui_alertButton = lv_btn_create(ui_alertPanelDialog);
+
+    lv_obj_set_width(ui_alertButton, 100);
+    lv_obj_set_height(ui_alertButton, 30);
+
+    lv_obj_set_x(ui_alertButton, 0);
+    lv_obj_set_y(ui_alertButton, 36);
+
+    lv_obj_set_align(ui_alertButton, LV_ALIGN_BOTTOM_MID);
+
+    lv_obj_add_flag(ui_alertButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+    lv_obj_clear_flag(ui_alertButton, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_set_style_radius(ui_alertButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_alertButton, event_alert, LV_EVENT_CLICKED, NULL);
+
+    // ui_alertButtonText
+
+    ui_alertButtonText = lv_label_create(ui_alertButton);
+
+    lv_obj_set_width(ui_alertButtonText, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_alertButtonText, LV_SIZE_CONTENT);
+
+    lv_obj_set_x(ui_alertButtonText, 0);
+    lv_obj_set_y(ui_alertButtonText, 0);
+
+    lv_obj_set_align(ui_alertButtonText, LV_ALIGN_CENTER);
+
+    lv_label_set_text(ui_alertButtonText, "Okay");
+}
 
 void navigation(lv_obj_t *parent)
 {
@@ -833,7 +1082,7 @@ void notification_panel(lv_obj_t *parent)
     create_action_tile(ui_actionPanel, "WiFi", NULL, true, 0, 0, 1, NULL);
     create_action_tile(ui_actionPanel, "Buetooth", NULL, true, 1, 0, 1, NULL);
     create_action_tile(ui_actionPanel, "Screen", NULL, false, 2, 0, 1, NULL);
-    create_action_tile(ui_actionPanel, "Cellular", NULL, false, 3, 0, 1, NULL);
+    create_action_tile(ui_actionPanel, "LED", NULL, false, 3, 0, 1, ui_event_appLed);
     create_action_tile(ui_actionPanel, "Location", NULL, true, 4, 0, 1, NULL);
 
     // ui_actionDate
@@ -1075,25 +1324,25 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_style_border_width(cont, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(cont, LV_SCROLLBAR_MODE_OFF);
 
-    create_tile(cont, "Phone", &ui_img_1276322231, 0, 0, 1, NULL);
-    create_tile(cont, "People", &ui_img_people_png, 1, 0, 2, NULL);
+    create_tile(cont, "Phone", &ui_img_1276322231, 0, 0, 1, event_install);
+    create_tile(cont, "People", &ui_img_people_png, 1, 0, 2, event_install);
 
-    create_tile(cont, "Messaging", &ui_img_237043237, 0, 1, 1, NULL);
-    create_tile(cont, "Mail", &ui_img_email_png, 1, 1, 1, NULL);
-    create_tile(cont, "Calendar", &ui_img_calendar_png, 2, 1, 1, NULL);
+    create_tile(cont, "Messaging", &ui_img_237043237, 0, 1, 1, event_install);
+    create_tile(cont, "Mail", &ui_img_email_png, 1, 1, 1, event_install);
+    create_tile(cont, "Calendar", &ui_img_calendar_png, 2, 1, 1, event_install);
 
-    create_tile(cont, "Edge", &ui_img_microsoft_png, 0, 2, 1, NULL);
-    create_tile(cont, "Weather", &ui_img_1127648905, 1, 2, 2, NULL);
+    create_tile(cont, "Edge", &ui_img_microsoft_png, 0, 2, 1, event_install);
+    create_tile(cont, "Weather", &ui_img_1127648905, 1, 2, 2, event_install);
 
-    create_tile(cont, "Photos", &ui_img_gallery_png, 0, 3, 2, NULL);
-    create_tile(cont, "Music", &ui_img_359952343, 2, 3, 1, NULL);
+    create_tile(cont, "Photos", &ui_img_gallery_png, 0, 3, 2, event_install);
+    create_tile(cont, "Music", &ui_img_359952343, 2, 3, 1, event_install);
 
     create_tile(cont, "Settings", &ui_img_gear_png, 0, 4, 1, event_settings);
-    create_tile(cont, "Maps", &ui_img_846015263, 1, 4, 2, NULL);
+    create_tile(cont, "Maps", &ui_img_846015263, 1, 4, 2, event_install);
 
-    create_tile(cont, "OneDrive", &ui_img_cloud_png, 0, 5, 1, NULL);
+    create_tile(cont, "OneDrive", &ui_img_cloud_png, 0, 5, 1, event_install);
     create_tile(cont, "LED", &ui_img_led_control_png, 1, 5, 1, event_appLed);
-    create_tile(cont, "Wallet", &ui_img_wallet_png, 2, 5, 1, NULL);
+    create_tile(cont, "Wallet", &ui_img_wallet_png, 2, 5, 1, event_install);
 
     /*Tile2: appList*/
     ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
@@ -1108,27 +1357,31 @@ void ui_startScreen_screen_init(void)
     lv_obj_set_style_bg_opa(list1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(list1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(list1, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_pad_top(list1, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(list1, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     /*Add apps to the list*/
 
-    add_item(list1, "Calendar", &ui_img_calendar_png, NULL);
-    add_item(list1, "Edge", &ui_img_microsoft_png, NULL);
+    add_item(list1, "About", &ui_img_gear_png, event_about);
+    add_item(list1, "Calendar", &ui_img_calendar_png, event_install);
+    add_item(list1, "Edge", &ui_img_microsoft_png, event_install);
     add_item(list1, "LED Control", &ui_img_led_control_png, event_appLed);
-    add_item(list1, "Mail", &ui_img_email_png, NULL);
-    add_item(list1, "Maps", &ui_img_846015263, NULL);
-    add_item(list1, "Messaging", &ui_img_237043237, NULL);
-    add_item(list1, "Music", &ui_img_359952343, NULL);
-    add_item(list1, "OneDrive", &ui_img_cloud_png, NULL);
-    add_item(list1, "People", &ui_img_people_png, NULL);
-    add_item(list1, "Phone", &ui_img_1276322231, NULL);
-    add_item(list1, "Photos", &ui_img_gallery_png, NULL);
+    add_item(list1, "Mail", &ui_img_email_png, event_install);
+    add_item(list1, "Maps", &ui_img_846015263, event_install);
+    add_item(list1, "Messaging", &ui_img_237043237, event_install);
+    add_item(list1, "Music", &ui_img_359952343, event_install);
+    add_item(list1, "OneDrive", &ui_img_cloud_png, event_install);
+    add_item(list1, "People", &ui_img_people_png, event_install);
+    add_item(list1, "Phone", &ui_img_1276322231, event_install);
+    add_item(list1, "Photos", &ui_img_gallery_png, event_install);
     add_item(list1, "Settings", &ui_img_gear_png, event_settings);
-    add_item(list1, "Store", &ui_img_571330079, NULL);
-    add_item(list1, "Wallet", &ui_img_wallet_png, NULL);
-    add_item(list1, "Weather", &ui_img_1127648905, NULL);
+    add_item(list1, "Store", &ui_img_571330079, event_install);
+    add_item(list1, "Wallet", &ui_img_wallet_png, event_install);
+    add_item(list1, "Weather", &ui_img_1127648905, event_install);
 
     navigation(ui_startScreen);
     notification_panel(ui_startScreen);
+    alert_box(ui_startScreen);
 }
 
 void ui_settingsScreen_screen_init(void)
@@ -1648,6 +1901,8 @@ void ui_appLedControl_screen_init(void)
     lv_label_set_text(ui_ledAppLabel, "LED Control");
 
     lv_obj_set_style_text_font(ui_ledAppLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    led.color = 0xFFFFFFFF;
 }
 
 void ui_init(void)
@@ -1661,6 +1916,7 @@ void ui_init(void)
     ui_startScreen_screen_init();
     ui_settingsScreen_screen_init();
     ui_appLedControl_screen_init();
+
     lv_disp_load_scr(ui_bootScreen);
 }
 
@@ -1670,6 +1926,7 @@ void openStart()
     lv_obj_set_parent(ui_Panel2, ui_startScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_startScreen);
     lv_obj_set_parent(ui_statusBar, ui_startScreen);
+    lv_obj_set_parent(ui_alertPanel, ui_startScreen);
     lv_disp_load_scr(ui_startScreen);
 }
 
@@ -1679,6 +1936,7 @@ void openSettings()
     lv_obj_set_parent(ui_Panel2, ui_settingsScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_settingsScreen);
     lv_obj_set_parent(ui_statusBar, ui_settingsScreen);
+    lv_obj_set_parent(ui_alertPanel, ui_settingsScreen);
     lv_disp_load_scr(ui_settingsScreen);
 }
 
@@ -1693,6 +1951,7 @@ void openAppLed()
     lv_obj_set_parent(ui_Panel2, ui_appLedControl); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_appLedControl);
     lv_obj_set_parent(ui_statusBar, ui_appLedControl);
+    lv_obj_set_parent(ui_alertPanel, ui_appLedControl);
     lv_disp_load_scr(ui_appLedControl);
 }
 
@@ -1702,4 +1961,22 @@ void vibrate(long time)
     printf("Vibrate %d\n", time);
     delay(time);
     digitalWrite(MOTOR, LOW);
+}
+
+void showAlert(const void *src, bool state, int size)
+{
+    if (state)
+    {
+        lv_label_set_text(ui_alertTitle, alert.title);
+        lv_label_set_text(ui_alertMessage, alert.message);
+        lv_img_set_src(ui_alertIcon, src);
+        lv_obj_set_height(ui_alertPanelDialog, size);
+        lv_obj_set_height(ui_alertScroll, size - 100);
+
+        lv_obj_clear_flag(ui_alertPanel, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {
+        lv_obj_add_flag(ui_alertPanel, LV_OBJ_FLAG_HIDDEN);
+    }
 }
