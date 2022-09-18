@@ -1,5 +1,5 @@
 # Lumia-ESP32
-This demo project for the WT32-SC01 module.
+This demo project is for the WT32-SC01 module.
 
 
 ![1](1.png?raw=true "1")
