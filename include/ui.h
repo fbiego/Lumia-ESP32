@@ -60,21 +60,6 @@ extern lv_obj_t * ui_settingsIcon;
 extern lv_obj_t * ui_settingsLabel;
 extern lv_obj_t * ui_aboutLabel;
 extern lv_obj_t * ui_aboutText;
-extern lv_obj_t * ui_appLedControl;
-extern lv_obj_t * ui_appLedPanel;
-extern lv_obj_t * ui_appLedStatusLabel;
-extern lv_obj_t * ui_appLedSwitch;
-extern lv_obj_t * ui_appLedBrightnessLabel;
-extern lv_obj_t * ui_appLedBrightnessSlider;
-extern lv_obj_t * ui_appLedColorLabel;
-extern lv_obj_t * ui_appLedColorWheel;
-extern lv_obj_t * ui_appLedModeLabel;
-extern lv_obj_t * ui_appLedModeDropdown;
-extern lv_obj_t * ui_appLedSpeedLabel;
-extern lv_obj_t * ui_appLedSpeedSlider;
-extern lv_obj_t * ui_appLedTitle;
-extern lv_obj_t * ui_ledAppIcon;
-extern lv_obj_t * ui_ledAppLabel;
 extern lv_obj_t * ui_alertPanel;
 extern lv_obj_t * ui_alertPanelDialog;
 extern lv_obj_t * ui_alertIcon;
@@ -83,6 +68,20 @@ extern lv_obj_t * ui_alertScroll;
 extern lv_obj_t * ui_alertMessage;
 extern lv_obj_t * ui_alertButton;
 extern lv_obj_t * ui_alertButtonText;
+extern lv_obj_t * ui_appWifi;
+extern lv_obj_t * ui_appWifiPanel;
+extern lv_obj_t * ui_appWifiStatus;
+extern lv_obj_t * ui_appWifiSwitch;
+extern lv_obj_t * ui_appWifiNo;
+extern lv_obj_t * ui_appWifiList;
+extern lv_obj_t * ui_appWifiName;
+extern lv_obj_t * ui_appWifiPass;
+extern lv_obj_t * ui_appWifiSelect;
+extern lv_obj_t * ui_appWifiButton;
+extern lv_obj_t * ui_appWifiButtonLabel;
+extern lv_obj_t * ui_appWifiTitle;
+extern lv_obj_t * ui_appWifiIcon;
+extern lv_obj_t * ui_appWifiLabel;
 
 
 
@@ -108,7 +107,6 @@ LV_IMG_DECLARE(ui_img_359952343);    // assets\music (1).png
 LV_IMG_DECLARE(ui_img_people_png);    // assets\people.png
 LV_IMG_DECLARE(ui_img_571330079);    // assets\shopping-bag.png
 LV_IMG_DECLARE(ui_img_wallet_png);    // assets\wallet.png
-LV_IMG_DECLARE(ui_img_led_control_png);    // assets\led_control.png
 
 
 
@@ -119,11 +117,11 @@ void vibrate(long time);
 void openStart();
 void openSettings();
 void openLock();
-void openAppLed();
-void setLed();
+void openAppWifi();
+
 void showAlert(const void *src, bool state, int size);
 
-
+void saveWifiList();
 
 #ifdef __cplusplus
 } /*extern "C"*/

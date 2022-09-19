@@ -30,28 +30,20 @@
 #include "ui.h"
 #include <Arduino_GFX_Library.h>
 #include <ESP32Time.h>
-#include <WS2812FX.h>
+#include <ArduinoNvs.h>
+
+#include <WiFi.h>
+#include <WiFiMulti.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
 
 Arduino_DataBus *bus = new Arduino_ESP32SPI(21 /* DC */, 15 /* CS */, 14 /* SCK */, 13 /* MOSI */, -1 /* MISO */, VSPI /* spi_num */);
 Arduino_GFX *gfx = new Arduino_ST7796(bus, 22 /* RST */, 0 /* rotation */);
 ESP32Time rtc(3 * 3600);
 FT6336U ft6336u(I2C_SDA, I2C_SCL, RST_N_PIN, INT_N_PIN);
-WS2812FX ws2812fx = WS2812FX(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+WiFiMulti wifiMulti;
+HTTPClient http;
 
-
-uint8_t FX_MODES[11] = { //"Static\nBlink\nBreath\nRainbow\nScan\nFade\nTwinkle\nStrobe\nLarson\nComet\nFireworks"
-  FX_MODE_STATIC,
-  FX_MODE_BLINK,
-  FX_MODE_BREATH,
-  FX_MODE_RAINBOW,
-  FX_MODE_SCAN,
-  FX_MODE_FADE,
-  FX_MODE_TWINKLE,
-  FX_MODE_STROBE,
-  FX_MODE_LARSON_SCANNER,
-  FX_MODE_COMET,
-  FX_MODE_FIREWORKS
-  };
 
 /* Display flushing */
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
@@ -78,6 +70,165 @@ void my_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
   // return false; /*No buffering now so no more data read*/
 }
 
+void requestResult(int requestCode, int statusCode, String payload, long time)
+{
+
+  Serial.printf("Request %d received, time %dms, code: %d\n", requestCode, time, statusCode);
+
+  if (statusCode == HTTP_CODE_OK)
+  {
+    Serial.println(payload);
+  }
+
+  switch (requestCode)
+  {
+  case TIME_REQUEST:
+    if (statusCode == HTTP_CODE_OK)
+    {
+      DynamicJsonDocument json(100);
+      deserializeJson(json, payload);
+      long t = json["timestamp"].as<long>();
+      rtc.setTime(t);
+    }
+    break;
+  }
+}
+
+void sendRequest(void *parameter)
+{
+  long t;
+
+  for (int r = 0; r < MAX_REQUEST; r++)
+  {
+    if (request[r].active)
+    {
+      t = millis();
+      http.begin(request[r].url);
+      int httpCode;
+      if (request[r].method)
+      {
+        httpCode = http.POST(request[r].data);
+      }
+      else
+      {
+        httpCode = http.GET();
+      }
+
+      String payload = http.getString();
+
+      // http.end();
+      t = millis() - t;
+      requestResult(request[r].code, httpCode, payload, t);
+      request[r].active = false;
+    }
+  }
+  http.end();
+  activeRequest = false;
+  // When you're done, call vTaskDelete. Don't forget this!
+  vTaskDelete(NULL);
+}
+
+void connectWiFi(void *parameter)
+{
+  uint8_t status;
+  while (true)
+  {
+    status = wifiMulti.run();
+    Serial.printf("WiFi trying: %d\n", status);
+    if (status == WL_CONNECTED || status == WL_CONNECT_FAILED || status == WL_DISCONNECTED){
+      break;
+    }
+  }
+  Serial.printf("WiFi exit: %d\n", status);
+  // When you're done, call vTaskDelete. Don't forget this!
+  vTaskDelete(NULL);
+}
+
+bool runRequest()
+{
+  // returns true if the task was created
+  // returns false if the previous task has not completed, new one cannot be created
+  if (!activeRequest)
+  {
+    activeRequest = true;
+    // xTaskCreatePinnedToCore(
+    xTaskCreate(
+        sendRequest,     // Function that should be called
+        "HTTP Requests", // Name of the task (for debugging)
+        8192,            // Stack size (bytes)
+        NULL,            // Parameter to pass
+        1,               // Task priority
+        NULL
+        // NULL,               // Task handle
+        // 1
+    );
+
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+void getNVSData()
+{
+  String val;
+  val = NVS.getString("ssid1");
+  strncpy(ssid1, val.c_str(), val.length() + 1);
+  val = NVS.getString("ssid2");
+  strncpy(ssid2, val.c_str(), val.length() + 1);
+  val = NVS.getString("ssid3");
+  strncpy(ssid3, val.c_str(), val.length() + 1);
+  val = NVS.getString("ssid4");
+  strncpy(ssid4, val.c_str(), val.length() + 1);
+  val = NVS.getString("ssid5");
+  strncpy(ssid5, val.c_str(), val.length() + 1);
+  val = NVS.getString("pass1");
+  strncpy(pass1, val.c_str(), val.length() + 1);
+  val = NVS.getString("pass2");
+  strncpy(pass2, val.c_str(), val.length() + 1);
+  val = NVS.getString("pass3");
+  strncpy(pass3, val.c_str(), val.length() + 1);
+  val = NVS.getString("pass4");
+  strncpy(pass4, val.c_str(), val.length() + 1);
+  val = NVS.getString("pass5");
+  strncpy(pass5, val.c_str(), val.length() + 1);
+}
+
+void setWifi()
+{
+  wifiMulti.addAP(ssid1, pass1);
+  wifiMulti.addAP(ssid2, pass2);
+  wifiMulti.addAP(ssid3, pass3);
+  wifiMulti.addAP(ssid4, pass4);
+  wifiMulti.addAP(ssid5, pass5);
+
+  String wifiList = "Saved Wifi";
+  wifiList += "\n1. " + String(ssid1);
+  wifiList += "\n2. " + String(ssid2);
+  wifiList += "\n3. " + String(ssid3);
+  wifiList += "\n4. " + String(ssid4);
+  wifiList += "\n5. " + String(ssid5);
+
+  lv_label_set_text(ui_appWifiList, wifiList.c_str());
+}
+
+void saveWifiList()
+{
+  setWifi();
+  NVS.setString("ssid1", String(ssid1));
+  NVS.setString("ssid2", String(ssid2));
+  NVS.setString("ssid3", String(ssid3));
+  NVS.setString("ssid4", String(ssid4));
+  NVS.setString("ssid5", String(ssid5));
+  NVS.setString("pass1", String(pass1));
+  NVS.setString("pass2", String(pass2));
+  NVS.setString("pass3", String(pass3));
+  NVS.setString("pass4", String(pass4));
+  NVS.setString("pass5", String(pass5));
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -88,6 +239,9 @@ void setup()
   ft6336u.begin();
   pinMode(MOTOR, OUTPUT);
   digitalWrite(MOTOR, LOW);
+  NVS.begin();
+
+  getNVSData();
 
   ledcSetup(ledChannel, freq, resolution);
   ledcAttachPin(ledPin, ledChannel);
@@ -152,13 +306,15 @@ void setup()
   }
   vibrate(200);
   openLock();
+  setWifi();
 
-  ws2812fx.init();
-  ws2812fx.setBrightness(0);
-  ws2812fx.setSpeed(1000);
-  ws2812fx.setColor(0x007BFF);
-  ws2812fx.setMode(FX_MODE_STATIC);
-  ws2812fx.start();
+  xTaskCreate(
+      connectWiFi,    // Function that should be called
+      "WIFI Connect", // Name of the task (for debugging)
+      8192,           // Stack size (bytes)
+      NULL,           // Parameter to pass
+      1,              // Task priority
+      NULL);
 
   uint64_t mac = ESP.getEfuseMac();
   // Serial.print("Mac: ");
@@ -183,7 +339,7 @@ void setup()
   info += "\nRAM size: " + String((ESP.getHeapSize() / 1024.0), 0) + "kB";
   info += "\nPSRAM size: " + String((ESP.getPsramSize() / (1024.0 * 1024.0)), 0) + "MB";
 
-  // info += "\nFlash size: " + String((ESP.getFlashChipSize() / (1024.0 * 1024.0)), 0) + "MB";
+  info += "\nFlash size: " + String((ESP.getFlashChipSize() / (1024.0 * 1024.0)), 0) + "MB";
   info += "\nFlash speed: " + String((ESP.getFlashChipSpeed() / 1000000.0), 0) + "Mhz";
 
   info += "\nSDK version: " + String(ESP.getSdkVersion());
@@ -215,6 +371,13 @@ void setup()
   lv_slider_set_value(ui_brightnessSlider, 100, LV_ANIM_OFF);
 
   lv_label_set_text(ui_aboutText, info.c_str());
+
+  request[0].active = true;
+  request[0].method = false;
+  request[0].code = TIME_REQUEST;
+  request[0].url = "https://iot.fbiego.com/api/v1/time";
+
+  Serial.println("Device ready");
 }
 
 void loop()
@@ -225,21 +388,28 @@ void loop()
   touch_data.xpos = ft6336u.read_touch1_x();
   touch_data.ypos = ft6336u.read_touch1_y();
 
-  ws2812fx.service();
-
   lv_timer_handler(); /* let the GUI do its work */
-  delay(5);
+  // delay(5);
 
+  // if (wifiMulti.run() == WL_CONNECTED)
+  if (WiFi.isConnected())
+  {
+    lv_obj_clear_flag(ui_wifiIcon, LV_OBJ_FLAG_HIDDEN);
+    if (!onConnect)
+    {
+      Serial.println("WiFi Connected");
+      lv_label_set_text_fmt(ui_appWifiStatus, "Connected to %s", WiFi.SSID().c_str());
+      runRequest();
+      onConnect = true;
+    }
+  }
+  else
+  {
+    onConnect = false;
+    lv_obj_add_flag(ui_wifiIcon, LV_OBJ_FLAG_HIDDEN);
+  }
   lv_label_set_text(ui_lockScreenTime, rtc.getTime("%H:%M").c_str());
   lv_label_set_text(ui_lockTime, rtc.getTime("%H:%M").c_str());
   lv_label_set_text(ui_lockScreenDate, rtc.getTime("%A, %B %d").c_str());
   lv_label_set_text(ui_actionDate, rtc.getTime("%m/%d").c_str());
-}
-
-
-void setLed(){
-  ws2812fx.setBrightness(led.brightness);
-  ws2812fx.setSpeed(led.speed);
-  ws2812fx.setColor(led.color);
-  ws2812fx.setMode(FX_MODES[led.mode]);
 }

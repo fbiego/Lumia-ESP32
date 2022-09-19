@@ -76,6 +76,20 @@ lv_obj_t *ui_alertScroll;
 lv_obj_t *ui_alertMessage;
 lv_obj_t *ui_alertButton;
 lv_obj_t *ui_alertButtonText;
+lv_obj_t *ui_appWifi;
+lv_obj_t *ui_appWifiPanel;
+lv_obj_t *ui_appWifiStatus;
+lv_obj_t *ui_appWifiSwitch;
+lv_obj_t *ui_appWifiNo;
+lv_obj_t *ui_appWifiList;
+lv_obj_t *ui_appWifiName;
+lv_obj_t *ui_appWifiPass;
+lv_obj_t *ui_appWifiSelect;
+lv_obj_t *ui_appWifiButton;
+lv_obj_t *ui_appWifiButtonLabel;
+lv_obj_t *ui_appWifiTitle;
+lv_obj_t *ui_appWifiIcon;
+lv_obj_t *ui_appWifiLabel;
 
 lv_obj_t *ui_tileView;
 lv_obj_t *ui_tileStart;
@@ -150,6 +164,39 @@ static void event_handler(lv_event_t *e)
     lv_obj_t *obj = lv_event_get_target(e);
     if (code == LV_EVENT_CLICKED)
     {
+        if (obj == ui_appWifiButton)
+        {
+            int index = lv_dropdown_get_selected(ui_appWifiSelect);
+            char *name = lv_textarea_get_text(ui_appWifiName);
+            char *pass = lv_textarea_get_text(ui_appWifiPass);
+            switch (index)
+            {
+            case 0:
+                strncpy(ssid1, name, strlen(name) + 1);
+                strncpy(pass1, pass, strlen(pass) + 1);
+                break;
+            case 1:
+                strncpy(ssid2, name, strlen(name) + 1);
+                strncpy(pass2, pass, strlen(pass) + 1);
+                break;
+            case 2:
+                strncpy(ssid3, name, strlen(name) + 1);
+                strncpy(pass3, pass, strlen(pass) + 1);
+                break;
+            case 3:
+                strncpy(ssid4, name, strlen(name) + 1);
+                strncpy(pass4, pass, strlen(pass) + 1);
+                break;
+            case 4:
+                strncpy(ssid5, name, strlen(name) + 1);
+                strncpy(pass5, pass, strlen(pass) + 1);
+                break;
+            }
+            alert.title = name;
+            alert.message = "WiFi Saved";
+            showAlert(&ui_img_gear_png, true, 200);
+            saveWifiList();
+        }
     }
 }
 
@@ -187,16 +234,6 @@ static void event_settings(lv_event_t *e)
     }
 }
 
-static void event_appLed(lv_event_t *e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t *obj = lv_event_get_target(e);
-    if (code == LV_EVENT_CLICKED)
-    {
-        openAppLed();
-    }
-}
-
 static void event_navigate(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -207,6 +244,8 @@ static void event_navigate(lv_event_t *e)
     if (code == LV_EVENT_CLICKED)
     {
         printf("Navigate action: ");
+        lv_obj_add_flag(ui_systemKeyboard, LV_OBJ_FLAG_HIDDEN);
+
         if (obj == ui_backButton)
         {
             printf("Back\n");
@@ -307,7 +346,7 @@ static void ui_event_notificationPanel(lv_event_t *e)
     }
     if (event == LV_EVENT_PRESSED)
     {
-        printf("Press\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+        //printf("Press\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
 
         notification.y = indev->proc.types.pointer.act_point.y;
         if (!notification.active)
@@ -336,11 +375,11 @@ static void ui_event_notificationPanel(lv_event_t *e)
     }
     if (event == LV_EVENT_RELEASED)
     {
-        printf("Release\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
+        //printf("Release\tx:%d, y:%d\n", indev->proc.types.pointer.act_point.x, indev->proc.types.pointer.act_point.y);
         notification.dragging = false;
 
         int vect = indev->proc.types.pointer.act_point.y - notification.y;
-        printf("Drag strength: %d\n", vect);
+        //printf("Drag strength: %d\n", vect);
 
         if (notification.active)
         {
@@ -455,74 +494,6 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
     }
 }
 
-static void ui_event_appLed(lv_event_t *e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t *obj = lv_event_get_target(e);
-    int data = (int)lv_event_get_user_data(e);
-
-    // if (obj == ui_appLedSwitch){
-    //     lv_obj_get_state(obj) & LV_STATE_CHECKED ? "Checked" : "Unchecked";
-
-    // }
-
-    if (obj == ui_appLedBrightnessSlider)
-    {
-        led.brightness = (uint8_t)lv_slider_get_value(obj);
-        if (led.brightness > 0)
-        {
-            lv_label_set_text(ui_appLedStatusLabel, "LED status: ON");
-        }
-        else
-        {
-            lv_label_set_text(ui_appLedStatusLabel, "LED status: OFF");
-        }
-        lv_label_set_text_fmt(ui_appLedBrightnessLabel, "Brightness: %d", led.brightness);
-    }
-
-    if (obj == ui_appLedColorWheel)
-    {
-        lv_color_t c = lv_colorwheel_get_rgb(obj);
-        led.color = lv_color_to32(c);
-    }
-    if (obj == ui_appLedModeDropdown)
-    {
-        int index = lv_dropdown_get_selected(obj);
-        if (index >= 0 && index < 11)
-        {
-            led.mode = index;
-        }
-        else
-        {
-            led.mode = 0;
-        }
-    }
-    if (obj == ui_appLedSpeedSlider)
-    {
-        led.speed = (uint16_t)lv_slider_get_value(obj) * 500;
-        lv_label_set_text_fmt(ui_appLedSpeedLabel, "Speed: %dms", led.speed);
-    }
-
-    if (data == 10)
-    {
-        if (!(lv_obj_get_state(obj) & LV_STATE_CHECKED))
-        {
-            led.brightness = 255;
-            led.mode = 0;
-            led.color = 0xFFFFFFFF;
-            // alert.title = "LED";
-            // alert.message = "Led turned ON";
-            // showAlert(&ui_img_led_control_png, true, 200);
-        }
-        else
-        {
-            led.brightness = 0;
-        }
-    }
-
-    setLed();
-}
-
 static void event_alert(lv_event_t *e)
 {
     lv_obj_t *obj = lv_event_get_current_target(e);
@@ -538,15 +509,22 @@ static void event_install(lv_event_t *e)
 
         char buf[150];
         char *data = (char *)lv_event_get_user_data(e);
-
         printf("App name: %s\n", data);
-        alert.title = "App not installed";
-        char *msg = " is not currently available\nOn the app list, click on \"About\" for more info.";
-        strncpy(buf, data, strlen(data));
-        strncpy(buf + strlen(data), msg, strlen(msg) + 1);
-        alert.message = buf;
 
-        showAlert(&ui_img_gear_png, true, 200);
+        if (data == "WiFi")
+        {
+            openAppWifi();
+        }
+        else
+        {
+            alert.title = "App not installed";
+            char *msg = " is not currently available\nOn the app list, click on \"About\" for more info.";
+            strncpy(buf, data, strlen(data));
+            strncpy(buf + strlen(data), msg, strlen(msg) + 1);
+            alert.message = buf;
+
+            showAlert(&ui_img_gear_png, true, 200);
+        }
     }
 }
 
@@ -561,6 +539,23 @@ static void event_about(lv_event_t *e)
         alert.message = aboutText;
 
         showAlert(&ui_img_gear_png, true, 400);
+    }
+}
+
+static void event_textarea(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta = lv_event_get_target(e);
+    if (code == LV_EVENT_FOCUSED)
+    {
+        lv_keyboard_set_textarea(ui_systemKeyboard, ta);
+        lv_obj_clear_flag(ui_systemKeyboard, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    if (code == LV_EVENT_DEFOCUSED)
+    {
+        lv_keyboard_set_textarea(ui_systemKeyboard, NULL);
+        lv_obj_add_flag(ui_systemKeyboard, LV_OBJ_FLAG_HIDDEN);
     }
 }
 ///////////////////// FUNCTIONS ////////////////////
@@ -730,7 +725,7 @@ void alert_box(lv_obj_t *parent)
     // ui_alertIcon
 
     ui_alertIcon = lv_img_create(ui_alertPanelDialog);
-    lv_img_set_src(ui_alertIcon, &ui_img_led_control_png);
+    lv_img_set_src(ui_alertIcon, &ui_img_gear_png);
 
     lv_obj_set_width(ui_alertIcon, LV_SIZE_CONTENT);
     lv_obj_set_height(ui_alertIcon, LV_SIZE_CONTENT);
@@ -955,7 +950,7 @@ void status_bar(lv_obj_t *parent)
     lv_obj_set_x(ui_wifiIcon, 35);
     lv_obj_set_y(ui_wifiIcon, 11);
 
-    lv_obj_add_flag(ui_wifiIcon, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_add_flag(ui_wifiIcon, LV_OBJ_FLAG_ADV_HITTEST | LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui_wifiIcon, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
 
     // ui_networkIcon
@@ -992,7 +987,7 @@ void status_bar(lv_obj_t *parent)
 void keyboard(lv_obj_t *parent)
 {
     // ui_systemKeyboard
-    ui_systemKeyboard = lv_obj_create(parent);
+    ui_systemKeyboard = lv_keyboard_create(parent);
     lv_obj_clear_flag(ui_systemKeyboard, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_set_width(ui_systemKeyboard, 320);
@@ -1002,6 +997,8 @@ void keyboard(lv_obj_t *parent)
     lv_obj_set_y(ui_systemKeyboard, -40);
 
     lv_obj_set_align(ui_systemKeyboard, LV_ALIGN_BOTTOM_MID);
+
+    lv_obj_add_flag(ui_systemKeyboard, LV_OBJ_FLAG_HIDDEN);
 
     lv_obj_set_style_radius(ui_systemKeyboard, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_systemKeyboard, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1072,7 +1069,7 @@ void notification_panel(lv_obj_t *parent)
     create_action_tile(ui_actionPanel, "WiFi", NULL, true, 0, 0, 1, NULL);
     create_action_tile(ui_actionPanel, "Buetooth", NULL, true, 1, 0, 1, NULL);
     create_action_tile(ui_actionPanel, "Screen", NULL, false, 2, 0, 1, NULL);
-    create_action_tile(ui_actionPanel, "LED", NULL, false, 3, 0, 1, ui_event_appLed);
+    create_action_tile(ui_actionPanel, "Network", NULL, false, 3, 0, 1, NULL);
     create_action_tile(ui_actionPanel, "Location", NULL, true, 4, 0, 1, NULL);
 
     // ui_actionDate
@@ -1331,8 +1328,8 @@ void ui_startScreen_screen_init(void)
     create_tile(cont, "Maps", &ui_img_846015263, 1, 4, 2, event_install);
 
     create_tile(cont, "OneDrive", &ui_img_cloud_png, 0, 5, 1, event_install);
-    create_tile(cont, "LED", &ui_img_led_control_png, 1, 5, 1, event_appLed);
-    create_tile(cont, "Wallet", &ui_img_wallet_png, 2, 5, 1, event_install);
+    create_tile(cont, "Wallet", &ui_img_wallet_png, 1, 5, 1, event_install);
+    create_tile(cont, "WiFi", &ui_img_gear_png, 2, 5, 1, event_install);
 
     /*Tile2: appList*/
     ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
@@ -1355,7 +1352,6 @@ void ui_startScreen_screen_init(void)
     add_item(list1, "About", &ui_img_gear_png, event_about);
     add_item(list1, "Calendar", &ui_img_calendar_png, event_install);
     add_item(list1, "Edge", &ui_img_microsoft_png, event_install);
-    add_item(list1, "LED Control", &ui_img_led_control_png, event_appLed);
     add_item(list1, "Mail", &ui_img_email_png, event_install);
     add_item(list1, "Maps", &ui_img_846015263, event_install);
     add_item(list1, "Messaging", &ui_img_237043237, event_install);
@@ -1368,9 +1364,11 @@ void ui_startScreen_screen_init(void)
     add_item(list1, "Store", &ui_img_571330079, event_install);
     add_item(list1, "Wallet", &ui_img_wallet_png, event_install);
     add_item(list1, "Weather", &ui_img_1127648905, event_install);
+    add_item(list1, "WiFi", &ui_img_gear_png, event_install);
 
     navigation(ui_startScreen);
     notification_panel(ui_startScreen);
+    keyboard(ui_startScreen);
     alert_box(ui_startScreen);
 }
 
@@ -1651,162 +1649,122 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_style_text_font(ui_settingsLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
-void ui_appLedControl_screen_init(void)
+void ui_appWifi_screen_init(void)
 {
 
-    // ui_appLedControl
+    // ui_appWifi
 
-    ui_appLedControl = lv_obj_create(NULL);
+    ui_appWifi = lv_obj_create(NULL);
 
-    lv_obj_clear_flag(ui_appLedControl, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(ui_appWifi, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_set_style_bg_color(ui_appLedControl, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_appLedControl, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appWifi, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appWifi, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_appLedPanel
+    // ui_appWifiPanel
 
-    ui_appLedPanel = lv_obj_create(ui_appLedControl);
+    ui_appWifiPanel = lv_obj_create(ui_appWifi);
 
-    lv_obj_set_width(ui_appLedPanel, 320);
-    lv_obj_set_height(ui_appLedPanel, 480);
+    lv_obj_set_width(ui_appWifiPanel, 320);
+    lv_obj_set_height(ui_appWifiPanel, 480);
 
-    lv_obj_set_x(ui_appLedPanel, 0);
-    lv_obj_set_y(ui_appLedPanel, 0);
+    lv_obj_set_x(ui_appWifiPanel, 0);
+    lv_obj_set_y(ui_appWifiPanel, 0);
 
-    lv_obj_set_align(ui_appLedPanel, LV_ALIGN_TOP_MID);
+    lv_obj_set_align(ui_appWifiPanel, LV_ALIGN_TOP_MID);
 
-    lv_obj_set_scrollbar_mode(ui_appLedPanel, LV_SCROLLBAR_MODE_ACTIVE);
+    lv_obj_set_scrollbar_mode(ui_appWifiPanel, LV_SCROLLBAR_MODE_ACTIVE);
 
-    lv_obj_set_style_radius(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_appLedPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_appLedPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_appLedPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_appLedPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui_appWifiPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appWifiPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appWifiPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_appWifiPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_appWifiPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_appWifiPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_appWifiPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_appWifiPanel, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_appLedStatusLabel
+    ui_appWifiStatus = lv_label_create(ui_appWifiPanel);
+    lv_obj_set_width(ui_appWifiStatus, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_appWifiStatus, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appWifiStatus, 30);
+    lv_obj_set_y(ui_appWifiStatus, 100);
+    lv_label_set_text(ui_appWifiStatus, "Status: ON");
+    lv_obj_set_style_text_font(ui_appWifiStatus, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_appLedStatusLabel = lv_label_create(ui_appLedPanel);
+    ui_appWifiSwitch = lv_switch_create(ui_appWifiPanel);
+    lv_obj_set_width(ui_appWifiSwitch, 50);
+    lv_obj_set_height(ui_appWifiSwitch, 25);
+    lv_obj_set_x(ui_appWifiSwitch, 177);
+    lv_obj_set_y(ui_appWifiSwitch, 96);
+    lv_obj_set_style_radius(ui_appWifiSwitch, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_width(ui_appLedStatusLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_appLedStatusLabel, LV_SIZE_CONTENT);
+    lv_obj_set_style_radius(ui_appWifiSwitch, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
-    lv_obj_set_x(ui_appLedStatusLabel, 30);
-    lv_obj_set_y(ui_appLedStatusLabel, 100);
+    lv_obj_set_style_radius(ui_appWifiSwitch, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_add_flag(ui_appWifiSwitch, LV_OBJ_FLAG_HIDDEN);
 
-    lv_label_set_text(ui_appLedStatusLabel, "LED status: OFF");
+    ui_appWifiNo = lv_label_create(ui_appWifiPanel);
+    lv_obj_set_width(ui_appWifiNo, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_appWifiNo, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appWifiNo, 30);
+    lv_obj_set_y(ui_appWifiNo, 200);
+    lv_label_set_text(ui_appWifiNo, "WiFI No.");
+    lv_obj_set_style_text_font(ui_appWifiNo, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_style_text_font(ui_appLedStatusLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_appWifiList = lv_label_create(ui_appWifiPanel);
+    lv_obj_set_width(ui_appWifiList, 240);
+    lv_obj_set_height(ui_appWifiList, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appWifiList, 28);
+    lv_obj_set_y(ui_appWifiList, 255);
+    lv_label_set_text(ui_appWifiList, "Current WiFi List\n");
+    lv_obj_set_style_text_font(ui_appWifiList, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_appLedSwitch
+    ui_appWifiName = lv_textarea_create(ui_appWifiPanel);
+    lv_obj_set_width(ui_appWifiName, 130);
+    lv_obj_set_height(ui_appWifiName, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appWifiName, -70);
+    lv_obj_set_y(ui_appWifiName, 140);
+    lv_obj_set_align(ui_appWifiName, LV_ALIGN_TOP_MID);
+    lv_textarea_set_placeholder_text(ui_appWifiName, "WiFi Name");
+    lv_textarea_set_one_line(ui_appWifiName, true);
+    lv_obj_set_style_radius(ui_appWifiName, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appWifiName, lv_color_hex(0x323232), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appWifiName, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_appWifiName, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_appWifiName, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_appWifiName, event_textarea, LV_EVENT_ALL, NULL);
 
-    // ui_appLedSwitch = lv_switch_create(ui_appLedPanel);
+    ui_appWifiPass = lv_textarea_create(ui_appWifiPanel);
+    lv_obj_set_width(ui_appWifiPass, 130);
+    lv_obj_set_height(ui_appWifiPass, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appWifiPass, 70);
+    lv_obj_set_y(ui_appWifiPass, 140);
+    lv_obj_set_align(ui_appWifiPass, LV_ALIGN_TOP_MID);
+    lv_textarea_set_placeholder_text(ui_appWifiPass, "WiFi Password");
+    lv_textarea_set_one_line(ui_appWifiPass, true);
+    lv_obj_set_style_radius(ui_appWifiPass, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appWifiPass, lv_color_hex(0x323232), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appWifiPass, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_appWifiPass, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_appWifiPass, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_appWifiPass, event_textarea, LV_EVENT_ALL, NULL);
 
-    // lv_obj_set_width(ui_appLedSwitch, 50);
-    // lv_obj_set_height(ui_appLedSwitch, 25);
+    ui_appWifiSelect = lv_dropdown_create(ui_appWifiPanel);
+    lv_dropdown_set_options(ui_appWifiSelect, "1\n2\n3\n4\n5");
+    lv_obj_set_width(ui_appWifiSelect, 60);
+    lv_obj_set_height(ui_appWifiSelect, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appWifiSelect, -12);
+    lv_obj_set_y(ui_appWifiSelect, 190);
+    lv_obj_set_align(ui_appWifiSelect, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_appWifiSelect, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+    lv_obj_set_style_radius(ui_appWifiSelect, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appWifiSelect, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appWifiSelect, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_appWifiSelect, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_appWifiSelect, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // lv_obj_set_x(ui_appLedSwitch, 177);
-    // lv_obj_set_y(ui_appLedSwitch, 96);
-
-    // ui_appLedBrightnessLabel
-
-    ui_appLedBrightnessLabel = lv_label_create(ui_appLedPanel);
-
-    lv_obj_set_width(ui_appLedBrightnessLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_appLedBrightnessLabel, LV_SIZE_CONTENT);
-
-    lv_obj_set_x(ui_appLedBrightnessLabel, 30);
-    lv_obj_set_y(ui_appLedBrightnessLabel, 143);
-
-    lv_label_set_text(ui_appLedBrightnessLabel, "Brightness");
-
-    lv_obj_set_style_text_font(ui_appLedBrightnessLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    // ui_appLedBrightnessSlider
-
-    ui_appLedBrightnessSlider = lv_slider_create(ui_appLedPanel);
-    lv_slider_set_range(ui_appLedBrightnessSlider, 0, 255);
-
-    lv_obj_set_width(ui_appLedBrightnessSlider, 250);
-    lv_obj_set_height(ui_appLedBrightnessSlider, 10);
-
-    lv_obj_set_x(ui_appLedBrightnessSlider, 37);
-    lv_obj_set_y(ui_appLedBrightnessSlider, 175);
-
-    lv_obj_add_event_cb(ui_appLedBrightnessSlider, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
-
-    // ui_appLedColorLabel
-
-    ui_appLedColorLabel = lv_label_create(ui_appLedPanel);
-
-    lv_obj_set_width(ui_appLedColorLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_appLedColorLabel, LV_SIZE_CONTENT);
-
-    lv_obj_set_x(ui_appLedColorLabel, 30);
-    lv_obj_set_y(ui_appLedColorLabel, 215);
-
-    lv_label_set_text(ui_appLedColorLabel, "Color");
-
-    lv_obj_set_style_text_font(ui_appLedColorLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    // ui_appLedColorWheel
-
-    ui_appLedColorWheel = lv_colorwheel_create(ui_appLedPanel, true);
-
-    lv_colorwheel_set_mode_fixed(ui_appLedColorWheel, true);
-
-    lv_obj_set_width(ui_appLedColorWheel, 150);
-    lv_obj_set_height(ui_appLedColorWheel, 150);
-
-    lv_obj_set_x(ui_appLedColorWheel, 0);
-    lv_obj_set_y(ui_appLedColorWheel, 218);
-
-    lv_obj_set_align(ui_appLedColorWheel, LV_ALIGN_TOP_MID);
-
-    lv_obj_add_event_cb(ui_appLedColorWheel, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
-
-    lv_obj_clear_flag(ui_appLedColorWheel, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE);
-
-    // ui_appLedModeLabel
-
-    ui_appLedModeLabel = lv_label_create(ui_appLedPanel);
-
-    lv_obj_set_width(ui_appLedModeLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_appLedModeLabel, LV_SIZE_CONTENT);
-
-    lv_obj_set_x(ui_appLedModeLabel, 30);
-    lv_obj_set_y(ui_appLedModeLabel, 420);
-
-    lv_label_set_text(ui_appLedModeLabel, "Mode");
-
-    lv_obj_set_style_text_font(ui_appLedModeLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    // ui_appLedModeDropdown
-
-    ui_appLedModeDropdown = lv_dropdown_create(ui_appLedPanel);
-    lv_dropdown_set_options(ui_appLedModeDropdown, "Static\nBlink\nBreath\nRainbow\nScan\nFade\nTwinkle\nStrobe\nLarson\nComet\nFireworks");
-    // lv_dropdown_set_text(ui_appLedModeDropdown, "");
-
-    lv_obj_set_width(ui_appLedModeDropdown, 150);
-    lv_obj_set_height(ui_appLedModeDropdown, LV_SIZE_CONTENT);
-
-    lv_obj_set_x(ui_appLedModeDropdown, 110);
-    lv_obj_set_y(ui_appLedModeDropdown, 411);
-
-    lv_obj_add_flag(ui_appLedModeDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-
-    lv_obj_add_event_cb(ui_appLedModeDropdown, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
-
-    lv_obj_set_style_radius(ui_appLedModeDropdown, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_appLedModeDropdown, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_appLedModeDropdown, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(ui_appLedModeDropdown, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_opa(ui_appLedModeDropdown, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_appLedModeDropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    lv_obj_t *list = lv_dropdown_get_list(ui_appLedModeDropdown); /*Get the list*/
+    lv_obj_t *list = lv_dropdown_get_list(ui_appWifiSelect); /*Get the list*/
     lv_obj_set_style_radius(list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(list, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(list, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1814,85 +1772,74 @@ void ui_appLedControl_screen_init(void)
     lv_obj_set_style_border_opa(list, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(list, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_appLedSpeedLabel
+    ui_appWifiButton = lv_btn_create(ui_appWifiPanel);
+    lv_obj_set_width(ui_appWifiButton, 100);
+    lv_obj_set_height(ui_appWifiButton, LV_SIZE_CONTENT); /// 50
+    lv_obj_set_x(ui_appWifiButton, 87);
+    lv_obj_set_y(ui_appWifiButton, 190);
+    lv_obj_set_align(ui_appWifiButton, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_appWifiButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+    lv_obj_clear_flag(ui_appWifiButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
+    lv_obj_set_style_radius(ui_appWifiButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_appWifiButton, event_handler, LV_EVENT_ALL, NULL);
 
-    ui_appLedSpeedLabel = lv_label_create(ui_appLedPanel);
+    ui_appWifiButtonLabel = lv_label_create(ui_appWifiButton);
+    lv_obj_set_width(ui_appWifiButtonLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_appWifiButtonLabel, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_appWifiButtonLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_appWifiButtonLabel, "Set");
+    lv_obj_set_style_text_font(ui_appWifiButtonLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_width(ui_appLedSpeedLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_appLedSpeedLabel, LV_SIZE_CONTENT);
+    // ui_appWifiTitle
 
-    lv_obj_set_x(ui_appLedSpeedLabel, 30);
-    lv_obj_set_y(ui_appLedSpeedLabel, 463);
+    ui_appWifiTitle = lv_obj_create(ui_appWifi);
 
-    lv_label_set_text(ui_appLedSpeedLabel, "Speed:  500ms");
+    lv_obj_set_width(ui_appWifiTitle, 320);
+    lv_obj_set_height(ui_appWifiTitle, 69);
 
-    lv_obj_set_style_text_font(ui_appLedSpeedLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_x(ui_appWifiTitle, 0);
+    lv_obj_set_y(ui_appWifiTitle, 0);
 
-    // ui_appLedSpeedSlider
+    lv_obj_set_align(ui_appWifiTitle, LV_ALIGN_TOP_MID);
 
-    ui_appLedSpeedSlider = lv_slider_create(ui_appLedPanel);
-    lv_slider_set_range(ui_appLedSpeedSlider, 1, 10);
+    lv_obj_clear_flag(ui_appWifiTitle, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_set_width(ui_appLedSpeedSlider, 250);
-    lv_obj_set_height(ui_appLedSpeedSlider, 10);
+    lv_obj_set_style_radius(ui_appWifiTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appWifiTitle, lv_color_hex(0x323232), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appWifiTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_appWifiTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_x(ui_appLedSpeedSlider, 30);
-    lv_obj_set_y(ui_appLedSpeedSlider, 500);
+    // ui_appWifiIcon
 
-    lv_obj_add_event_cb(ui_appLedSpeedSlider, ui_event_appLed, LV_EVENT_VALUE_CHANGED, NULL);
+    ui_appWifiIcon = lv_img_create(ui_appWifiTitle);
+    lv_img_set_src(ui_appWifiIcon, &ui_img_gear_png);
 
-    // ui_appLedTitle
+    lv_obj_set_width(ui_appWifiIcon, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_appWifiIcon, LV_SIZE_CONTENT);
 
-    ui_appLedTitle = lv_obj_create(ui_appLedControl);
+    lv_obj_set_x(ui_appWifiIcon, 10);
+    lv_obj_set_y(ui_appWifiIcon, 5);
 
-    lv_obj_set_width(ui_appLedTitle, 320);
-    lv_obj_set_height(ui_appLedTitle, 69);
+    lv_obj_set_align(ui_appWifiIcon, LV_ALIGN_BOTTOM_LEFT);
 
-    lv_obj_set_x(ui_appLedTitle, 0);
-    lv_obj_set_y(ui_appLedTitle, 0);
+    lv_obj_add_flag(ui_appWifiIcon, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_clear_flag(ui_appWifiIcon, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_set_align(ui_appLedTitle, LV_ALIGN_TOP_MID);
+    // ui_appWifiLabel
 
-    lv_obj_clear_flag(ui_appLedTitle, LV_OBJ_FLAG_SCROLLABLE);
+    ui_appWifiLabel = lv_label_create(ui_appWifiTitle);
 
-    lv_obj_set_style_radius(ui_appLedTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_appLedTitle, lv_color_hex(0x323232), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_appLedTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_appLedTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_width(ui_appWifiLabel, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_appWifiLabel, LV_SIZE_CONTENT);
 
-    // ui_ledAppIcon
+    lv_obj_set_x(ui_appWifiLabel, 50);
+    lv_obj_set_y(ui_appWifiLabel, 4);
 
-    ui_ledAppIcon = lv_img_create(ui_appLedTitle);
-    lv_img_set_src(ui_ledAppIcon, &ui_img_led_control_png);
+    lv_obj_set_align(ui_appWifiLabel, LV_ALIGN_BOTTOM_LEFT);
 
-    lv_obj_set_width(ui_ledAppIcon, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_ledAppIcon, LV_SIZE_CONTENT);
+    lv_label_set_text(ui_appWifiLabel, "WiFi");
 
-    lv_obj_set_x(ui_ledAppIcon, 10);
-    lv_obj_set_y(ui_ledAppIcon, 5);
-
-    lv_obj_set_align(ui_ledAppIcon, LV_ALIGN_BOTTOM_LEFT);
-
-    lv_obj_add_flag(ui_ledAppIcon, LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_clear_flag(ui_ledAppIcon, LV_OBJ_FLAG_SCROLLABLE);
-
-    // ui_ledAppLabel
-
-    ui_ledAppLabel = lv_label_create(ui_appLedTitle);
-
-    lv_obj_set_width(ui_ledAppLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_ledAppLabel, LV_SIZE_CONTENT);
-
-    lv_obj_set_x(ui_ledAppLabel, 50);
-    lv_obj_set_y(ui_ledAppLabel, 4);
-
-    lv_obj_set_align(ui_ledAppLabel, LV_ALIGN_BOTTOM_LEFT);
-
-    lv_label_set_text(ui_ledAppLabel, "LED Control");
-
-    lv_obj_set_style_text_font(ui_ledAppLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    led.color = 0xFFFFFFFF;
+    lv_obj_set_style_text_font(ui_appWifiLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 void ui_init(void)
@@ -1905,7 +1852,7 @@ void ui_init(void)
     ui_lockScreen_screen_init();
     ui_startScreen_screen_init();
     ui_settingsScreen_screen_init();
-    ui_appLedControl_screen_init();
+    ui_appWifi_screen_init();
 
     lv_disp_load_scr(ui_bootScreen);
 }
@@ -1916,6 +1863,7 @@ void openStart()
     lv_obj_set_parent(ui_Panel2, ui_startScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_startScreen);
     lv_obj_set_parent(ui_statusBar, ui_startScreen);
+    lv_obj_set_parent(ui_systemKeyboard, ui_startScreen);
     lv_obj_set_parent(ui_alertPanel, ui_startScreen);
     lv_disp_load_scr(ui_startScreen);
 }
@@ -1926,6 +1874,7 @@ void openSettings()
     lv_obj_set_parent(ui_Panel2, ui_settingsScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_settingsScreen);
     lv_obj_set_parent(ui_statusBar, ui_settingsScreen);
+    lv_obj_set_parent(ui_systemKeyboard, ui_settingsScreen);
     lv_obj_set_parent(ui_alertPanel, ui_settingsScreen);
     lv_disp_load_scr(ui_settingsScreen);
 }
@@ -1936,19 +1885,20 @@ void openLock()
     lv_disp_load_scr(ui_lockScreen);
 }
 
-void openAppLed()
+void openAppWifi()
 {
-    lv_obj_set_parent(ui_Panel2, ui_appLedControl); // navigation
-    lv_obj_set_parent(ui_notificationPanel, ui_appLedControl);
-    lv_obj_set_parent(ui_statusBar, ui_appLedControl);
-    lv_obj_set_parent(ui_alertPanel, ui_appLedControl);
-    lv_disp_load_scr(ui_appLedControl);
+    lv_obj_set_parent(ui_Panel2, ui_appWifi); // navigation
+    lv_obj_set_parent(ui_notificationPanel, ui_appWifi);
+    lv_obj_set_parent(ui_statusBar, ui_appWifi);
+    lv_obj_set_parent(ui_systemKeyboard, ui_appWifi);
+    lv_obj_set_parent(ui_alertPanel, ui_appWifi);
+
+    lv_disp_load_scr(ui_appWifi);
 }
 
 void vibrate(long time)
 {
     digitalWrite(MOTOR, HIGH);
-    printf("Vibrate %d\n", time);
     delay(time);
     digitalWrite(MOTOR, LOW);
 }

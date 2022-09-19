@@ -32,11 +32,11 @@
 
 #define MOTOR 4
 
-#define LED_COUNT 16
-#define LED_PIN 5
-
 #define FORMAT_SPIFFS_IF_FAILED true
 
+#define MAX_REQUEST 5
+
+#define TIME_REQUEST 0
 
 struct TouchData{
     int xpos;
@@ -54,6 +54,11 @@ const int resolution = 8;
 
 
 long currentMillis;
+bool onConnect;
+bool activeRequest;
+
+char ssid1[20], ssid2[20], ssid3[20], ssid4[20], ssid5[20];
+char pass1[20], pass2[20], pass3[20], pass4[20], pass5[20];
 
 /* Change to your screen resolution */
 static uint32_t screenWidth;
@@ -62,9 +67,14 @@ static lv_disp_draw_buf_t draw_buf;
 static lv_color_t *disp_draw_buf;
 static lv_disp_drv_t disp_drv;
 
-struct LED{
-  uint8_t mode;
-  uint8_t brightness;
-  uint16_t speed;
-  uint32_t color;
-} led;
+struct Request{
+  char *url;
+  int code;
+  bool method;
+  char *data;
+  bool active;
+};
+
+struct Request request[MAX_REQUEST];
+
+bool runRequest();
