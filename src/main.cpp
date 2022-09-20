@@ -44,6 +44,13 @@ FT6336U ft6336u(I2C_SDA, I2C_SCL, RST_N_PIN, INT_N_PIN);
 WiFiMulti wifiMulti;
 HTTPClient http;
 
+AppComponent testApp[] = {
+    {.id = 0, .parent = 0, .type = LABEL, .text = "Hello world", .xPos = 20, .yPos = 20, .width = 25, .height = 25},
+    {.id = 1, .parent = 0, .type = BUTTON, .text = "Click", .xPos = 20, .yPos = 70, .width = 100, .height = 10},
+    {.id = 2, .parent = 0, .type = SLIDER, .text = "", .xPos = 20, .yPos = 150, .width = 250, .height = 5},
+    {.id = 3, .parent = 0, .type = SWITCH, .text = "", .xPos = 20, .yPos = 250, .width = 50, .height = 20},
+    {.id = 4, .parent = 0, .type = LABEL, .text = "Test app", .xPos = 20, .yPos = 300, .width = 25, .height = 25},
+};
 
 /* Display flushing */
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
@@ -89,6 +96,34 @@ void requestResult(int requestCode, int statusCode, String payload, long time)
       deserializeJson(json, payload);
       long t = json["timestamp"].as<long>();
       rtc.setTime(t);
+
+      // lv_calendar_set_today_date(ui_appCalendarObj, rtc.getYear(), rtc.getMonth() + 1, rtc.getDay());
+    }
+    break;
+  case APPS_REQUEST:
+    if (statusCode == HTTP_CODE_OK)
+    {
+      DynamicJsonDocument json(2048);
+      deserializeJson(json, payload);
+      JsonArray array = json.as<JsonArray>();
+      int x = 0;
+
+      for (JsonVariant j : array)
+      {
+        JsonObject v = j.as<JsonObject>();
+        String name = v["name"].as<String>();
+        strncpy(appList[x].name, name.c_str(), name.length() + 1);
+        appList[x].id = v["id"].as<uint32_t>();
+        appList[x].version = v["version"].as<uint32_t>();
+        appList[x].size = v["size"].as<uint32_t>();
+        appList[x].state = true;
+        x++;
+        
+        if (x >= MAX_APPS)
+        {
+          break;
+        }
+      }
     }
     break;
   }
@@ -135,7 +170,8 @@ void connectWiFi(void *parameter)
   {
     status = wifiMulti.run();
     Serial.printf("WiFi trying: %d\n", status);
-    if (status == WL_CONNECTED || status == WL_CONNECT_FAILED || status == WL_DISCONNECTED){
+    if (status == WL_CONNECTED || status == WL_CONNECT_FAILED || status == WL_DISCONNECTED)
+    {
       break;
     }
   }
@@ -194,6 +230,8 @@ void getNVSData()
   strncpy(pass4, val.c_str(), val.length() + 1);
   val = NVS.getString("pass5");
   strncpy(pass5, val.c_str(), val.length() + 1);
+  brightness = NVS.getInt("brightness", brightness);
+  themeColor = NVS.getInt("theme", themeColor);
 }
 
 void setWifi()
@@ -229,6 +267,51 @@ void saveWifiList()
   NVS.setString("pass5", String(pass5));
 }
 
+void saveSettings(){
+  NVS.setInt("brightness", brightness);
+  NVS.setInt("theme", themeColor);
+}
+
+lv_obj_t *create_component(lv_obj_t *parent, AppComponent component)
+{
+  lv_obj_t *object;
+  if (component.type == LABEL)
+  {
+    object = create_label(parent, component.text, component.yPos);
+  }
+  else if (component.type == BUTTON)
+  {
+    object = create_button(parent, component.text, component.xPos, component.yPos, component.width);
+  }
+  else if (component.type == SLIDER)
+  {
+    object = create_slider(parent, component.xPos, component.yPos, component.width, component.height);
+  }
+  else if (component.type == SWITCH)
+  {
+    object = create_switch(parent, component.xPos, component.yPos);
+  }
+
+  return object;
+}
+
+void loadTestApp()
+{
+  size_t n = sizeof(testApp) / sizeof(testApp[0]);
+  appSize = n;
+
+  closeApp();
+
+  lv_obj_t *container = app_canvas();
+
+  for (int i = 0; i < n; i++)
+  {
+    create_component(container, testApp[i]);
+  }
+
+  launchApp("Test App", &ui_img_gear_png);
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -249,7 +332,7 @@ void setup()
   if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED))
   {
     Serial.println("SPIFFS Mount Failed");
-    ledcWrite(ledChannel, 100);
+    ledcWrite(ledChannel, brightness);
     gfx->fillScreen(BLUE);
     delay(2000);
     ESP.restart();
@@ -368,14 +451,20 @@ void setup()
 
   lv_bar_set_value(ui_storageBar, int((used / (total * 1.0)) * 100.0), LV_ANIM_OFF);
   lv_label_set_text(ui_storageText, usage.c_str());
-  lv_slider_set_value(ui_brightnessSlider, 100, LV_ANIM_OFF);
-
+  lv_slider_set_value(ui_brightnessSlider, brightness, LV_ANIM_OFF);
+  lv_colorwheel_set_rgb(ui_themeWheel, lv_color_hex(themeColor));
+  lv_event_send(ui_themeWheel, LV_EVENT_VALUE_CHANGED, NULL);
   lv_label_set_text(ui_aboutText, info.c_str());
 
   request[0].active = true;
   request[0].method = false;
   request[0].code = TIME_REQUEST;
   request[0].url = "https://iot.fbiego.com/api/v1/time";
+
+  request[1].active = true;
+  request[1].method = false;
+  request[1].code = APPS_REQUEST;
+  request[1].url = "https://iot.fbiego.com/esp32/apps";
 
   Serial.println("Device ready");
 }
@@ -398,7 +487,6 @@ void loop()
     if (!onConnect)
     {
       Serial.println("WiFi Connected");
-      lv_label_set_text_fmt(ui_appWifiStatus, "Connected to %s", WiFi.SSID().c_str());
       runRequest();
       onConnect = true;
     }

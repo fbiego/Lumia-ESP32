@@ -82,7 +82,13 @@ extern lv_obj_t * ui_appWifiButtonLabel;
 extern lv_obj_t * ui_appWifiTitle;
 extern lv_obj_t * ui_appWifiIcon;
 extern lv_obj_t * ui_appWifiLabel;
-
+extern lv_obj_t * ui_appScreen;
+extern lv_obj_t * ui_appPanel;
+extern lv_obj_t * ui_appCalendar;
+extern lv_obj_t * ui_appCalendarObj;
+extern lv_obj_t * ui_appHeader;
+extern lv_obj_t * ui_appIcon;
+extern lv_obj_t * ui_appLabel;
 
 
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
@@ -108,20 +114,43 @@ LV_IMG_DECLARE(ui_img_people_png);    // assets\people.png
 LV_IMG_DECLARE(ui_img_571330079);    // assets\shopping-bag.png
 LV_IMG_DECLARE(ui_img_wallet_png);    // assets\wallet.png
 
-
+//user settings
+extern int brightness;
+extern uint32_t themeColor;
 
 void ui_init(void);
 
 void vibrate(long time);
+lv_obj_t *app_canvas();
 
 void openStart();
 void openSettings();
 void openLock();
 void openAppWifi();
+void openAppCalendar();
+void openAppStore();
+void openAppAbout();
 
 void showAlert(const void *src, bool state, int size);
 
 void saveWifiList();
+void saveSettings();
+void setWifi();
+
+void loadTestApp();
+void launchApp(const char *name, const void *src);
+
+void closeApp();
+
+lv_obj_t *create_label(lv_obj_t *parent, const char *text, uint32_t yPos);
+lv_obj_t *create_button(lv_obj_t *parent, const char *text, uint32_t xPos, uint32_t yPos, uint32_t width);
+lv_obj_t *create_slider(lv_obj_t *parent, uint32_t xPos, uint32_t yPos, uint32_t width, uint32_t height);
+lv_obj_t *create_switch(lv_obj_t *parent, uint32_t xPos, uint32_t yPos);
+
+
+
+lv_obj_t **activeApp;
+uint32_t appSize;
 
 #ifdef __cplusplus
 } /*extern "C"*/
