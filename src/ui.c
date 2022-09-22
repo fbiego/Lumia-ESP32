@@ -2045,6 +2045,7 @@ void ui_settingsScreen_screen_init(void)
     lv_textarea_set_accepted_chars(ui_lockPass, "0123456789");
     lv_textarea_set_max_length(ui_lockPass, 4);
     lv_textarea_set_password_mode(ui_lockPass, true);
+    lv_obj_set_style_text_letter_space(ui_lockPass, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_radius(ui_lockPass, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_lockPass, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_lockPass, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -2098,6 +2099,7 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_height(ui_themeWheel, 150);
     lv_obj_set_x(ui_themeWheel, 50);
     lv_obj_set_y(ui_themeWheel, 398);
+    lv_obj_add_event_cb(ui_themeWheel, theme_change, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_clear_flag(ui_themeWheel, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
 
     ui_aboutLabel = lv_label_create(ui_settingsScroll);
