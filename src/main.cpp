@@ -44,13 +44,76 @@ FT6336U ft6336u(I2C_SDA, I2C_SCL, RST_N_PIN, INT_N_PIN);
 WiFiMulti wifiMulti;
 HTTPClient http;
 
-AppComponent testApp[] = {
-    {.id = 0, .parent = 0, .type = LABEL, .text = "Hello world", .xPos = 20, .yPos = 20, .width = 25, .height = 25},
-    {.id = 1, .parent = 0, .type = BUTTON, .text = "Click", .xPos = 20, .yPos = 70, .width = 100, .height = 10},
-    {.id = 2, .parent = 0, .type = SLIDER, .text = "", .xPos = 20, .yPos = 150, .width = 250, .height = 5},
-    {.id = 3, .parent = 0, .type = SWITCH, .text = "", .xPos = 20, .yPos = 250, .width = 50, .height = 20},
-    {.id = 4, .parent = 0, .type = LABEL, .text = "Test app", .xPos = 20, .yPos = 300, .width = 25, .height = 25},
-};
+// AppComponent testApp[] = {
+//     {.id = 0, .parent = 0, .type = LABEL, .text = "Hello world", .xPos = 20, .yPos = 20, .width = 25, .height = 25},
+//     {.id = 1, .parent = 0, .type = BUTTON, .text = "Click", .xPos = 20, .yPos = 70, .width = 100, .height = 10},
+//     {.id = 2, .parent = 0, .type = SLIDER, .text = "", .xPos = 20, .yPos = 150, .width = 250, .height = 5},
+//     {.id = 3, .parent = 0, .type = SWITCH, .text = "", .xPos = 20, .yPos = 250, .width = 50, .height = 20},
+//     {.id = 4, .parent = 0, .type = LABEL, .text = "Test app", .xPos = 20, .yPos = 300, .width = 25, .height = 25},
+// };
+
+uint8_t ext[] = {
+    // id, type, comp id   , parent id ,    x pos  ,    y pos  ,   width  ,   height   , text ..... terminator
+    0xAA, 0x01, 0x10, 0x01, 0xAB, 0x01, 0x00, 0x14, 0x00, 0x14, 0x00, 0x19, 0x00, 0x19, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x00,
+    0xAA, 0x02, 0x10, 0x02, 0xAB, 0x01, 0x00, 0x14, 0x00, 0x46, 0x00, 0x64, 0x00, 0x00, 0x43, 0x6c, 0x69, 0x63, 0x6b, 0x00,
+    0xAA, 0x05, 0x10, 0x03, 0xAB, 0x01, 0x00, 0x14, 0x00, 0x96, 0x00, 0xFA, 0x00, 0x05, 0x00,
+    0xAA, 0x07, 0x10, 0x04, 0xAB, 0x01, 0x00, 0x14, 0x00, 0xFA, 0x00, 0x32, 0x00, 0x14, 0x00,
+    0xAA, 0x01, 0x10, 0x05, 0xAB, 0x01, 0x00, 0x14, 0x01, 0x2C, 0x00, 0x19, 0x00, 0x19, 0x54, 0x65, 0x73, 0x74, 0x20, 0x61, 0x70, 0x70, 0x00};
+
+AppComponent testApp[10];
+
+void extractApp()
+{
+
+  int a = 0, i = 0, j, z = sizeof(ext) / sizeof(ext[0]);
+  uint8_t buf[100];
+  while (1)
+  {
+    // copy component data to buffer
+    for (j = 0; j < 14; j++)
+    {
+      if (i >= z)
+      {
+        break; // not enough data for component
+      }
+      buf[j] = ext[i];
+      i++;
+    }
+    while (1)
+    {
+      buf[j] = ext[i];
+      j++;
+      i++;
+      if (buf[j - 1] == 0x00)
+      {
+        break; // component terminator found
+      }
+      if (i >= z)
+      {
+        break; // component terminator not found & end of component data
+      }
+    }
+    if (buf[j - 1] != 0x00)
+    {
+      break; // component incomplete
+    }
+
+    // component info was loaded to buffer
+    if (buf[0] == 0xAA)
+    {
+      testApp[a].type = (Type)buf[1];
+      testApp[a].id = buf[2] << 8 | buf[3];
+      testApp[a].parent = buf[4] << 8 | buf[5];
+      testApp[a].xPos = buf[6] << 8 | buf[7];
+      testApp[a].yPos = buf[8] << 8 | buf[9];
+      testApp[a].width = buf[10] << 8 | buf[11];
+      testApp[a].height = buf[12] << 8 | buf[13];
+      strncpy(testApp[a].text, (char *)buf + 14, j - 14);
+      printf("App UI Component > 0x%X\n", uuid(testApp[a].parent, testApp[a].id));
+      a++;
+    }
+  }
+}
 
 /* Display flushing */
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
@@ -118,7 +181,7 @@ void requestResult(int requestCode, int statusCode, String payload, long time)
         appList[x].size = v["size"].as<uint32_t>();
         appList[x].state = true;
         x++;
-        
+
         if (x >= MAX_APPS)
         {
           break;
@@ -170,7 +233,7 @@ void connectWiFi(void *parameter)
   {
     status = wifiMulti.run();
     Serial.printf("WiFi trying: %d\n", status);
-    if (status == WL_CONNECTED || status == WL_CONNECT_FAILED || status == WL_DISCONNECTED)
+    if (status == WL_CONNECTED || status == WL_CONNECT_FAILED || status == WL_DISCONNECTED || status == WL_NO_SSID_AVAIL)
     {
       break;
     }
@@ -267,7 +330,8 @@ void saveWifiList()
   NVS.setString("pass5", String(pass5));
 }
 
-void saveSettings(){
+void saveSettings()
+{
   NVS.setInt("brightness", brightness);
   NVS.setInt("theme", themeColor);
 }
@@ -275,21 +339,26 @@ void saveSettings(){
 lv_obj_t *create_component(lv_obj_t *parent, AppComponent component)
 {
   lv_obj_t *object;
+  printf("Comp %d, x:%d, y:%d > %s\n", component.type, component.xPos, component.yPos, &component.text);
   if (component.type == LABEL)
   {
     object = create_label(parent, component.text, component.yPos);
   }
   else if (component.type == BUTTON)
   {
-    object = create_button(parent, component.text, component.xPos, component.yPos, component.width);
+    object = create_button(parent, uuid(component.parent, component.id), component.text, component.xPos, component.yPos, component.width, component.height);
   }
   else if (component.type == SLIDER)
   {
-    object = create_slider(parent, component.xPos, component.yPos, component.width, component.height);
+    object = create_slider(parent, uuid(component.parent, component.id), component.xPos, component.yPos, component.width, component.height);
   }
   else if (component.type == SWITCH)
   {
-    object = create_switch(parent, component.xPos, component.yPos);
+    object = create_switch(parent, uuid(component.parent, component.id), component.xPos, component.yPos);
+  }
+  else
+  {
+    object = NULL;
   }
 
   return object;
@@ -297,8 +366,9 @@ lv_obj_t *create_component(lv_obj_t *parent, AppComponent component)
 
 void loadTestApp()
 {
-  size_t n = sizeof(testApp) / sizeof(testApp[0]);
+  size_t n = 10;
   appSize = n;
+  extractApp();
 
   closeApp();
 
@@ -306,10 +376,13 @@ void loadTestApp()
 
   for (int i = 0; i < n; i++)
   {
-    create_component(container, testApp[i]);
+    if (testApp[i].parent != 0)
+    {
+      create_component(container, testApp[i]);
+    }
   }
 
-  launchApp("Test App", &ui_img_gear_png);
+  launchApp("Test App", &ui_img_gear_png, true);
 }
 
 void setup()
@@ -381,7 +454,7 @@ void setup()
     Serial.println("Setup done");
   }
 
-  ledcWrite(ledChannel, 100);
+  ledcWrite(ledChannel, brightness);
   currentMillis = millis();
   while (currentMillis + 2000 > millis())
   {

@@ -22,6 +22,8 @@ extern lv_obj_t * ui_lockScreen;
 extern lv_obj_t * ui_lockScreenPanel;
 extern lv_obj_t * ui_lockScreenTime;
 extern lv_obj_t * ui_lockScreenDate;
+extern lv_obj_t *ui_lockPanel;
+extern lv_obj_t * ui_lockScreenCode;
 extern lv_obj_t * ui_statusBar;
 extern lv_obj_t * ui_batteryBar;
 extern lv_obj_t * ui_wifiIcon;
@@ -50,6 +52,10 @@ extern lv_obj_t * ui_brightnessSlider;
 extern lv_obj_t * ui_timeoutLabel;
 extern lv_obj_t * ui_timeoutSelect;
 extern lv_obj_t * ui_storageLabel;
+extern lv_obj_t * ui_screenLock;
+extern lv_obj_t * ui_lockSwitch;
+extern lv_obj_t * ui_lockPass;
+extern lv_obj_t * ui_settingsKeypad;
 extern lv_obj_t * ui_deviceLabel;
 extern lv_obj_t * ui_storageBar;
 extern lv_obj_t * ui_storageText;
@@ -89,7 +95,7 @@ extern lv_obj_t * ui_appCalendarObj;
 extern lv_obj_t * ui_appHeader;
 extern lv_obj_t * ui_appIcon;
 extern lv_obj_t * ui_appLabel;
-
+extern lv_obj_t * ui_keyPad;
 
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
 LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
@@ -122,6 +128,7 @@ void ui_init(void);
 
 void vibrate(long time);
 lv_obj_t *app_canvas();
+uint32_t uuid(uint16_t parent, uint16_t id);
 
 void openStart();
 void openSettings();
@@ -130,6 +137,7 @@ void openAppWifi();
 void openAppCalendar();
 void openAppStore();
 void openAppAbout();
+void openPhone();
 
 void showAlert(const void *src, bool state, int size);
 
@@ -138,19 +146,19 @@ void saveSettings();
 void setWifi();
 
 void loadTestApp();
-void launchApp(const char *name, const void *src);
+void launchApp(const char *name, const void *src, bool header);
 
 void closeApp();
 
-lv_obj_t *create_label(lv_obj_t *parent, const char *text, uint32_t yPos);
-lv_obj_t *create_button(lv_obj_t *parent, const char *text, uint32_t xPos, uint32_t yPos, uint32_t width);
-lv_obj_t *create_slider(lv_obj_t *parent, uint32_t xPos, uint32_t yPos, uint32_t width, uint32_t height);
-lv_obj_t *create_switch(lv_obj_t *parent, uint32_t xPos, uint32_t yPos);
+lv_obj_t *create_label(lv_obj_t *parent, const char *text, uint16_t yPos);
+lv_obj_t *create_button(lv_obj_t *parent, uint32_t id, const char *text, uint16_t xPos, uint16_t yPos, uint16_t width, uint16_t height);
+lv_obj_t *create_slider(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t yPos, uint16_t width, uint16_t height);
+lv_obj_t *create_switch(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t yPos);
 
 
 
 lv_obj_t **activeApp;
-uint32_t appSize;
+uint16_t appSize;
 
 #ifdef __cplusplus
 } /*extern "C"*/

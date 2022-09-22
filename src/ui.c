@@ -15,6 +15,8 @@ lv_obj_t *ui_lockScreen;
 lv_obj_t *ui_lockScreenPanel;
 lv_obj_t *ui_lockScreenTime;
 lv_obj_t *ui_lockScreenDate;
+lv_obj_t *ui_lockPanel;
+lv_obj_t *ui_lockScreenCode;
 lv_obj_t *ui_statusBar;
 lv_obj_t *ui_batteryBar;
 lv_obj_t *ui_wifiIcon;
@@ -51,6 +53,9 @@ lv_obj_t *ui_themeWheel;
 lv_obj_t *ui_settingPanel;
 lv_obj_t *ui_settingsIcon;
 lv_obj_t *ui_settingsLabel;
+lv_obj_t *ui_screenLock;
+lv_obj_t *ui_lockSwitch;
+lv_obj_t *ui_lockPass;
 lv_obj_t *ui_aboutLabel;
 lv_obj_t *ui_aboutText;
 lv_obj_t *ui_appLedControl;
@@ -90,6 +95,8 @@ lv_obj_t *ui_appWifiButtonLabel;
 lv_obj_t *ui_appWifiTitle;
 lv_obj_t *ui_appWifiIcon;
 lv_obj_t *ui_appWifiLabel;
+lv_obj_t *ui_keyPad;
+lv_obj_t *ui_settingsKeypad;
 
 lv_obj_t *ui_appScreen;
 lv_obj_t *ui_appPanel;
@@ -155,6 +162,13 @@ Alert alert;
 // user settings
 int brightness = 100;
 uint32_t themeColor = 0xFF0081FF;
+
+uint32_t STORE_REFRESH = 0xA45E0001;
+
+uint16_t KEYPAD = 0xA200;
+uint8_t PHONE = 0xEA;
+uint8_t LOCK = 0xEB;
+uint8_t SETTINGS = 0xEC;
 
 ///////////////////// ANIMATIONS ////////////////////
 
@@ -232,7 +246,7 @@ void theme_change(lv_event_t *e)
     lv_obj_set_style_text_color(ui_deviceLabel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
     themeColor = lv_color_to32(c);
 
-    uint32_t i;
+    uint16_t i;
     for (i = 0; i < lv_obj_get_child_cnt(list1); i++)
     {
         lv_obj_t *child = lv_obj_get_child(list1, i);
@@ -269,7 +283,7 @@ static void event_navigate(lv_event_t *e)
         {
             // printf("Back\n");
             vibrate(100);
-            if (actScr == ui_startScreen)
+            if (actScr == ui_startScreen || actScr == ui_lockScreen)
             {
                 openLock();
             }
@@ -491,17 +505,20 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
         int vect = lockscreen.y - indev->proc.types.pointer.act_point.y;
         // printf("Drag strength: %d\n", vect);
 
-        if (vect > 150)
-        {
-
-            openStart();
-        }
-
         lv_obj_set_y(ui_lockScreenTime, 138);
         lv_obj_set_y(ui_lockScreenDate, 178);
 
         lv_obj_set_style_text_opa(ui_lockScreenTime, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_opa(ui_lockScreenDate, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+        if (vect > 150)
+        {
+            lv_obj_clear_flag(ui_lockPanel, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_lockScreenCode, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_set_style_text_opa(ui_lockScreenTime, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_opa(ui_lockScreenDate, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            // openStart();
+        }
     }
 }
 
@@ -525,6 +542,10 @@ static void event_launch(lv_event_t *e)
         if (data == "WiFi")
         {
             openAppWifi();
+        }
+        else if (data == "Phone")
+        {
+            openPhone();
         }
         else if (data == "Calendar")
         {
@@ -572,6 +593,31 @@ static void event_textarea(lv_event_t *e)
     }
 }
 
+static void event_lockcode(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta = lv_event_get_target(e);
+    uint32_t id = (uint32_t)lv_event_get_user_data(e);
+    uint16_t pId = id >> 0x10 & 0xFFFF;
+    uint16_t oId = id & 0xFFFF;
+    printf("PID 0x%X  UID 0x%X\n", pId, oId);
+    if (code == LV_EVENT_FOCUSED)
+    {
+        if (pId == (KEYPAD | LOCK))
+        {
+        }
+        else if (pId == (KEYPAD | SETTINGS))
+        {
+            lv_obj_clear_flag(ui_settingsKeypad, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+
+    if (code == LV_EVENT_DEFOCUSED)
+    {
+        // lv_obj_add_flag(ui_settingsKeypad, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
 static void event_appstore_install(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -579,7 +625,7 @@ static void event_appstore_install(lv_event_t *e)
 
     if (code == LV_EVENT_CLICKED)
     {
-       int id = (int)lv_event_get_user_data(e);
+        int id = (int)lv_event_get_user_data(e);
         alert.title = "Install";
         printf("%d\n", id);
         alert.message = "Feature is not currently available\nComing soon";
@@ -602,7 +648,75 @@ static void event_appstore_uninstall(lv_event_t *e)
         showAlert(&ui_img_gear_png, true, 200);
     }
 }
+
+///////////////////// APP ACTIONS ////////////////////
+
+static void event_app_component(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+
+    if (code == LV_EVENT_CLICKED)
+    {
+        uint32_t id = (uint32_t)lv_event_get_user_data(e);
+        uint16_t pId = id >> 0x10 & 0xFFFF;
+        uint16_t oId = id & 0xFFFF;
+        printf("PID 0x%X\n", pId);
+        if (pId == (KEYPAD | PHONE))
+        {
+            printf("Phone  %X clicked\n", oId);
+        }
+        else if (pId == (KEYPAD | LOCK))
+        {
+            printf("Lock  %X clicked\n", oId);
+            if (oId == 0x0A)
+            {
+                lv_textarea_del_char(ui_lockScreenCode);
+                // check if == 0 close keypad(relaunch lock screen)
+            }
+            else if (oId == 0x0C)
+            {
+                openStart(); // check if matches
+            }
+            else
+            {
+                lv_textarea_add_char(ui_lockScreenCode, (char)(0x30 + oId));
+            }
+        }
+        else if (pId == (KEYPAD | SETTINGS))
+        {
+            printf("Settings  %X clicked\n", oId);
+            if (oId == 0x0A)
+            {
+                lv_textarea_del_char(ui_lockPass);
+            }
+            else if (oId == 0x0C)
+            {
+                lv_obj_add_flag(ui_settingsKeypad, LV_OBJ_FLAG_HIDDEN);
+                // check if >4 then save
+            }
+            else
+            {
+                lv_textarea_add_char(ui_lockPass, (char)(0x30 + oId));
+            }
+        }
+        else if (id == STORE_REFRESH)
+        {
+            openAppStore();
+        }
+        else
+        {
+            printf("Button %X clicked from %X\n", oId, pId);
+        }
+    }
+}
+
 ///////////////////// FUNCTIONS ////////////////////
+
+uint32_t uuid(uint16_t parent, uint16_t id)
+{
+    return parent << 0x10 | id;
+}
 
 void create_tile(lv_obj_t *parent, char *name, const void *src, int col, int row, int size, lv_event_cb_t callback)
 {
@@ -753,7 +867,7 @@ void add_app(lv_obj_t *parent, struct AppStore app)
     lv_obj_add_flag(ui_appListAction, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
     lv_obj_clear_flag(ui_appListAction, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
     lv_obj_set_style_radius(ui_appListAction, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(ui_appListAction, app.installed ? event_appstore_uninstall: event_appstore_install, LV_EVENT_CLICKED, app.id);
+    lv_obj_add_event_cb(ui_appListAction, app.installed ? event_appstore_uninstall : event_appstore_install, LV_EVENT_CLICKED, app.id);
 
     lv_obj_t *ui_appListActionLabel = lv_label_create(ui_appListAction);
     lv_obj_set_width(ui_appListActionLabel, LV_SIZE_CONTENT);  /// 1
@@ -764,7 +878,7 @@ void add_app(lv_obj_t *parent, struct AppStore app)
 
 ///////////////////// DYNAMIC COMPONENTS ////////////////////
 
-lv_obj_t *create_label(lv_obj_t *parent, const char *text, uint32_t yPos)
+lv_obj_t *create_label(lv_obj_t *parent, const char *text, uint16_t yPos)
 {
     lv_obj_t *label = lv_label_create(parent);
     lv_obj_set_width(label, 280);              /// 1
@@ -776,18 +890,18 @@ lv_obj_t *create_label(lv_obj_t *parent, const char *text, uint32_t yPos)
     return label;
 }
 
-lv_obj_t *create_button(lv_obj_t *parent, const char *text, uint32_t xPos, uint32_t yPos, uint32_t width)
+lv_obj_t *create_button(lv_obj_t *parent, uint32_t id, const char *text, uint16_t xPos, uint16_t yPos, uint16_t width, uint16_t height)
 {
     lv_obj_t *button = lv_btn_create(parent);
     lv_obj_set_width(button, width);
-    lv_obj_set_height(button, LV_SIZE_CONTENT); /// 50
+    lv_obj_set_height(button, height == 0 ? LV_SIZE_CONTENT : height); /// 50
     lv_obj_set_x(button, xPos);
     lv_obj_set_y(button, yPos);
     lv_obj_set_align(button, LV_ALIGN_TOP_LEFT);
     lv_obj_add_flag(button, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
     lv_obj_clear_flag(button, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
     lv_obj_set_style_radius(button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(button, event_handler, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(button, event_app_component, LV_EVENT_CLICKED, id);
 
     lv_obj_t *label = lv_label_create(button);
     lv_obj_set_width(label, LV_SIZE_CONTENT);  /// 1
@@ -798,7 +912,7 @@ lv_obj_t *create_button(lv_obj_t *parent, const char *text, uint32_t xPos, uint3
     return button;
 }
 
-lv_obj_t *create_slider(lv_obj_t *parent, uint32_t xPos, uint32_t yPos, uint32_t width, uint32_t height)
+lv_obj_t *create_slider(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t yPos, uint16_t width, uint16_t height)
 {
     lv_obj_t *slider = lv_slider_create(parent);
     lv_slider_set_range(slider, 0, 255);
@@ -806,15 +920,16 @@ lv_obj_t *create_slider(lv_obj_t *parent, uint32_t xPos, uint32_t yPos, uint32_t
     lv_obj_set_height(slider, height);
     lv_obj_set_x(slider, xPos);
     lv_obj_set_y(slider, yPos);
-    lv_obj_add_event_cb(slider, slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb(slider, event_app_component, LV_EVENT_VALUE_CHANGED, id);
     return slider;
 }
 
-lv_obj_t *create_switch(lv_obj_t *parent, uint32_t xPos, uint32_t yPos)
+lv_obj_t *create_switch(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t yPos)
 {
     lv_obj_t *switcH = lv_switch_create(parent);
     lv_obj_set_x(switcH, xPos);
     lv_obj_set_y(switcH, yPos);
+    lv_obj_add_event_cb(switcH, event_app_component, LV_EVENT_VALUE_CHANGED, id);
     return switcH;
 }
 
@@ -831,8 +946,8 @@ lv_obj_t *app_canvas()
     lv_obj_set_style_border_width(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(container, 70, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(container, 40, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_set_style_radius(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(container, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -953,8 +1068,7 @@ void alert_box(lv_obj_t *parent)
     lv_obj_set_x(ui_alertMessage, 20);
     lv_obj_set_y(ui_alertMessage, 0);
 
-    lv_label_set_text(ui_alertMessage,
-                      "Flash size: 4194304Flash speed: 40000000\nRAM size: 322216\nPSRAM size: 4194252\nCPU freq: 240\nChip model: ESP32-D0WDQ5\nChip cores: 2\nChip version: 1\nCode size: 1221088\nMac: e8:31:cd:1a:19:94");
+    lv_label_set_text(ui_alertMessage, "");
 
     lv_obj_set_style_text_font(ui_alertMessage, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -1178,6 +1292,71 @@ void keyboard(lv_obj_t *parent)
     lv_obj_set_style_radius(ui_systemKeyboard, 0, LV_PART_ITEMS | LV_STATE_DEFAULT);
 }
 
+lv_obj_t *keypad(lv_obj_t *parent, int offset, uint8_t id)
+{
+    lv_obj_t *key = lv_obj_create(parent);
+    lv_obj_set_width(key, 320);
+    lv_obj_set_height(key, 210);
+    lv_obj_set_x(key, 0);
+    lv_obj_set_y(key, offset);
+    lv_obj_set_align(key, LV_ALIGN_BOTTOM_MID);
+    lv_obj_clear_flag(key, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_bg_color(key, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(key, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(key, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(key, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(key, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(key, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(key, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t *button;
+    int k;
+    int lb;
+    for (k = 0; k < 12; k++)
+    {
+        lb = k + 1;
+        if (id != PHONE)
+        {
+            if (lb == 10)
+            {
+                create_button(key, uuid((KEYPAD | id), lb), "<", (k % 3 * 100) + 20, (k / 3 * 50) + 10, 80, 40);
+                continue;
+            }
+            if (lb == 12)
+            {
+                create_button(key, uuid((KEYPAD | id), lb), "OK", (k % 3 * 100) + 20, (k / 3 * 50) + 10, 80, 40);
+                continue;
+            }
+        }
+        button = lv_label_create(key);
+        lv_obj_set_width(button, 80);
+        lv_obj_set_height(button, 40);
+        lv_obj_set_x(button, (k % 3 * 100) + 20); //(k %3 * 100) + 20, (z/3 * 50) + 10,
+        lv_obj_set_y(button, (k / 3 * 50) + 10);
+        if (lb == 11)
+        {
+            lb = 0;
+        }
+        lv_label_set_text_fmt(button, "%d", lb);
+        if (lb == 10)
+        {
+            lv_label_set_text(button, "*");
+        }
+        if (lb == 12)
+        {
+            lv_label_set_text(button, "#");
+        }
+        lv_obj_add_flag(button, LV_OBJ_FLAG_CLICKABLE);    /// Flags
+        lv_obj_clear_flag(button, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+        lv_obj_set_scrollbar_mode(button, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_set_style_text_align(button, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(button, &lv_font_montserrat_34, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(button, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+        lv_obj_set_style_bg_opa(button, 50, LV_PART_MAIN | LV_STATE_PRESSED);
+        lv_obj_add_event_cb(button, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | id), lb));
+    }
+}
+
 void notification_panel(lv_obj_t *parent)
 {
 
@@ -1333,7 +1512,8 @@ void notification_panel(lv_obj_t *parent)
 
 void appCalendar()
 {
-    ui_appCalendar = lv_obj_create(ui_appPanel);
+    lv_obj_t *canvas = app_canvas();
+    ui_appCalendar = lv_obj_create(canvas);
     lv_obj_set_width(ui_appCalendar, 320);
     lv_obj_set_height(ui_appCalendar, LV_SIZE_CONTENT); /// 50
     lv_obj_set_align(ui_appCalendar, LV_ALIGN_TOP_MID);
@@ -1364,8 +1544,8 @@ void appCalendar()
 
 void appWifi()
 {
-
-    ui_appWifi = lv_obj_create(ui_appPanel);
+    lv_obj_t *canvas = app_canvas();
+    ui_appWifi = lv_obj_create(canvas);
     lv_obj_set_width(ui_appWifi, 320);
     lv_obj_set_height(ui_appWifi, LV_SIZE_CONTENT); /// 50
     lv_obj_set_align(ui_appWifi, LV_ALIGN_TOP_MID);
@@ -1588,6 +1768,28 @@ void ui_lockScreen_screen_init(void)
     lv_obj_set_style_text_color(ui_lockScreenDate, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_lockScreenDate, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_lockScreenCode = lv_textarea_create(ui_lockScreen);
+    lv_obj_set_width(ui_lockScreenCode, 320);
+    lv_obj_set_height(ui_lockScreenCode, LV_SIZE_CONTENT); /// 70
+    lv_obj_set_x(ui_lockScreenCode, 0);
+    lv_obj_set_y(ui_lockScreenCode, -210);
+    lv_obj_set_align(ui_lockScreenCode, LV_ALIGN_BOTTOM_MID);
+    lv_textarea_set_accepted_chars(ui_lockScreenCode, "1234567890");
+    lv_textarea_set_max_length(ui_lockScreenCode, 4);
+    lv_textarea_set_one_line(ui_lockScreenCode, true);
+    lv_textarea_set_password_mode(ui_lockScreenCode, true);
+    lv_obj_set_style_text_letter_space(ui_lockScreenCode, 30, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_line_space(ui_lockScreenCode, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_lockScreenCode, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_decor(ui_lockScreenCode, LV_TEXT_DECOR_NONE, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_lockScreenCode, &lv_font_montserrat_34, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui_lockScreenCode, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_lockScreenCode, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_lockScreenCode, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_lockScreenCode, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_lockScreenCode, event_lockcode, LV_EVENT_ALL, uuid((KEYPAD | LOCK), 0xFFFF));
+
+    ui_lockPanel = keypad(ui_lockScreenPanel, 0, LOCK);
     status_bar(ui_lockScreen);
 }
 
@@ -1822,115 +2024,99 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_style_border_opa(list, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(list, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_storageLabel
+    ui_screenLock = lv_label_create(ui_settingsScroll);
+    lv_obj_set_width(ui_screenLock, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_screenLock, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_screenLock, 40);
+    lv_obj_set_y(ui_screenLock, 202);
+    lv_label_set_text(ui_screenLock, "Screen Lock");
+
+    ui_lockSwitch = lv_switch_create(ui_settingsScroll);
+    lv_obj_set_width(ui_lockSwitch, 50);
+    lv_obj_set_height(ui_lockSwitch, 25);
+    lv_obj_set_x(ui_lockSwitch, 40);
+    lv_obj_set_y(ui_lockSwitch, 239);
+
+    ui_lockPass = lv_textarea_create(ui_settingsScroll);
+    lv_obj_set_width(ui_lockPass, 80);
+    lv_obj_set_height(ui_lockPass, LV_SIZE_CONTENT); /// 70
+    lv_obj_set_x(ui_lockPass, 117);
+    lv_obj_set_y(ui_lockPass, 233);
+    lv_textarea_set_accepted_chars(ui_lockPass, "0123456789");
+    lv_textarea_set_max_length(ui_lockPass, 4);
+    lv_textarea_set_password_mode(ui_lockPass, true);
+    lv_obj_set_style_radius(ui_lockPass, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_lockPass, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_lockPass, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_lockPass, event_lockcode, LV_EVENT_ALL, uuid((KEYPAD | SETTINGS), 0xFFFF));
 
     ui_storageLabel = lv_label_create(ui_settingsScroll);
-
-    lv_obj_set_width(ui_storageLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_storageLabel, LV_SIZE_CONTENT);
-
+    lv_obj_set_width(ui_storageLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_storageLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_storageLabel, 20);
-    lv_obj_set_y(ui_storageLabel, 202);
-
+    lv_obj_set_y(ui_storageLabel, 282);
     lv_label_set_text(ui_storageLabel, "Storage");
 
-    // ui_deviceLabel
-
     ui_deviceLabel = lv_label_create(ui_settingsScroll);
-
-    lv_obj_set_width(ui_deviceLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_deviceLabel, LV_SIZE_CONTENT);
-
+    lv_obj_set_width(ui_deviceLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_deviceLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_deviceLabel, 40);
-    lv_obj_set_y(ui_deviceLabel, 224);
-
+    lv_obj_set_y(ui_deviceLabel, 304);
     lv_label_set_text(ui_deviceLabel, "This device");
-
-    lv_obj_set_style_text_color(ui_deviceLabel, lv_palette_main(LV_PALETTE_BLUE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_deviceLabel, lv_color_hex(0x2095F6), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_deviceLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_deviceLabel, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_storageBar
-
     ui_storageBar = lv_bar_create(ui_settingsScroll);
-    lv_bar_set_range(ui_storageBar, 0, 100);
     lv_bar_set_value(ui_storageBar, 25, LV_ANIM_OFF);
-
     lv_obj_set_width(ui_storageBar, 240);
     lv_obj_set_height(ui_storageBar, 10);
-
     lv_obj_set_x(ui_storageBar, 40);
-    lv_obj_set_y(ui_storageBar, 263);
-
+    lv_obj_set_y(ui_storageBar, 323);
     lv_obj_set_style_radius(ui_storageBar, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_set_style_radius(ui_storageBar, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
-    // ui_storageText
-
     ui_storageText = lv_label_create(ui_settingsScroll);
-
-    lv_obj_set_width(ui_storageText, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_storageText, LV_SIZE_CONTENT);
-
+    lv_obj_set_width(ui_storageText, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_storageText, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_storageText, 40);
-    lv_obj_set_y(ui_storageText, 243);
-
+    lv_obj_set_y(ui_storageText, 343);
     lv_label_set_text(ui_storageText, "6.22 MB used out of 7.27MB");
-
     lv_obj_set_style_text_font(ui_storageText, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    // ui_themeLabel
-
     ui_themeLabel = lv_label_create(ui_settingsScroll);
-
-    lv_obj_set_width(ui_themeLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_themeLabel, LV_SIZE_CONTENT);
-
+    lv_obj_set_width(ui_themeLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_themeLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_themeLabel, 20);
-    lv_obj_set_y(ui_themeLabel, 289);
-
+    lv_obj_set_y(ui_themeLabel, 369);
     lv_label_set_text(ui_themeLabel, "Theme Color");
 
-    // ui_themeWheel
-
     ui_themeWheel = lv_colorwheel_create(ui_settingsScroll, true);
-
     lv_colorwheel_set_mode_fixed(ui_themeWheel, true);
-
     lv_obj_set_width(ui_themeWheel, 150);
     lv_obj_set_height(ui_themeWheel, 150);
-
     lv_obj_set_x(ui_themeWheel, 50);
-    lv_obj_set_y(ui_themeWheel, 318);
-
-    lv_obj_add_event_cb(ui_themeWheel, theme_change, LV_EVENT_VALUE_CHANGED, NULL);
-
-    lv_obj_clear_flag(ui_themeWheel, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE);
-
-    // ui_aboutLabel
+    lv_obj_set_y(ui_themeWheel, 398);
+    lv_obj_clear_flag(ui_themeWheel, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
 
     ui_aboutLabel = lv_label_create(ui_settingsScroll);
-
-    lv_obj_set_width(ui_aboutLabel, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_aboutLabel, LV_SIZE_CONTENT);
-
+    lv_obj_set_width(ui_aboutLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_aboutLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_aboutLabel, 20);
-    lv_obj_set_y(ui_aboutLabel, 510);
-
+    lv_obj_set_y(ui_aboutLabel, 580);
     lv_label_set_text(ui_aboutLabel, "About");
 
-    // ui_aboutText
-
     ui_aboutText = lv_label_create(ui_settingsScroll);
-
-    lv_obj_set_width(ui_aboutText, LV_SIZE_CONTENT);
-    lv_obj_set_height(ui_aboutText, LV_SIZE_CONTENT);
-
-    lv_obj_set_x(ui_aboutText, 25);
-    lv_obj_set_y(ui_aboutText, 540);
+    lv_obj_set_width(ui_aboutText, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_aboutText, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_aboutText, 30);
+    lv_obj_set_y(ui_aboutText, 610);
 
     lv_label_set_text(ui_aboutText, "Text");
+
+    ui_settingsKeypad = keypad(ui_settingsScreen, -40, SETTINGS);
+    lv_obj_set_style_bg_opa(ui_settingsKeypad, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_settingPanel
 
@@ -2002,8 +2188,8 @@ void ui_appScreen_screen_init(void)
     lv_obj_set_style_border_width(ui_appPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_appPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_appPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_appPanel, 70, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_appPanel, 40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_appPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_appPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_appHeader = lv_obj_create(ui_appScreen);
     lv_obj_set_width(ui_appHeader, 320);
@@ -2053,13 +2239,22 @@ void ui_init(void)
     lv_disp_load_scr(ui_bootScreen);
 }
 
-void launchApp(const char *name, const void *src)
+void launchApp(const char *name, const void *src, bool header)
 {
     lv_obj_set_parent(ui_Panel2, ui_appScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_appScreen);
     lv_obj_set_parent(ui_statusBar, ui_appScreen);
     lv_obj_set_parent(ui_systemKeyboard, ui_appScreen);
     lv_obj_set_parent(ui_alertPanel, ui_appScreen);
+
+    if (header)
+    {
+        lv_obj_clear_flag(ui_appHeader, LV_OBJ_FLAG_HIDDEN); // show the header
+    }
+    else
+    {
+        lv_obj_add_flag(ui_appHeader, LV_OBJ_FLAG_HIDDEN); // hide the header
+    }
 
     lv_label_set_text(ui_appLabel, name);
     lv_img_set_src(ui_appIcon, src);
@@ -2098,11 +2293,16 @@ void openSettings()
     lv_obj_set_parent(ui_statusBar, ui_settingsScreen);
     lv_obj_set_parent(ui_systemKeyboard, ui_settingsScreen);
     lv_obj_set_parent(ui_alertPanel, ui_settingsScreen);
+    lv_obj_add_flag(ui_settingsKeypad, LV_OBJ_FLAG_HIDDEN);
     lv_disp_load_scr(ui_settingsScreen);
 }
 
 void openLock()
 {
+    lv_obj_set_style_text_opa(ui_lockScreenTime, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_lockScreenDate, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_flag(ui_lockPanel, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui_lockScreenCode, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_parent(ui_statusBar, ui_lockScreen);
     lv_disp_load_scr(ui_lockScreen);
 }
@@ -2113,14 +2313,22 @@ void openAppWifi()
     appWifi();
     setWifi();
     lv_label_set_text_fmt(ui_appWifiStatus, onConnect ? "Connected" : "Disconnected");
-    launchApp("Wifi", &ui_img_gear_png);
+    launchApp("Wifi", &ui_img_gear_png, true);
 }
 
 void openAppCalendar()
 {
     closeApp();
     appCalendar();
-    launchApp("Calendar", &ui_img_calendar_png);
+    launchApp("Calendar", &ui_img_calendar_png, true);
+}
+
+void openPhone()
+{
+    closeApp();
+    keypad(ui_appPanel, -90, PHONE);
+    create_button(ui_appPanel, uuid(KEYPAD, 0xFF), "Call", 0, 390, 320, 50);
+    launchApp("Phone", &ui_img_1276322231, false);
 }
 
 void openAppStore()
@@ -2148,11 +2356,13 @@ void openAppStore()
         }
     }
 
-    if (b == 0) {
+    if (b == 0)
+    {
         create_label(canvas, "Apps currently unavailable", 70);
+        create_button(canvas, STORE_REFRESH, "Refresh", 20, 120, 100, 0);
     }
 
-    launchApp("App Store", &ui_img_571330079);
+    launchApp("App Store", &ui_img_571330079, true);
 }
 
 void openAppAbout()
@@ -2161,7 +2371,7 @@ void openAppAbout()
     lv_obj_t *canvas = app_canvas();
     create_label(canvas, aboutText, 20);
 
-    launchApp("About", &ui_img_gear_png);
+    launchApp("About", &ui_img_gear_png, true);
 }
 
 void vibrate(long time)

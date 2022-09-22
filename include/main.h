@@ -100,32 +100,31 @@ enum Type
 
 struct AppComponent
 {
-  uint32_t id;
-  uint32_t parent;
+  uint16_t id;
+  uint16_t parent;
   enum Type type;
-  char *text;
-  uint32_t xPos;
-  uint32_t yPos;
-  uint32_t width;
-  uint32_t height;
+  char text[100];
+  uint16_t xPos;
+  uint16_t yPos;
+  uint16_t width;
+  uint16_t height;
 };
 
+//#25|34|BTN|Click|20|20|100|50
 
 struct AppStore
 {
   bool state;
-  uint32_t id;
+  uint16_t id;
   char name[20];
-  uint32_t version;
-  uint32_t size;
+  uint16_t version;
+  uint16_t size;
   bool installed;
 };
 
 struct AppStore appList[MAX_APPS];
 
 lv_obj_t *create_component(lv_obj_t *parent, struct AppComponent component);
-
-
 
 
 #endif
