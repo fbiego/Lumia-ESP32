@@ -139,7 +139,7 @@ void openAppStore();
 void openAppAbout();
 void openPhone();
 
-void showAlert(const void *src, bool state, int size);
+void showAlert(const void *src, bool state, int size, uint16_t code);
 
 void saveWifiList();
 void saveSettings();
@@ -149,6 +149,8 @@ void loadTestApp();
 void launchApp(const char *name, const void *src, bool header);
 
 void closeApp();
+extern void light_sleep();
+extern void deep_sleep();
 
 lv_obj_t *create_label(lv_obj_t *parent, const char *text, uint16_t yPos);
 lv_obj_t *create_button(lv_obj_t *parent, uint32_t id, const char *text, uint16_t xPos, uint16_t yPos, uint16_t width, uint16_t height);

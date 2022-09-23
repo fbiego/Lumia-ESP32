@@ -126,5 +126,11 @@ struct AppStore appList[MAX_APPS];
 
 lv_obj_t *create_component(lv_obj_t *parent, struct AppComponent component);
 
+struct Passcode{
+  bool set;
+  uint8_t code[4];
+} passcode;
 
+
+// extern struct Passcode passcode;
 #endif

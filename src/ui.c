@@ -155,6 +155,7 @@ typedef struct AlertDialog
 {
     char *title;
     char *message;
+    uint16_t code;
 } Alert;
 
 Alert alert;
@@ -166,6 +167,7 @@ uint32_t themeColor = 0xFF0081FF;
 uint32_t STORE_REFRESH = 0xA45E0001;
 
 uint16_t KEYPAD = 0xA200;
+uint16_t ALERT = 0xA001;
 uint8_t PHONE = 0xEA;
 uint8_t LOCK = 0xEB;
 uint8_t SETTINGS = 0xEC;
@@ -180,8 +182,8 @@ static void slider_event_cb(lv_event_t *e)
     if (slider == ui_brightnessSlider)
     {
         brightness = (int)lv_slider_get_value(slider);
-        ledcWrite(ledChannel, brightness);
     }
+    
 }
 
 static void event_handler(lv_event_t *e)
@@ -220,7 +222,7 @@ static void event_handler(lv_event_t *e)
             }
             alert.title = name;
             alert.message = "WiFi Saved";
-            showAlert(&ui_img_gear_png, true, 200);
+            showAlert(&ui_img_gear_png, true, 200, 0x00);
             saveWifiList();
         }
     }
@@ -234,7 +236,7 @@ static void event_handler(lv_event_t *e)
     }
 }
 
-void theme_change(lv_event_t *e)
+static void theme_change(lv_event_t *e)
 {
     lv_obj_t *picker = lv_event_get_target(e);
     // val = lv_slider_get_value(picker); //
@@ -315,18 +317,6 @@ static void event_navigate(lv_event_t *e)
             vibrate(100);
         }
     }
-}
-
-static void ui_event_Image6(lv_event_t *e)
-{
-    lv_event_code_t event = lv_event_get_code(e);
-    lv_obj_t *ta = lv_event_get_target(e);
-
-    if (event == LV_EVENT_PRESSED)
-    {
-        openLock();
-    }
-    // printf("Event code: %d\n", event);
 }
 
 static void ui_event_notificationPanel(lv_event_t *e)
@@ -513,11 +503,17 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
 
         if (vect > 150)
         {
-            lv_obj_clear_flag(ui_lockPanel, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(ui_lockScreenCode, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_set_style_text_opa(ui_lockScreenTime, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_opa(ui_lockScreenDate, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-            // openStart();
+            if (passcode.set)
+            {
+                lv_obj_clear_flag(ui_lockPanel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(ui_lockScreenCode, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_set_style_text_opa(ui_lockScreenTime, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_opa(ui_lockScreenDate, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+            else
+            {
+                openStart();
+            }
         }
     }
 }
@@ -525,7 +521,13 @@ static void ui_event_lockScreenPanel(lv_event_t *e)
 static void event_alert(lv_event_t *e)
 {
     lv_obj_t *obj = lv_event_get_current_target(e);
-    showAlert(NULL, false, 0);
+    lv_event_code_t code = lv_event_get_code(e);
+    uint32_t id = (uint32_t)lv_event_get_user_data(e);
+    uint16_t pId = id >> 0x10 & 0xFFFF;
+    uint16_t oId = id & 0xFFFF;
+
+    showAlert(NULL, false, 0, 0x00);
+
 }
 
 static void event_launch(lv_event_t *e)
@@ -563,6 +565,18 @@ static void event_launch(lv_event_t *e)
         {
             openAppAbout();
         }
+         else if (data == "Power Off")
+        {
+            deep_sleep();
+        }
+        else if (data == "Sleep")
+        {
+            light_sleep();
+        }
+        else if (data == "Lock Screen")
+        {
+            openLock();
+        }
         else
         {
             alert.title = "App not installed";
@@ -571,7 +585,7 @@ static void event_launch(lv_event_t *e)
             strncpy(buf + strlen(data), msg, strlen(msg) + 1);
             alert.message = buf;
 
-            showAlert(&ui_img_gear_png, true, 200);
+            showAlert(&ui_img_gear_png, true, 200, 0x00);
         }
     }
 }
@@ -600,7 +614,7 @@ static void event_lockcode(lv_event_t *e)
     uint32_t id = (uint32_t)lv_event_get_user_data(e);
     uint16_t pId = id >> 0x10 & 0xFFFF;
     uint16_t oId = id & 0xFFFF;
-    printf("PID 0x%X  UID 0x%X\n", pId, oId);
+    
     if (code == LV_EVENT_FOCUSED)
     {
         if (pId == (KEYPAD | LOCK))
@@ -630,7 +644,7 @@ static void event_appstore_install(lv_event_t *e)
         printf("%d\n", id);
         alert.message = "Feature is not currently available\nComing soon";
 
-        showAlert(&ui_img_gear_png, true, 200);
+        showAlert(&ui_img_gear_png, true, 200, 0x00);
     }
 }
 
@@ -645,7 +659,7 @@ static void event_appstore_uninstall(lv_event_t *e)
         alert.title = "Uninstall";
         alert.message = "Feature is not currently available\nComing soon";
 
-        showAlert(&ui_img_gear_png, true, 200);
+        showAlert(&ui_img_gear_png, true, 200, 0x00);
     }
 }
 
@@ -676,16 +690,48 @@ static void event_app_component(lv_event_t *e)
             }
             else if (oId == 0x0C)
             {
-                openStart(); // check if matches
+                uint8_t pass[4];
+                const char *cd = lv_textarea_get_text(ui_lockScreenCode);
+                strncpy(pass, cd, 4);
+                int i;
+                for (i = 0; i < 4; i++){
+                    if (pass[i] != passcode.code[i]){
+                        break;
+                    }
+                }
+                lv_textarea_set_text(ui_lockScreenCode, "");
+                if (i == 4){
+                    openStart(); // matches
+                } else {
+                    //fail
+                }
+                
             }
             else
             {
                 lv_textarea_add_char(ui_lockScreenCode, (char)(0x30 + oId));
+
+                //direct unlock
+                uint8_t pass[4];
+                const char *cd = lv_textarea_get_text(ui_lockScreenCode);
+                strncpy(pass, cd, 4);
+                int i;
+                for (i = 0; i < 4; i++){
+                    if (pass[i] != passcode.code[i]){
+                        break;
+                    }
+                }
+                if (i == 4){
+                    lv_textarea_set_text(ui_lockScreenCode, "");
+                    openStart(); // matches
+                } else {
+                    //fail or incomplete < 4
+                }
             }
         }
         else if (pId == (KEYPAD | SETTINGS))
         {
-            printf("Settings  %X clicked\n", oId);
+            printf("Settings %X clicked\n", oId);
             if (oId == 0x0A)
             {
                 lv_textarea_del_char(ui_lockPass);
@@ -693,6 +739,15 @@ static void event_app_component(lv_event_t *e)
             else if (oId == 0x0C)
             {
                 lv_obj_add_flag(ui_settingsKeypad, LV_OBJ_FLAG_HIDDEN);
+
+                const char *cd = lv_textarea_get_text(ui_lockPass);
+                printf("%s\n", cd);
+                if (strlen(cd) == 4){
+                    strncpy(passcode.code, cd, 4);
+                    passcode.set = true;
+                } else {
+                    passcode.set = false;
+                }
                 // check if >4 then save
             }
             else
@@ -1864,6 +1919,10 @@ void ui_startScreen_screen_init(void)
     create_tile(cont, "OneDrive", &ui_img_cloud_png, 0, 5, 1, event_launch);
     create_tile(cont, "Wallet", &ui_img_wallet_png, 1, 5, 1, event_launch);
     create_tile(cont, "WiFi", &ui_img_gear_png, 2, 5, 1, event_launch);
+    
+    create_tile(cont, "Lock Screen", &ui_img_gear_png, 0, 6, 1, event_launch);
+    create_tile(cont, "Sleep", &ui_img_gear_png, 1, 6, 1, event_launch);
+    create_tile(cont, "Power Off", &ui_img_gear_png, 2, 6, 1, event_launch);
 
     /*Tile2: appList*/
     ui_tileApps = lv_tileview_add_tile(ui_tileView, 1, 0, LV_DIR_LEFT);
@@ -1894,7 +1953,9 @@ void ui_startScreen_screen_init(void)
     add_item(list1, "People", &ui_img_people_png, event_launch);
     add_item(list1, "Phone", &ui_img_1276322231, event_launch);
     add_item(list1, "Photos", &ui_img_gallery_png, event_launch);
+    add_item(list1, "Power Off", &ui_img_gear_png, event_launch);
     add_item(list1, "Settings", &ui_img_gear_png, event_settings);
+    add_item(list1, "Sleep", &ui_img_gear_png, event_launch);
     add_item(list1, "Store", &ui_img_571330079, event_launch);
     add_item(list1, "Test App", &ui_img_571330079, event_launch);
     add_item(list1, "Wallet", &ui_img_wallet_png, event_launch);
@@ -2383,7 +2444,7 @@ void vibrate(long time)
     digitalWrite(MOTOR, LOW);
 }
 
-void showAlert(const void *src, bool state, int size)
+void showAlert(const void *src, bool state, int size, uint16_t code)
 {
     if (state)
     {
@@ -2392,6 +2453,7 @@ void showAlert(const void *src, bool state, int size)
         lv_img_set_src(ui_alertIcon, src);
         lv_obj_set_height(ui_alertPanelDialog, size);
         lv_obj_set_height(ui_alertScroll, size - 100);
+        lv_obj_add_event_cb(ui_alertButton, event_alert, LV_EVENT_CLICKED, uuid(ALERT, code));
 
         lv_obj_clear_flag(ui_alertPanel, LV_OBJ_FLAG_HIDDEN);
     }

@@ -53,7 +53,11 @@ HTTPClient http;
 // };
 
 uint8_t ext[] = {
-    // id, type, comp id   , parent id ,    x pos  ,    y pos  ,   width  ,   height   , text ..... terminator
+  // APP DATA
+    0xAA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x54, 0x65, 0x73, 0x74, 0x20, 0x41, 0x70, 0x70, 0x00,
+
+    // UI COMPONENTS
+    // d, type, comp id   , parent id ,    x pos  ,    y pos  ,   width  ,   height   , text ..... terminator
     0xAA, 0x01, 0x10, 0x01, 0xAB, 0x01, 0x00, 0x14, 0x00, 0x14, 0x00, 0x19, 0x00, 0x19, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x00,
     0xAA, 0x02, 0x10, 0x02, 0xAB, 0x01, 0x00, 0x14, 0x00, 0x46, 0x00, 0x64, 0x00, 0x00, 0x43, 0x6c, 0x69, 0x63, 0x6b, 0x00,
     0xAA, 0x05, 0x10, 0x03, 0xAB, 0x01, 0x00, 0x14, 0x00, 0x96, 0x00, 0xFA, 0x00, 0x05, 0x00,
@@ -62,10 +66,10 @@ uint8_t ext[] = {
 
 AppComponent testApp[10];
 
-void extractApp()
+void extractApp(uint8_t *data, int size)
 {
 
-  int a = 0, i = 0, j, z = sizeof(ext) / sizeof(ext[0]);
+  int a = 0, i = 0, j, z = size;
   uint8_t buf[100];
   while (1)
   {
@@ -76,12 +80,12 @@ void extractApp()
       {
         break; // not enough data for component
       }
-      buf[j] = ext[i];
+      buf[j] = data[i];
       i++;
     }
     while (1)
     {
-      buf[j] = ext[i];
+      buf[j] = data[i];
       j++;
       i++;
       if (buf[j - 1] == 0x00)
@@ -111,6 +115,10 @@ void extractApp()
       strncpy(testApp[a].text, (char *)buf + 14, j - 14);
       printf("App UI Component > 0x%X\n", uuid(testApp[a].parent, testApp[a].id));
       a++;
+    } else if (buf[0] == 0xA0){
+      char appName[20];
+      strncpy(appName, (char *)buf + 14, j - 14);
+      printf("App Name %s\n", appName);
     }
   }
 }
@@ -295,6 +303,11 @@ void getNVSData()
   strncpy(pass5, val.c_str(), val.length() + 1);
   brightness = NVS.getInt("brightness", brightness);
   themeColor = NVS.getInt("theme", themeColor);
+
+  NVS.getBlob("passCode", passcode.code, 4);
+  passcode.set = NVS.getInt("passSet", 0) != 0;
+
+  Serial.printf("Passcode loaded %s - %d%d%d%d\n", passcode.set ? "ON" : "OFF", passcode.code[0], passcode.code[2], passcode.code[2], passcode.code[3]);
 }
 
 void setWifi()
@@ -334,6 +347,9 @@ void saveSettings()
 {
   NVS.setInt("brightness", brightness);
   NVS.setInt("theme", themeColor);
+  NVS.setBlob("passCode", passcode.code, 4);
+  NVS.setInt("passSet", passcode.set ? 1 : 0);
+  Serial.printf("Passcode set %s - %d%d%d%d\n", passcode.set ? "ON" : "OFF", passcode.code[0], passcode.code[2], passcode.code[2], passcode.code[3]);
 }
 
 lv_obj_t *create_component(lv_obj_t *parent, AppComponent component)
@@ -364,11 +380,27 @@ lv_obj_t *create_component(lv_obj_t *parent, AppComponent component)
   return object;
 }
 
+void loadLocalApp(const char * path, int &size){
+    Serial.printf("Reading file: %s\r\n", path);
+    int z = 0;
+    File file = SPIFFS.open(path);
+    if(!file || file.isDirectory()){
+        Serial.println("- failed to open file for reading");
+        return;
+    }
+    Serial.println("- read from file:");
+    while(file.available()){
+        Serial.write(file.read());
+        z++;
+    }
+    file.close();
+}
+
 void loadTestApp()
 {
   size_t n = 10;
   appSize = n;
-  extractApp();
+  extractApp(ext, sizeof(ext) / sizeof(ext[0]));
 
   closeApp();
 
@@ -434,6 +466,7 @@ void light_sleep()
 
   digitalWrite(MOTOR, LOW);
   ledcWrite(ledChannel, 0);
+  openLock();
 
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0); // 1 = High, 0 = Low
 
@@ -609,6 +642,9 @@ void loop()
 
   lv_timer_handler(); /* let the GUI do its work */
   // delay(5);
+
+  
+  ledcWrite(ledChannel, brightness);
 
   if (WiFi.isConnected())
   {
