@@ -378,11 +378,68 @@ void loadTestApp()
   {
     if (testApp[i].parent != 0)
     {
-      create_component(container, testApp[i]);
+      activeApp[i] = create_component(container, testApp[i]);
     }
   }
 
   launchApp("Test App", &ui_img_gear_png, true);
+}
+
+void deep_sleep()
+{
+
+  vibrate(100);
+
+  ledcWrite(ledChannel, 0);
+
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0); // 1 = High, 0 = Low
+
+  // Go to sleep now
+  Serial.println("Going to deep sleep now");
+  esp_deep_sleep_start();
+}
+
+void wakeup_reason()
+{
+  esp_sleep_wakeup_cause_t wakeup_reason;
+
+  wakeup_reason = esp_sleep_get_wakeup_cause();
+
+  switch (wakeup_reason)
+  {
+  case ESP_SLEEP_WAKEUP_EXT0:
+    Serial.println("Wakeup caused by external signal using RTC_IO");
+    break;
+  case ESP_SLEEP_WAKEUP_EXT1:
+    Serial.println("Wakeup caused by external signal using RTC_CNTL");
+    break;
+  case ESP_SLEEP_WAKEUP_TIMER:
+    Serial.println("Wakeup caused by timer");
+    break;
+  case ESP_SLEEP_WAKEUP_TOUCHPAD:
+    Serial.println("Wakeup caused by touchpad");
+    break;
+  case ESP_SLEEP_WAKEUP_ULP:
+    Serial.println("Wakeup caused by ULP program");
+    break;
+  default:
+    Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
+    rtc.setTime(1663491331); // Sunday, September 18, 2022 8:55:31 AM
+    break;
+  }
+}
+
+void light_sleep()
+{
+
+  digitalWrite(MOTOR, LOW);
+  ledcWrite(ledChannel, 0);
+
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0); // 1 = High, 0 = Low
+
+  // Go to sleep now
+  Serial.println("Going to light sleep now");
+  esp_light_sleep_start();
 }
 
 void setup()
@@ -411,7 +468,7 @@ void setup()
     ESP.restart();
   }
 
-  rtc.setTime(1663491331); // Sunday, September 18, 2022 8:55:31 AM
+  wakeup_reason();
 
   lv_init();
 
@@ -553,7 +610,6 @@ void loop()
   lv_timer_handler(); /* let the GUI do its work */
   // delay(5);
 
-  // if (wifiMulti.run() == WL_CONNECTED)
   if (WiFi.isConnected())
   {
     lv_obj_clear_flag(ui_wifiIcon, LV_OBJ_FLAG_HIDDEN);

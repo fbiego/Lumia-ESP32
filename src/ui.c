@@ -1768,7 +1768,7 @@ void ui_lockScreen_screen_init(void)
     lv_obj_set_style_text_color(ui_lockScreenDate, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_lockScreenDate, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_lockScreenCode = lv_textarea_create(ui_lockScreen);
+    ui_lockScreenCode = lv_textarea_create(ui_lockScreenPanel);
     lv_obj_set_width(ui_lockScreenCode, 320);
     lv_obj_set_height(ui_lockScreenCode, LV_SIZE_CONTENT); /// 70
     lv_obj_set_x(ui_lockScreenCode, 0);

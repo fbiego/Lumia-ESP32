@@ -157,7 +157,7 @@ lv_obj_t *create_switch(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t y
 
 
 
-lv_obj_t **activeApp;
+lv_obj_t *activeApp[10];
 uint16_t appSize;
 
 #ifdef __cplusplus
