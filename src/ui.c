@@ -313,7 +313,7 @@ static void event_navigate(lv_event_t *e)
         if (obj == ui_startButton)
         {
             // printf("Start\n");
-            vibrate(100);
+            vibrate(100); 
             if (actScr != ui_startScreen)
             {
                 openStart();
@@ -322,7 +322,7 @@ static void event_navigate(lv_event_t *e)
             {
                 lv_obj_set_tile_id(ui_tileView, 0, 0, LV_ANIM_ON);
             }
-            
+
             if (chatScr){
                 chatScr = false;
             }
