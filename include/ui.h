@@ -96,6 +96,10 @@ extern lv_obj_t * ui_appHeader;
 extern lv_obj_t * ui_appIcon;
 extern lv_obj_t * ui_appLabel;
 extern lv_obj_t * ui_keyPad;
+extern lv_obj_t * ui_phoneNumber;
+extern lv_obj_t * ui_phoneNumberDelete;
+extern lv_obj_t * ui_messageSendText;
+extern lv_obj_t * ui_messageSendButton;
 
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
 LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
@@ -138,6 +142,8 @@ void openAppCalendar();
 void openAppStore();
 void openAppAbout();
 void openPhone();
+void openMessage();
+void openChat();
 
 void showAlert(const void *src, bool state, int size, uint16_t code);
 
@@ -157,10 +163,19 @@ lv_obj_t *create_button(lv_obj_t *parent, uint32_t id, const char *text, uint16_
 lv_obj_t *create_slider(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t yPos, uint16_t width, uint16_t height);
 lv_obj_t *create_switch(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t yPos);
 
+lv_obj_t *add_chat_item(lv_obj_t *parent, const char *message, bool dir);
 
 
 lv_obj_t *activeApp[10];
 uint16_t appSize;
+
+typedef struct RtcTime{
+  int year;
+  int month;
+  int day;
+} Time;
+
+extern Time rtcTime;
 
 #ifdef __cplusplus
 } /*extern "C"*/

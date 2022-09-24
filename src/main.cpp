@@ -168,7 +168,6 @@ void requestResult(int requestCode, int statusCode, String payload, long time)
       long t = json["timestamp"].as<long>();
       rtc.setTime(t);
 
-      // lv_calendar_set_today_date(ui_appCalendarObj, rtc.getYear(), rtc.getMonth() + 1, rtc.getDay());
     }
     break;
   case APPS_REQUEST:
@@ -307,7 +306,7 @@ void getNVSData()
   NVS.getBlob("passCode", passcode.code, 4);
   passcode.set = NVS.getInt("passSet", 0) != 0;
 
-  Serial.printf("Passcode loaded %s - %d%d%d%d\n", passcode.set ? "ON" : "OFF", passcode.code[0], passcode.code[2], passcode.code[2], passcode.code[3]);
+  Serial.printf("Passcode loaded %s - %d%d%d%d\n", passcode.set ? "ON" : "OFF", passcode.code[0], passcode.code[1], passcode.code[2], passcode.code[3]);
 }
 
 void setWifi()
@@ -349,7 +348,7 @@ void saveSettings()
   NVS.setInt("theme", themeColor);
   NVS.setBlob("passCode", passcode.code, 4);
   NVS.setInt("passSet", passcode.set ? 1 : 0);
-  Serial.printf("Passcode set %s - %d%d%d%d\n", passcode.set ? "ON" : "OFF", passcode.code[0], passcode.code[2], passcode.code[2], passcode.code[3]);
+  Serial.printf("Passcode set %s - %d%d%d%d\n", passcode.set ? "ON" : "OFF", passcode.code[0], passcode.code[1], passcode.code[2], passcode.code[3]);
 }
 
 lv_obj_t *create_component(lv_obj_t *parent, AppComponent component)
@@ -642,6 +641,10 @@ void loop()
 
   lv_timer_handler(); /* let the GUI do its work */
   // delay(5);
+
+  rtcTime.day = rtc.getDay();
+  rtcTime.month = rtc.getMonth() + 1;
+  rtcTime.year = rtc.getYear();
 
   
   ledcWrite(ledChannel, brightness);
