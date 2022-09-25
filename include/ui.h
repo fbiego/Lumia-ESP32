@@ -127,6 +127,8 @@ LV_IMG_DECLARE(ui_img_wallet_png);    // assets\wallet.png
 //user settings
 extern int brightness;
 extern uint32_t themeColor;
+extern long timeouts[4];
+extern long screenTime;
 
 void ui_init(void);
 

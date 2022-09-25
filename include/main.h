@@ -62,6 +62,7 @@ const int resolution = 8;
 long currentMillis;
 bool onConnect;
 bool activeRequest;
+long timeout;
 
 char ssid1[20], ssid2[20], ssid3[20], ssid4[20], ssid5[20];
 char pass1[20], pass2[20], pass3[20], pass4[20], pass5[20];

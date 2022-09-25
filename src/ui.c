@@ -170,6 +170,9 @@ Time rtcTime;
 // user settings
 int brightness = 100;
 uint32_t themeColor = 0xFF0081FF;
+long timeouts[4] = {30000, 60000, 180000, 300000};
+long screenTime = 30000;
+
 
 bool chatScr = false;
 
@@ -240,6 +243,14 @@ static void event_handler(lv_event_t *e)
         if (obj == ui_settingsScreen)
         {
             saveSettings();
+        }
+    }
+
+    if (code == LV_EVENT_VALUE_CHANGED){
+        uint32_t index = lv_dropdown_get_selected(ui_timeoutSelect);
+        if (index < 4){
+            screenTime = timeouts[index];
+            printf("screen time: %d\n", screenTime);
         }
     }
 }
@@ -2245,7 +2256,6 @@ void ui_settingsScreen_screen_init(void)
 
     ui_timeoutSelect = lv_dropdown_create(ui_settingsScroll);
     lv_dropdown_set_options(ui_timeoutSelect, "30 seconds\n1 minute\n3 minutes\n5 minutes");
-    // lv_dropdown_set_text(ui_timeoutSelect, "30 seconds");
 
     lv_obj_set_width(ui_timeoutSelect, 189);
     lv_obj_set_height(ui_timeoutSelect, LV_SIZE_CONTENT);
@@ -2261,6 +2271,7 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_style_border_color(ui_timeoutSelect, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_timeoutSelect, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_timeoutSelect, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_timeoutSelect, event_handler, LV_EVENT_VALUE_CHANGED, NULL);
 
     lv_obj_t *list = lv_dropdown_get_list(ui_timeoutSelect); /*Get the list*/
     lv_obj_set_style_radius(list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);

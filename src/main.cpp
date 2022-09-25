@@ -53,7 +53,7 @@ HTTPClient http;
 // };
 
 uint8_t ext[] = {
-  // APP DATA
+    // APP DATA
     0xAA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x54, 0x65, 0x73, 0x74, 0x20, 0x41, 0x70, 0x70, 0x00,
 
     // UI COMPONENTS
@@ -115,7 +115,9 @@ void extractApp(uint8_t *data, int size)
       strncpy(testApp[a].text, (char *)buf + 14, j - 14);
       printf("App UI Component > 0x%X\n", uuid(testApp[a].parent, testApp[a].id));
       a++;
-    } else if (buf[0] == 0xA0){
+    }
+    else if (buf[0] == 0xA0)
+    {
       char appName[20];
       strncpy(appName, (char *)buf + 14, j - 14);
       printf("App Name %s\n", appName);
@@ -140,6 +142,7 @@ void my_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
   if (touch_data.event == 1)
   {
     data->state = LV_INDEV_STATE_PR;
+    currentMillis = millis();
   }
   else
   {
@@ -167,7 +170,6 @@ void requestResult(int requestCode, int statusCode, String payload, long time)
       deserializeJson(json, payload);
       long t = json["timestamp"].as<long>();
       rtc.setTime(t);
-
     }
     break;
   case APPS_REQUEST:
@@ -302,9 +304,12 @@ void getNVSData()
   strncpy(pass5, val.c_str(), val.length() + 1);
   brightness = NVS.getInt("brightness", brightness);
   themeColor = NVS.getInt("theme", themeColor);
+  screenTime = (long)NVS.getInt("screentime", (uint32_t)screenTime);
 
   NVS.getBlob("passCode", passcode.code, 4);
   passcode.set = NVS.getInt("passSet", 0) != 0;
+
+  printf("loaded screentime %d\n", screenTime);
 
   Serial.printf("Passcode loaded %s - %d%d%d%d\n", passcode.set ? "ON" : "OFF", passcode.code[0], passcode.code[1], passcode.code[2], passcode.code[3]);
 }
@@ -348,7 +353,9 @@ void saveSettings()
   NVS.setInt("theme", themeColor);
   NVS.setBlob("passCode", passcode.code, 4);
   NVS.setInt("passSet", passcode.set ? 1 : 0);
+  NVS.setInt("screentime", (uint32_t)screenTime);
   Serial.printf("Passcode set %s - %d%d%d%d\n", passcode.set ? "ON" : "OFF", passcode.code[0], passcode.code[1], passcode.code[2], passcode.code[3]);
+  printf("saved screentime %d\n", screenTime);
 }
 
 lv_obj_t *create_component(lv_obj_t *parent, AppComponent component)
@@ -379,20 +386,23 @@ lv_obj_t *create_component(lv_obj_t *parent, AppComponent component)
   return object;
 }
 
-void loadLocalApp(const char * path, int &size){
-    Serial.printf("Reading file: %s\r\n", path);
-    int z = 0;
-    File file = SPIFFS.open(path);
-    if(!file || file.isDirectory()){
-        Serial.println("- failed to open file for reading");
-        return;
-    }
-    Serial.println("- read from file:");
-    while(file.available()){
-        Serial.write(file.read());
-        z++;
-    }
-    file.close();
+void loadLocalApp(const char *path, int &size)
+{
+  Serial.printf("Reading file: %s\r\n", path);
+  int z = 0;
+  File file = SPIFFS.open(path);
+  if (!file || file.isDirectory())
+  {
+    Serial.println("- failed to open file for reading");
+    return;
+  }
+  Serial.println("- read from file:");
+  while (file.available())
+  {
+    Serial.write(file.read());
+    z++;
+  }
+  file.close();
 }
 
 void loadTestApp()
@@ -511,7 +521,16 @@ void setup()
   Serial.print(screenWidth);
   Serial.print("\tHeight: ");
   Serial.println(screenHeight);
-  disp_draw_buf = (lv_color_t *)malloc(sizeof(lv_color_t) * screenWidth * 10);
+  if (psramFound())
+  {
+    disp_draw_buf = (lv_color_t *)ps_malloc(sizeof(lv_color_t) * screenWidth * 10);
+  }
+  else
+  {
+    disp_draw_buf = (lv_color_t *)malloc(sizeof(lv_color_t) * screenWidth * 10);
+  }
+  Serial.print("Display buffer size: ");
+  Serial.println(sizeof(lv_color_t) * screenWidth * 10);
   if (!disp_draw_buf)
   {
     Serial.println("LVGL disp_draw_buf allocate failed!");
@@ -552,6 +571,7 @@ void setup()
   vibrate(200);
   openLock();
   setWifi();
+  currentMillis = millis();
 
   xTaskCreate(
       connectWiFi,    // Function that should be called
@@ -618,6 +638,14 @@ void setup()
   lv_event_send(ui_themeWheel, LV_EVENT_VALUE_CHANGED, NULL);
   lv_label_set_text(ui_aboutText, info.c_str());
 
+  for (int j = 0; j < 4; j++){
+    if (timeouts[j] == screenTime){
+      lv_dropdown_set_selected(ui_timeoutSelect, j);
+      printf("Selected %d\n", j);
+      break;
+    }
+  }
+
   request[0].active = true;
   request[0].method = false;
   request[0].code = TIME_REQUEST;
@@ -640,32 +668,48 @@ void loop()
   touch_data.ypos = ft6336u.read_touch1_y();
 
   lv_timer_handler(); /* let the GUI do its work */
-  // delay(5);
+  delay(5);
 
-  rtcTime.day = rtc.getDay();
-  rtcTime.month = rtc.getMonth() + 1;
-  rtcTime.year = rtc.getYear();
-
-  
-  ledcWrite(ledChannel, brightness);
-
-  if (WiFi.isConnected())
+  if (currentMillis + screenTime < millis())
   {
-    lv_obj_clear_flag(ui_wifiIcon, LV_OBJ_FLAG_HIDDEN);
-    if (!onConnect)
+    if (activeRequest)
     {
-      Serial.println("WiFi Connected");
-      runRequest();
-      onConnect = true;
+      printf("requests are active\n");
+      ledcWrite(ledChannel, 0);
+    }
+    else
+    {
+      printf("timeout: going to sleep\n");
+      light_sleep();
     }
   }
   else
   {
-    onConnect = false;
-    lv_obj_add_flag(ui_wifiIcon, LV_OBJ_FLAG_HIDDEN);
+
+    rtcTime.day = rtc.getDay();
+    rtcTime.month = rtc.getMonth() + 1;
+    rtcTime.year = rtc.getYear();
+
+    ledcWrite(ledChannel, brightness);
+
+    if (WiFi.isConnected())
+    {
+      lv_obj_clear_flag(ui_wifiIcon, LV_OBJ_FLAG_HIDDEN);
+      if (!onConnect)
+      {
+        Serial.println("WiFi Connected");
+        runRequest();
+        onConnect = true;
+      }
+    }
+    else
+    {
+      onConnect = false;
+      lv_obj_add_flag(ui_wifiIcon, LV_OBJ_FLAG_HIDDEN);
+    }
+    lv_label_set_text(ui_lockScreenTime, rtc.getTime("%H:%M").c_str());
+    lv_label_set_text(ui_lockTime, rtc.getTime("%H:%M").c_str());
+    lv_label_set_text(ui_lockScreenDate, rtc.getTime("%A, %B %d").c_str());
+    lv_label_set_text(ui_actionDate, rtc.getTime("%m/%d").c_str());
   }
-  lv_label_set_text(ui_lockScreenTime, rtc.getTime("%H:%M").c_str());
-  lv_label_set_text(ui_lockTime, rtc.getTime("%H:%M").c_str());
-  lv_label_set_text(ui_lockScreenDate, rtc.getTime("%A, %B %d").c_str());
-  lv_label_set_text(ui_actionDate, rtc.getTime("%m/%d").c_str());
 }
