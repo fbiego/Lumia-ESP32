@@ -16,6 +16,8 @@ extern "C" {
 #include "lvgl/lvgl.h"
 #endif
 
+void showNotification_Animation(lv_obj_t * TargetObject, int delay);
+
 extern lv_obj_t * ui_bootScreen;
 extern lv_obj_t * ui_bootLogo;
 extern lv_obj_t * ui_lockScreen;
@@ -101,6 +103,25 @@ extern lv_obj_t * ui_phoneNumberDelete;
 extern lv_obj_t * ui_messageSendText;
 extern lv_obj_t * ui_messageSendButton;
 
+extern lv_obj_t * ui_notificationAlert;
+extern lv_obj_t * ui_notificationAppIcon;
+extern lv_obj_t * ui_notificationAppTitle;
+extern lv_obj_t * ui_notificationContent;
+extern lv_obj_t * ui_weatherScreen;
+extern lv_obj_t * ui_weatherCity;
+extern lv_obj_t * ui_weatherTemperature;
+extern lv_obj_t * ui_weatherDescription;
+extern lv_obj_t * ui_weatherWindspeed;
+extern lv_obj_t * ui_callerScreen;
+extern lv_obj_t * ui_callerDetails;
+extern lv_obj_t * ui_callDetails;
+extern lv_obj_t * ui_callAnswerButton;
+extern lv_obj_t * ui_callAnswerLabel;
+extern lv_obj_t * ui_callMessageButton;
+extern lv_obj_t * ui_callMessageLabel;
+extern lv_obj_t * ui_callDeclineButton;
+extern lv_obj_t * ui_callDeclineText;
+
 LV_IMG_DECLARE(ui_img_windows_logo_png);    // assets\windows_logo.png
 LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
 LV_IMG_DECLARE(ui_img_wifi_png);    // assets\wifi.png
@@ -155,6 +176,12 @@ void setWifi();
 
 void loadTestApp();
 void launchApp(const char *name, const void *src, bool header);
+
+void showCaller(const char *name, const char *call, bool incoming);
+void showNotification(const char* app, const void *src, const char *alert);
+
+void startVibrate();
+void endVibrate();
 
 void closeApp();
 extern void light_sleep();

@@ -123,6 +123,25 @@ lv_obj_t *list1;
 lv_obj_t *alertBox;
 lv_obj_t *chatList;
 
+lv_obj_t * ui_notificationAlert;
+lv_obj_t * ui_notificationAppIcon;
+lv_obj_t * ui_notificationAppTitle;
+lv_obj_t * ui_notificationContent;
+lv_obj_t * ui_weatherScreen;
+lv_obj_t * ui_weatherCity;
+lv_obj_t * ui_weatherTemperature;
+lv_obj_t * ui_weatherDescription;
+lv_obj_t * ui_weatherWindspeed;
+lv_obj_t * ui_callerScreen;
+lv_obj_t * ui_callerDetails;
+lv_obj_t * ui_callDetails;
+lv_obj_t * ui_callAnswerButton;
+lv_obj_t * ui_callAnswerLabel;
+lv_obj_t * ui_callMessageButton;
+lv_obj_t * ui_callMessageLabel;
+lv_obj_t * ui_callDeclineButton;
+lv_obj_t * ui_callDeclineText;
+
 char aboutText[740] = {
     0x4c, 0x75, 0x6d, 0x69, 0x61, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x0a,
     0x41, 0x20, 0x55, 0x49, 0x20, 0x62, 0x61, 0x73, 0x65, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x4c, 0x56, 0x47, 0x4c, 0x20, 0x72, 0x75, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x20, 0x6f, 0x6e, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x20, 0x73, 0x69, 0x6d, 0x75, 0x6c, 0x61, 0x74, 0x69, 0x6e, 0x67, 0x20, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x73, 0x20, 0x4d, 0x6f, 0x62, 0x69, 0x6c, 0x65, 0x2e, 0x0a,
@@ -185,6 +204,57 @@ uint8_t LOCK = 0xEB;
 uint8_t SETTINGS = 0xEC;
 
 ///////////////////// ANIMATIONS ////////////////////
+
+///////////////////// ANIMATIONS ////////////////////
+static void close_alert();
+
+static void anim_y_cb(void * var, int32_t v)
+{
+    printf("Animating - set y : %d\n", v);
+    lv_obj_set_y(ui_notificationAlert, v);
+    if (v == 0){
+        close_alert();
+    }
+}
+
+static void close_alert(){
+    lv_anim_t PropertyAnimation_1;
+    lv_anim_init(&PropertyAnimation_1);
+    lv_anim_set_time(&PropertyAnimation_1, 1000);
+    lv_anim_set_user_data(&PropertyAnimation_1, ui_notificationAlert);
+    lv_anim_set_exec_cb(&PropertyAnimation_1, anim_y_cb);
+    lv_anim_set_values(&PropertyAnimation_1, 1, -120);
+    lv_anim_set_path_cb(&PropertyAnimation_1, lv_anim_path_ease_out);
+    lv_anim_set_delay(&PropertyAnimation_1, 3000);
+    lv_anim_set_playback_time(&PropertyAnimation_1, 0);
+    lv_anim_set_playback_delay(&PropertyAnimation_1, 0);
+    lv_anim_set_repeat_count(&PropertyAnimation_1, 0);
+    lv_anim_set_repeat_delay(&PropertyAnimation_1, 0);
+    lv_anim_set_early_apply(&PropertyAnimation_1, false);
+    lv_anim_start(&PropertyAnimation_1);
+}
+
+void showNotification_Animation(lv_obj_t * TargetObject, int delay)
+{
+    lv_anim_t PropertyAnimation_0;
+    lv_anim_init(&PropertyAnimation_0);
+    lv_anim_set_time(&PropertyAnimation_0, 1000);
+    lv_anim_set_user_data(&PropertyAnimation_0, TargetObject);
+    lv_anim_set_exec_cb(&PropertyAnimation_0, anim_y_cb); //(lv_anim_exec_xcb_t) lv_obj_set_x
+    lv_anim_set_values(&PropertyAnimation_0, -120, 0);
+    lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_ease_out);
+    lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
+    lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+    lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+    lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+    lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+    lv_anim_set_early_apply(&PropertyAnimation_0, false);
+    lv_anim_start(&PropertyAnimation_0);
+    
+
+}
+
+
 
 ///////////////////// CALLBACK FUNCTIONS ////////////////////
 
@@ -265,6 +335,7 @@ static void theme_change(lv_event_t *e)
     lv_disp_set_theme(display, theme);
     lv_obj_set_style_bg_color(ui_dragPanel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_deviceLabel, c, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_notificationAlert, c, LV_PART_MAIN | LV_STATE_DEFAULT);
     themeColor = lv_color_to32(c);
 
     uint16_t i;
@@ -739,6 +810,19 @@ static void event_app_component(lv_event_t *e)
             else if (oId == 0xFF)
             {
                 // call button
+                showCaller("lumia", "", false);
+            }
+            else if (oId == 0xFE)
+            {
+                // end call button
+                lv_obj_add_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
+                endVibrate();
+            }
+            else if (oId == 0xFD)
+            {
+                // answer call button
+                lv_obj_add_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
+                endVibrate();
             }
             else
             {
@@ -831,6 +915,7 @@ static void event_app_component(lv_event_t *e)
             {
                 add_chat_item(chatList, cd, false);
                 lv_textarea_set_text(ui_messageSendText, "");
+                showNotification("Message", &ui_img_237043237, "Lumia\nHello from the other side");
             }
         }
         else if (id == STORE_REFRESH)
@@ -1007,6 +1092,30 @@ void add_app(lv_obj_t *parent, struct AppStore app)
     lv_obj_set_height(ui_appListActionLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_appListActionLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_appListActionLabel, app.installed ? "Uninstall" : "Install");
+}
+
+void showCaller(const char *name, const char *call, bool incoming){
+    if (incoming){
+        lv_label_set_text(ui_callDetails, "Incoming Call");
+        lv_label_set_text(ui_callAnswerLabel, "Answer");
+        lv_obj_clear_flag(ui_callMessageButton, LV_OBJ_FLAG_HIDDEN); 
+        lv_obj_clear_flag(ui_callDeclineButton, LV_OBJ_FLAG_HIDDEN);
+        startVibrate();
+    } else {
+        lv_label_set_text(ui_callDetails, "Outgoing Call");
+        lv_label_set_text(ui_callAnswerLabel, "End Call");
+        lv_obj_add_flag(ui_callMessageButton, LV_OBJ_FLAG_HIDDEN); 
+        lv_obj_add_flag(ui_callDeclineButton, LV_OBJ_FLAG_HIDDEN); 
+    }
+    lv_label_set_text(ui_callerDetails, name);
+    lv_obj_clear_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
+}
+void showNotification(const char* app, const void *src, const char *alert){
+    lv_label_set_text(ui_notificationAppTitle, app);
+    lv_label_set_text(ui_notificationContent, alert);
+    lv_img_set_src(ui_notificationAppIcon, src);
+    showNotification_Animation(ui_notificationAlert, 0);
+    vibrate(50);
 }
 
 ///////////////////// DYNAMIC COMPONENTS ////////////////////
@@ -1606,6 +1715,133 @@ lv_obj_t *keypad(lv_obj_t *parent, int offset, uint8_t id)
     return key;
 }
 
+void notification_alert(lv_obj_t *parent){
+    ui_notificationAlert = lv_obj_create(parent);
+    lv_obj_set_width(ui_notificationAlert, 320);
+    lv_obj_set_height(ui_notificationAlert, 120);
+    lv_obj_set_x(ui_notificationAlert, 0);
+    lv_obj_set_y(ui_notificationAlert, -120);
+    lv_obj_set_align(ui_notificationAlert, LV_ALIGN_TOP_MID);
+    lv_obj_clear_flag(ui_notificationAlert, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_notificationAlert, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_notificationAlert, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_notificationAlert, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_notificationAlert, lv_color_hex(0x2095F6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_notificationAlert, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_notificationAlert, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_notificationAlert, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_notificationAppIcon = lv_img_create(ui_notificationAlert);
+    lv_img_set_src(ui_notificationAppIcon, &ui_img_237043237);
+    lv_obj_set_width(ui_notificationAppIcon, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_notificationAppIcon, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_notificationAppIcon, 0);
+    lv_obj_set_y(ui_notificationAppIcon, 17);
+    lv_obj_add_flag(ui_notificationAppIcon, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_notificationAppIcon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_notificationAppTitle = lv_label_create(ui_notificationAlert);
+    lv_obj_set_width(ui_notificationAppTitle, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_notificationAppTitle, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_notificationAppTitle, 40);
+    lv_obj_set_y(ui_notificationAppTitle, 21);
+    lv_label_set_text(ui_notificationAppTitle, "Message");
+
+    ui_notificationContent = lv_label_create(ui_notificationAlert);
+    lv_obj_set_height(ui_notificationContent, 40);
+    lv_obj_set_width(ui_notificationContent, lv_pct(100));
+    lv_obj_set_x(ui_notificationContent, 0);
+    lv_obj_set_y(ui_notificationContent, 48);
+    lv_obj_set_align(ui_notificationContent, LV_ALIGN_TOP_MID);
+    lv_label_set_long_mode(ui_notificationContent, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_notificationContent, "Notification content Notification \nNotification content");
+
+}
+
+void caller_screen(lv_obj_t *parent){
+
+    ui_callerScreen = lv_obj_create(parent);
+    lv_obj_set_width(ui_callerScreen, 320);
+    lv_obj_set_height(ui_callerScreen, 480);
+    lv_obj_clear_flag(ui_callerScreen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_callerScreen, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_callerScreen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_callerScreen, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_callerScreen, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_pad_left(ui_callerScreen, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_callerScreen, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
+    ui_callerDetails = lv_label_create(ui_callerScreen);
+    lv_obj_set_width(ui_callerDetails, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_callerDetails, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_callerDetails, 0);
+    lv_obj_set_y(ui_callerDetails, 100);
+    lv_obj_set_align(ui_callerDetails, LV_ALIGN_TOP_MID);
+    lv_label_set_text(ui_callerDetails, "0707070707");
+    lv_obj_set_style_text_font(ui_callerDetails, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_callDetails = lv_label_create(ui_callerScreen);
+    lv_obj_set_width(ui_callDetails, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_callDetails, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_callDetails, 0);
+    lv_obj_set_y(ui_callDetails, 70);
+    lv_obj_set_align(ui_callDetails, LV_ALIGN_TOP_MID);
+    lv_label_set_text(ui_callDetails, "Incoming Call");
+
+    ui_callAnswerButton = lv_btn_create(ui_callerScreen);
+    lv_obj_set_width(ui_callAnswerButton, 320);
+    lv_obj_set_height(ui_callAnswerButton, 50);
+    lv_obj_set_x(ui_callAnswerButton, 0);
+    lv_obj_set_y(ui_callAnswerButton, 370);
+    lv_obj_set_align(ui_callAnswerButton, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_callAnswerButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_callAnswerButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_callAnswerButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_callAnswerButton, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | PHONE), 0xFD));
+
+    ui_callAnswerLabel = lv_label_create(ui_callAnswerButton);
+    lv_obj_set_width(ui_callAnswerLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_callAnswerLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_callAnswerLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_callAnswerLabel, "Answer");
+
+    ui_callMessageButton = lv_btn_create(ui_callerScreen);
+    lv_obj_set_width(ui_callMessageButton, 158);
+    lv_obj_set_height(ui_callMessageButton, 50);
+    lv_obj_set_x(ui_callMessageButton, 0);
+    lv_obj_set_y(ui_callMessageButton, 316);
+    lv_obj_add_flag(ui_callMessageButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_callMessageButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_callMessageButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_callMessageButton, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_callMessageLabel = lv_label_create(ui_callMessageButton);
+    lv_obj_set_width(ui_callMessageLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_callMessageLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_callMessageLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_callMessageLabel, "Message");
+
+    ui_callDeclineButton = lv_btn_create(ui_callerScreen);
+    lv_obj_set_width(ui_callDeclineButton, 158);
+    lv_obj_set_height(ui_callDeclineButton, 50);
+    lv_obj_set_x(ui_callDeclineButton, 0);
+    lv_obj_set_y(ui_callDeclineButton, 316);
+    lv_obj_set_align(ui_callDeclineButton, LV_ALIGN_TOP_RIGHT);
+    lv_obj_add_flag(ui_callDeclineButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_callDeclineButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_callDeclineButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_callDeclineButton, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_callDeclineText = lv_label_create(ui_callDeclineButton);
+    lv_obj_set_width(ui_callDeclineText, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_callDeclineText, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_callDeclineText, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_callDeclineText, "Decline");
+    lv_obj_add_event_cb(ui_callDeclineButton, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | PHONE), 0xFE));
+}
+
 void notification_panel(lv_obj_t *parent)
 {
 
@@ -2041,7 +2277,12 @@ void ui_lockScreen_screen_init(void)
     lv_obj_add_event_cb(ui_lockScreenCode, event_lockcode, LV_EVENT_ALL, uuid((KEYPAD | LOCK), 0xFFFF));
 
     ui_lockPanel = keypad(ui_lockScreenPanel, 0, LOCK);
+    notification_alert(ui_lockScreen);
+    caller_screen(ui_lockScreen);
     status_bar(ui_lockScreen);
+
+    
+
 }
 
 void ui_startScreen_screen_init(void)
@@ -2524,6 +2765,8 @@ void launchApp(const char *name, const void *src, bool header)
 {
     lv_obj_set_parent(ui_Panel2, ui_appScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_appScreen);
+    lv_obj_set_parent(ui_notificationAlert, ui_appScreen);
+    lv_obj_set_parent(ui_callerScreen, ui_appScreen);
     lv_obj_set_parent(ui_statusBar, ui_appScreen);
     lv_obj_set_parent(ui_systemKeyboard, ui_appScreen);
     lv_obj_set_parent(ui_alertPanel, ui_appScreen);
@@ -2555,6 +2798,8 @@ void openStart()
 
     lv_obj_set_parent(ui_Panel2, ui_startScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_startScreen);
+    lv_obj_set_parent(ui_notificationAlert, ui_startScreen);
+    lv_obj_set_parent(ui_callerScreen, ui_startScreen);
     lv_obj_set_parent(ui_statusBar, ui_startScreen);
     lv_obj_set_parent(ui_systemKeyboard, ui_startScreen);
     lv_obj_set_parent(ui_alertPanel, ui_startScreen);
@@ -2566,6 +2811,8 @@ void openSettings()
 
     lv_obj_set_parent(ui_Panel2, ui_settingsScreen); // navigation
     lv_obj_set_parent(ui_notificationPanel, ui_settingsScreen);
+    lv_obj_set_parent(ui_notificationAlert, ui_settingsScreen);
+    lv_obj_set_parent(ui_callerScreen, ui_settingsScreen);
     lv_obj_set_parent(ui_statusBar, ui_settingsScreen);
     lv_obj_set_parent(ui_systemKeyboard, ui_settingsScreen);
     lv_obj_set_parent(ui_alertPanel, ui_settingsScreen);
@@ -2579,6 +2826,8 @@ void openLock()
     lv_obj_set_style_text_opa(ui_lockScreenDate, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_flag(ui_lockPanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_lockScreenCode, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_parent(ui_notificationAlert, ui_lockScreen);
+    lv_obj_set_parent(ui_callerScreen, ui_lockScreen);
     lv_obj_set_parent(ui_statusBar, ui_lockScreen);
     lv_disp_load_scr(ui_lockScreen);
 }
@@ -2708,6 +2957,14 @@ void vibrate(long time)
 {
     digitalWrite(MOTOR, HIGH);
     delay(time);
+    digitalWrite(MOTOR, LOW);
+}
+
+void startVibrate(){
+    digitalWrite(MOTOR, HIGH);
+}
+
+void endVibrate(){
     digitalWrite(MOTOR, LOW);
 }
 

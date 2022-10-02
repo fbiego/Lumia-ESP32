@@ -712,4 +712,14 @@ void loop()
     lv_label_set_text(ui_lockScreenDate, rtc.getTime("%A, %B %d").c_str());
     lv_label_set_text(ui_actionDate, rtc.getTime("%m/%d").c_str());
   }
+
+  if (Serial.available()){
+    String cmd = Serial.readStringUntil('\n');
+    if (cmd == "MSG"){
+      showNotification("Message", &ui_img_237043237, "Serial\nMessage from serial port");
+    }
+    if (cmd == "CALL"){
+      showCaller("Serial", "", true);
+    }
+  }
 }
