@@ -1,5 +1,5 @@
 # Lumia-ESP32
-This demo project is for the WT32-SC01 module.
+This is a demo project for the WT32-SC01 module.
 
 <!--
 [![Lumia ESP32](youtube.png?raw=true "youtube")](https://www.youtube.com/watch?v=jaJCa-hXfNk)
@@ -7,6 +7,9 @@ This demo project is for the WT32-SC01 module.
 ![2](2.png?raw=true "2")
 
 -->
+
+<img src="simulation.gif" width="320" height="480"/>
+
 [`Simulator Code`](https://github.com/fbiego/lv_platformio)
 - tested on Mac
 
