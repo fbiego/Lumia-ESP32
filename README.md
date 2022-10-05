@@ -10,7 +10,7 @@ This is a demo project for the WT32-SC01 module.
 
 <img src="simulation.gif" width="320" height="480" alt="simulator video"/>
 
-[`Simulator Code`](https://github.com/fbiego/lv_platformio)
+### [`Simulator Code`](https://github.com/fbiego/lv_platformio)
 - tested on Mac
 
 These are the current features
