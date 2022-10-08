@@ -810,19 +810,23 @@ static void event_app_component(lv_event_t *e)
             else if (oId == 0xFF)
             {
                 // call button
-                showCaller("lumia", "", false);
+                showCaller("Felix", "", false);
+                callFunction(0x00);
             }
             else if (oId == 0xFE)
             {
                 // end call button
                 lv_obj_add_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
                 endVibrate();
+                callFunction(0x01);
             }
             else if (oId == 0xFD)
             {
                 // answer call button
                 lv_obj_add_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
                 endVibrate();
+                callFunction(0x02);
+
             }
             else
             {

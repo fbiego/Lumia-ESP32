@@ -37,6 +37,8 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
+#define GSM Serial1
+
 Arduino_DataBus *bus = new Arduino_ESP32SPI(21 /* DC */, 15 /* CS */, 14 /* SCK */, 13 /* MOSI */, -1 /* MISO */, VSPI /* spi_num */);
 Arduino_GFX *gfx = new Arduino_ST7796(bus, 22 /* RST */, 0 /* rotation */);
 ESP32Time rtc(3 * 3600);
@@ -65,6 +67,8 @@ uint8_t ext[] = {
     0xAA, 0x01, 0x10, 0x05, 0xAB, 0x01, 0x00, 0x14, 0x01, 0x2C, 0x00, 0x19, 0x00, 0x19, 0x54, 0x65, 0x73, 0x74, 0x20, 0x61, 0x70, 0x70, 0x00};
 
 AppComponent testApp[10];
+
+void gsmHandler();
 
 void extractApp(uint8_t *data, int size)
 {
@@ -487,6 +491,7 @@ void light_sleep()
 void setup()
 {
   Serial.begin(115200);
+  GSM.begin(115200, SERIAL_8N1, 26, 25);
 
   gfx->begin();
   gfx->fillScreen(BLACK);
@@ -638,8 +643,10 @@ void setup()
   lv_event_send(ui_themeWheel, LV_EVENT_VALUE_CHANGED, NULL);
   lv_label_set_text(ui_aboutText, info.c_str());
 
-  for (int j = 0; j < 4; j++){
-    if (timeouts[j] == screenTime){
+  for (int j = 0; j < 4; j++)
+  {
+    if (timeouts[j] == screenTime)
+    {
       lv_dropdown_set_selected(ui_timeoutSelect, j);
       printf("Selected %d\n", j);
       break;
@@ -713,13 +720,82 @@ void loop()
     lv_label_set_text(ui_actionDate, rtc.getTime("%m/%d").c_str());
   }
 
-  if (Serial.available()){
+  if (Serial.available())
+  {
     String cmd = Serial.readStringUntil('\n');
-    if (cmd == "MSG"){
+    if (cmd == "MSG")
+    {
       showNotification("Message", &ui_img_237043237, "Serial\nMessage from serial port");
     }
-    if (cmd == "CALL"){
+    if (cmd == "CALL")
+    {
       showCaller("Serial", "", true);
     }
+  }
+  gsmHandler();
+}
+
+void gsmHandler()
+{
+  if (GSM.available())
+  {
+    uint8_t buf[50];
+    int ln = GSM.readBytes(buf, 50);
+    Serial.printf("GSM data len %d\n", ln);
+
+    switch (buf[0])
+    {
+    case 0xAA:
+      if (buf[1] == 0x00)
+      {
+        Serial.println("No simcard");
+      }
+      if (buf[1] == 0x01)
+      {
+        Serial.println("GSM Ready");
+      }
+      if (buf[1] == 0x02)
+      {
+        Serial.println("Network Registered");
+      }
+      break;
+    case 0xAB:
+      if (buf[1] == 0xC0)
+      {
+        Serial.printf("Dial State: %d, code %d\n", buf[2], buf[3]);
+      }
+      if (buf[1] == 0xC1)
+      {
+        Serial.printf("Hang up: %d, code %d\n", buf[2], buf[3]);
+        lv_obj_add_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
+        endVibrate();
+      }
+      if (buf[1] == 0xC2)
+      {
+        Serial.printf("Incoming call \n");
+        showCaller("Caller", "", true);
+      }
+      if (buf[1] == 0xC3)
+      {
+        Serial.println("Answer Success");
+      }
+      break;
+    }
+  }
+}
+
+void callFunction(uint8_t type)
+{
+  switch (type)
+  {
+  case 0x00:
+    GSM.write(0xC0);
+    break;
+  case 0x01:
+    GSM.write(0xC1);
+    break;
+  case 0x02:
+    GSM.write(0xC2);
+    break;
   }
 }
