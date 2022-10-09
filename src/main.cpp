@@ -21,14 +21,15 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+#define LGFX_USE_V1
+//#define LGFX_AUTODETECT // Autodetect board
 
 #include <Arduino.h>
 #include "SPIFFS.h"
 #include "main.h"
 #include <lvgl.h>
-#include "FT6336U.h"
 #include "ui.h"
-#include <Arduino_GFX_Library.h>
+#include <LovyanGFX.hpp>
 #include <ESP32Time.h>
 #include <ArduinoNvs.h>
 
@@ -37,14 +38,237 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-#define GSM Serial1
+// #define GSM Serial1
 
-Arduino_DataBus *bus = new Arduino_ESP32SPI(21 /* DC */, 15 /* CS */, 14 /* SCK */, 13 /* MOSI */, -1 /* MISO */, VSPI /* spi_num */);
-Arduino_GFX *gfx = new Arduino_ST7796(bus, 22 /* RST */, 0 /* rotation */);
+#ifdef PLUS
+
+class LGFX : public lgfx::LGFX_Device
+{
+
+  lgfx::Panel_ST7796 _panel_instance;
+
+  lgfx::Bus_Parallel8 _bus_instance;
+
+  lgfx::Light_PWM _light_instance;
+
+  lgfx::Touch_FT5x06 _touch_instance;
+
+public:
+  LGFX(void)
+  {
+    {
+      auto cfg = _bus_instance.config();
+
+      cfg.port = 0;
+      cfg.freq_write = 20000000;
+      cfg.pin_wr = 47; // pin number connecting WR
+      cfg.pin_rd = -1; // pin number connecting RD
+      cfg.pin_rs = 0;  // Pin number connecting RS(D/C)
+      cfg.pin_d0 = 9;  // pin number connecting D0
+      cfg.pin_d1 = 46; // pin number connecting D1
+      cfg.pin_d2 = 3;  // pin number connecting D2
+      cfg.pin_d3 = 8;  // pin number connecting D3
+      cfg.pin_d4 = 18; // pin number connecting D4
+      cfg.pin_d5 = 17; // pin number connecting D5
+      cfg.pin_d6 = 16; // pin number connecting D6
+      cfg.pin_d7 = 15; // pin number connecting D7
+
+      _bus_instance.config(cfg);              // Apply the settings to the bus.
+      _panel_instance.setBus(&_bus_instance); // Sets the bus to the panel.
+    }
+
+    {                                      // Set display panel control.
+      auto cfg = _panel_instance.config(); // Get the structure for display panel settings.
+
+      cfg.pin_cs = -1;   // Pin number to which CS is connected (-1 = disable)
+      cfg.pin_rst = 4;   // pin number where RST is connected (-1 = disable)
+      cfg.pin_busy = -1; // pin number to which BUSY is connected (-1 = disable)
+
+      // * The following setting values ​​are set to general default values ​​for each panel, and the pin number (-1 = disable) to which BUSY is connected, so please try commenting out any unknown items.
+
+      cfg.memory_width = 320;  // Maximum width supported by driver IC
+      cfg.memory_height = 480; // Maximum height supported by driver IC
+      cfg.panel_width = 320;   // actual displayable width
+      cfg.panel_height = 480;  // actual displayable height
+      cfg.offset_x = 0;        // Panel offset in X direction
+      cfg.offset_y = 0;        // Panel offset in Y direction
+      cfg.offset_rotation = 2;
+      cfg.dummy_read_pixel = 8;
+      cfg.dummy_read_bits = 1;
+      cfg.readable = false;
+      cfg.invert = true;
+      cfg.rgb_order = false;
+      cfg.dlen_16bit = false;
+      cfg.bus_shared = false;
+      
+
+      _panel_instance.config(cfg);
+    }
+
+    {                                      // Set backlight control. (delete if not necessary)
+      auto cfg = _light_instance.config(); // Get the structure for backlight configuration.
+
+      cfg.pin_bl = 45;     // pin number to which the backlight is connected
+      cfg.invert = false;  // true to invert backlight brightness
+      cfg.freq = 44100;    // backlight PWM frequency
+      cfg.pwm_channel = 0; // PWM channel number to use
+
+      _light_instance.config(cfg);
+      _panel_instance.setLight(&_light_instance); // Sets the backlight to the panel.
+    }
+
+    { // Configure settings for touch screen control. (delete if not necessary)
+      auto cfg = _touch_instance.config();
+
+      cfg.x_min = 0;   // Minimum X value (raw value) obtained from the touchscreen
+      cfg.x_max = 319; // Maximum X value (raw value) obtained from the touchscreen
+      cfg.y_min = 0;   // Minimum Y value obtained from touchscreen (raw value)
+      cfg.y_max = 479; // Maximum Y value (raw value) obtained from the touchscreen
+      cfg.pin_int = 7; // pin number to which INT is connected
+      cfg.bus_shared = false;
+      cfg.offset_rotation = 0;
+
+      // For I2C connection
+      cfg.i2c_port = 0;    // Select I2C to use (0 or 1)
+      cfg.i2c_addr = 0x38; // I2C device address number
+      cfg.pin_sda = 6;     // pin number where SDA is connected
+      cfg.pin_scl = 5;     // pin number to which SCL is connected
+      cfg.freq = 400000;   // set I2C clock
+
+      _touch_instance.config(cfg);
+      _panel_instance.setTouch(&_touch_instance); // Set the touchscreen to the panel.
+    }
+
+    setPanel(&_panel_instance); // Sets the panel to use.
+  }
+};
+
+#else
+class LGFX : public lgfx::LGFX_Device
+{
+
+  lgfx::Panel_ST7796 _panel_instance;
+
+  lgfx::Bus_SPI _bus_instance;
+
+  lgfx::Light_PWM _light_instance;
+
+  // lgfx::Touch_FT5x06 _touch_instance;
+
+public:
+  LGFX(void)
+  {
+    {
+      auto cfg = _bus_instance.config(); // Get the structure for bus configuration.
+
+      // SPI bus settings
+      cfg.spi_host = VSPI_HOST; // Select the SPI to use ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
+      // * With the ESP-IDF version upgrade, VSPI_HOST and HSPI_HOST descriptions are deprecated, so if an error occurs, use SPI2_HOST and SPI3_HOST instead.
+      cfg.spi_mode = 3;                  // Set SPI communication mode (0 ~ 3)
+      cfg.freq_write = 27000000;         // SPI clock when sending (up to 80MHz, rounded to 80MHz divided by an integer)
+      cfg.freq_read = 6000000;           // SPI clock when receiving
+      cfg.spi_3wire = false;             // set to true if receiving on MOSI pin
+      cfg.use_lock = true;               // set to true to use transaction lock
+      cfg.dma_channel = SPI_DMA_CH_AUTO; // Set the DMA channel to use (0=not use DMA / 1=1ch / 2=ch / SPI_DMA_CH_AUTO=auto setting)
+      // * With the ESP-IDF version upgrade, SPI_DMA_CH_AUTO (automatic setting) is recommended for the DMA channel. Specifying 1ch and 2ch is deprecated.
+      cfg.pin_sclk = 14; // set SPI SCLK pin number
+      cfg.pin_mosi = 13; // Set MOSI pin number for SPI
+      cfg.pin_miso = -1; // set SPI MISO pin number (-1 = disable)
+      cfg.pin_dc = 21;   // Set SPI D/C pin number (-1 = disable)
+
+      _bus_instance.config(cfg);              // Apply the settings to the bus.
+      _panel_instance.setBus(&_bus_instance); // Sets the bus to the panel.
+    }
+
+    {                                      // Set display panel control.
+      auto cfg = _panel_instance.config(); // Get the structure for display panel settings.
+
+      cfg.pin_cs = 15;   // Pin number to which CS is connected (-1 = disable)
+      cfg.pin_rst = 22;  // pin number where RST is connected (-1 = disable)
+      cfg.pin_busy = -1; // pin number to which BUSY is connected (-1 = disable)
+
+      // * The following setting values ​​are set to general default values ​​for each panel, and the pin number (-1 = disable) to which BUSY is connected, so please try commenting out any unknown items.
+
+      cfg.memory_width = 320;  // Maximum width supported by driver IC
+      cfg.memory_height = 480; // Maximum height supported by driver IC
+      cfg.panel_width = 320;   // actual displayable width
+      cfg.panel_height = 480;  // actual displayable height
+      cfg.offset_x = 0;        // Panel offset in X direction
+      cfg.offset_y = 0;        // Panel offset in Y direction
+      cfg.offset_rotation = 0;
+      cfg.dummy_read_pixel = 8;
+      cfg.dummy_read_bits = 1;
+      cfg.readable = false;
+      cfg.invert = false;
+      cfg.rgb_order = false;
+      cfg.dlen_16bit = false;
+      cfg.bus_shared = false;
+
+      _panel_instance.config(cfg);
+    }
+
+    {                                      // Set backlight control. (delete if not necessary)
+      auto cfg = _light_instance.config(); // Get the structure for backlight configuration.
+
+      cfg.pin_bl = 23;     // pin number to which the backlight is connected
+      cfg.invert = false;  // true to invert backlight brightness
+      cfg.freq = 44100;    // backlight PWM frequency
+      cfg.pwm_channel = 1; // PWM channel number to use
+
+      _light_instance.config(cfg);
+      _panel_instance.setLight(&_light_instance); // Sets the backlight to the panel.
+    }
+
+    // { // Configure settings for touch screen control. (delete if not necessary)
+    //    auto cfg = _touch_instance.config();
+
+    //    cfg.x_min = 0;    // Minimum X value (raw value) obtained from the touchscreen
+    //    cfg.x_max = 319;  // Maximum X value (raw value) obtained from the touchscreen
+    //    cfg.y_min = 0;    // Minimum Y value obtained from touchscreen (raw value)
+    //    cfg.y_max = 479;  // Maximum Y value (raw value) obtained from the touchscreen
+    //    cfg.pin_int = 36; // pin number to which INT is connected
+    //    cfg.bus_shared = false;
+    //    cfg.offset_rotation = 0;
+
+    //    // For I2C connection
+    //    cfg.i2c_port = 0;    // Select I2C to use (0 or 1)
+    //    cfg.i2c_addr = 0x38; // I2C device address number
+    //    cfg.pin_sda = 18;    // pin number where SDA is connected
+    //    cfg.pin_scl = 19;    // pin number to which SCL is connected
+    //    cfg.freq = 400000;   // set I2C clock
+
+    //    _touch_instance.config(cfg);
+    //    _panel_instance.setTouch(&_touch_instance); // Set the touchscreen to the panel.
+    // }
+
+    setPanel(&_panel_instance); // Sets the panel to use.
+  }
+};
+
+struct TouchData
+{
+  int xpos;
+  int ypos;
+  int event;
+} touch_data;
+
+#include "FT6336U.h"
+
+FT6336U ft6336u(18, 19, -1, 36);
+
+#endif
+
+// Create an instance of the prepared class.
+LGFX tft;
+
+
+static lv_color_t disp_draw_buf[screenWidth * SCR];
+static lv_color_t disp_draw_buf2[screenWidth * SCR];
+
 ESP32Time rtc(3 * 3600);
-FT6336U ft6336u(I2C_SDA, I2C_SCL, RST_N_PIN, INT_N_PIN);
 WiFiMulti wifiMulti;
 HTTPClient http;
+
 
 // AppComponent testApp[] = {
 //     {.id = 0, .parent = 0, .type = LABEL, .text = "Hello world", .xPos = 20, .yPos = 20, .width = 25, .height = 25},
@@ -56,7 +280,7 @@ HTTPClient http;
 
 uint8_t ext[] = {
     // APP DATA
-    0xAA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x54, 0x65, 0x73, 0x74, 0x20, 0x41, 0x70, 0x70, 0x00,
+    0xA0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x54, 0x65, 0x73, 0x74, 0x20, 0x41, 0x70, 0x70, 0x00,
 
     // UI COMPONENTS
     // d, type, comp id   , parent id ,    x pos  ,    y pos  ,   width  ,   height   , text ..... terminator
@@ -64,7 +288,7 @@ uint8_t ext[] = {
     0xAA, 0x02, 0x10, 0x02, 0xAB, 0x01, 0x00, 0x14, 0x00, 0x46, 0x00, 0x64, 0x00, 0x00, 0x43, 0x6c, 0x69, 0x63, 0x6b, 0x00,
     0xAA, 0x05, 0x10, 0x03, 0xAB, 0x01, 0x00, 0x14, 0x00, 0x96, 0x00, 0xFA, 0x00, 0x05, 0x00,
     0xAA, 0x07, 0x10, 0x04, 0xAB, 0x01, 0x00, 0x14, 0x00, 0xFA, 0x00, 0x32, 0x00, 0x14, 0x00,
-    0xAA, 0x01, 0x10, 0x05, 0xAB, 0x01, 0x00, 0x14, 0x01, 0x2C, 0x00, 0x19, 0x00, 0x19, 0x54, 0x65, 0x73, 0x74, 0x20, 0x61, 0x70, 0x70, 0x00};
+    0xAA, 0x01, 0x10, 0x05, 0xAB, 0x01, 0x00, 0x14, 0x01, 0x2C, 0x00, 0x19, 0x00, 0x19, 0x4c, 0x6f, 0x72, 0x65, 0x6d, 0x20, 0x69, 0x70, 0x73, 0x75, 0x6d, 0x20, 0x64, 0x6f, 0x6c, 0x6f, 0x72, 0x20, 0x0a, 0x73, 0x69, 0x74, 0x20, 0x61, 0x6d, 0x65, 0x74, 0x2c, 0x20, 0x63, 0x6f, 0x6e, 0x73, 0x65, 0x63, 0x74, 0x65, 0x74, 0x75, 0x72, 0x20, 0x0a, 0x61, 0x64, 0x69, 0x70, 0x69, 0x73, 0x63, 0x69, 0x6e, 0x67, 0x20, 0x65, 0x6c, 0x69, 0x74, 0x2e, 0x00};
 
 AppComponent testApp[10];
 
@@ -132,14 +356,38 @@ void extractApp(uint8_t *data, int size)
 /* Display flushing */
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
-  uint32_t w = (area->x2 - area->x1 + 1);
-  uint32_t h = (area->y2 - area->y1 + 1);
-  gfx->draw16bitBeRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-  lv_disp_flush_ready(disp);
+  if (tft.getStartCount() == 0)
+  {
+    tft.endWrite();
+  }
+
+  tft.pushImageDMA(area->x1, area->y1, area->x2 - area->x1 + 1, area->y2 - area->y1 + 1, (lgfx::swap565_t *)&color_p->full);
+
+  lv_disp_flush_ready(disp); /* tell lvgl that flushing is done */
 }
 
-void my_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
+/*Read the touchpad*/
+void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
 {
+#ifdef PLUS
+  uint16_t touchX, touchY;
+
+  bool touched = tft.getTouch(&touchX, &touchY);
+
+  if (!touched)
+  {
+    data->state = LV_INDEV_STATE_REL;
+  }
+  else
+  {
+    data->state = LV_INDEV_STATE_PR;
+
+    /*Set the coordinates*/
+    data->point.x = touchX;
+    data->point.y = touchY;
+    currentMillis = millis();
+  }
+#else
   data->point.x = touch_data.xpos;
   data->point.y = touch_data.ypos;
 
@@ -152,7 +400,7 @@ void my_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
   {
     data->state = LV_INDEV_STATE_REL;
   }
-  // return false; /*No buffering now so no more data read*/
+#endif
 }
 
 void requestResult(int requestCode, int statusCode, String payload, long time)
@@ -435,9 +683,9 @@ void deep_sleep()
 
   vibrate(100);
 
-  ledcWrite(ledChannel, 0);
+  tft.setBrightness(0);
 
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0); // 1 = High, 0 = Low
+  esp_sleep_enable_ext0_wakeup(WAKE_PIN, 0); // 1 = High, 0 = Low
 
   // Go to sleep now
   Serial.println("Going to deep sleep now");
@@ -477,11 +725,11 @@ void wakeup_reason()
 void light_sleep()
 {
 
-  digitalWrite(MOTOR, LOW);
-  ledcWrite(ledChannel, 0);
+  // digitalWrite(MOTOR, LOW);
+  tft.setBrightness(0);
   openLock();
 
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0); // 1 = High, 0 = Low
+  esp_sleep_enable_ext0_wakeup(WAKE_PIN, 0); // 1 = High, 0 = Low
 
   // Go to sleep now
   Serial.println("Going to light sleep now");
@@ -491,26 +739,32 @@ void light_sleep()
 void setup()
 {
   Serial.begin(115200);
+
+#ifdef GSM
   GSM.begin(115200, SERIAL_8N1, 26, 25);
+#endif
 
-  gfx->begin();
-  gfx->fillScreen(BLACK);
+  tft.init();
+  tft.initDMA();
+  tft.startWrite();
 
+#ifndef PLUS
   ft6336u.begin();
+
   pinMode(MOTOR, OUTPUT);
   digitalWrite(MOTOR, LOW);
+#endif
+
+
   NVS.begin();
 
   getNVSData();
 
-  ledcSetup(ledChannel, freq, resolution);
-  ledcAttachPin(ledPin, ledChannel);
-
   if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED))
   {
     Serial.println("SPIFFS Mount Failed");
-    ledcWrite(ledChannel, brightness);
-    gfx->fillScreen(BLUE);
+    tft.setBrightness(brightness);
+
     delay(2000);
     ESP.restart();
   }
@@ -519,30 +773,32 @@ void setup()
 
   lv_init();
 
-  screenWidth = gfx->width();
-  screenHeight = gfx->height();
-
   Serial.print("Width: ");
   Serial.print(screenWidth);
   Serial.print("\tHeight: ");
   Serial.println(screenHeight);
-  if (psramFound())
-  {
-    disp_draw_buf = (lv_color_t *)ps_malloc(sizeof(lv_color_t) * screenWidth * 10);
-  }
-  else
-  {
-    disp_draw_buf = (lv_color_t *)malloc(sizeof(lv_color_t) * screenWidth * 10);
-  }
-  Serial.print("Display buffer size: ");
-  Serial.println(sizeof(lv_color_t) * screenWidth * 10);
+
+  // if (psramFound())
+  // {
+  //   disp_draw_buf = (lv_color_t *)ps_malloc(sizeof(lv_color_t) * screenWidth * 10);
+  //   disp_draw_buf2 = (lv_color_t *)ps_malloc(sizeof(lv_color_t) * screenWidth * 10);
+  // }
+  // else
+  // {
+  //   disp_draw_buf = (lv_color_t *)malloc(sizeof(lv_color_t) * screenWidth * 10);
+  //   disp_draw_buf2 = (lv_color_t *)malloc(sizeof(lv_color_t) * screenWidth * 10);
+  // }
+
   if (!disp_draw_buf)
   {
     Serial.println("LVGL disp_draw_buf allocate failed!");
   }
   else
   {
-    lv_disp_draw_buf_init(&draw_buf, disp_draw_buf, NULL, screenWidth * 10);
+
+    Serial.print("Display buffer size: ");
+
+    lv_disp_draw_buf_init(&draw_buf, disp_draw_buf, disp_draw_buf2, screenWidth * SCR);
 
     /* Initialize the display */
     lv_disp_drv_init(&disp_drv);
@@ -557,7 +813,7 @@ void setup()
     static lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_POINTER;
-    indev_drv.read_cb = my_input_read;
+    indev_drv.read_cb = my_touchpad_read;
     lv_indev_drv_register(&indev_drv);
 
     ui_init();
@@ -566,8 +822,7 @@ void setup()
 
     Serial.println("Setup done");
   }
-
-  ledcWrite(ledChannel, brightness);
+  tft.setBrightness(brightness);
   currentMillis = millis();
   while (currentMillis + 2000 > millis())
   {
@@ -614,7 +869,7 @@ void setup()
 
   info += "\nSDK version: " + String(ESP.getSdkVersion());
   info += "\nFirmware size: " + String((ESP.getSketchSize() / (1024.0 * 1024.0)), 0) + "MB";
-  // info += "\nStorage space: " + String((SPIFFS.totalBytes() / (1024.0 * 1024.0)), 0) + "MB";
+  info += "\nStorage space: " + String((SPIFFS.totalBytes() / (1024.0 * 1024.0)), 0) + "MB";
   info += "\nMAC address: ";
 
   for (int i = 0; i < 6; i++)
@@ -669,11 +924,11 @@ void setup()
 void loop()
 {
 
-  // read the touch data
+#ifndef PLUS
   touch_data.event = ft6336u.read_td_status();
   touch_data.xpos = ft6336u.read_touch1_x();
   touch_data.ypos = ft6336u.read_touch1_y();
-
+#endif
   lv_timer_handler(); /* let the GUI do its work */
   delay(5);
 
@@ -682,7 +937,7 @@ void loop()
     if (activeRequest)
     {
       printf("requests are active\n");
-      ledcWrite(ledChannel, 0);
+      tft.setBrightness(0);
     }
     else
     {
@@ -697,7 +952,7 @@ void loop()
     rtcTime.month = rtc.getMonth() + 1;
     rtcTime.year = rtc.getYear();
 
-    ledcWrite(ledChannel, brightness);
+    tft.setBrightness(brightness);
 
     if (WiFi.isConnected())
     {
@@ -737,6 +992,7 @@ void loop()
 
 void gsmHandler()
 {
+#ifdef GSM
   if (GSM.available())
   {
     uint8_t buf[50];
@@ -782,10 +1038,12 @@ void gsmHandler()
       break;
     }
   }
+#endif
 }
 
 void callFunction(uint8_t type)
 {
+#ifdef GSM
   switch (type)
   {
   case 0x00:
@@ -798,4 +1056,5 @@ void callFunction(uint8_t type)
     GSM.write(0xC2);
     break;
   }
+#endif
 }

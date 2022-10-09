@@ -2959,17 +2959,23 @@ void openChat()
 
 void vibrate(long time)
 {
+    #ifndef PLUS
     digitalWrite(MOTOR, HIGH);
     delay(time);
     digitalWrite(MOTOR, LOW);
+    #endif
 }
 
 void startVibrate(){
+    #ifndef PLUS
     digitalWrite(MOTOR, HIGH);
+    #endif
 }
 
 void endVibrate(){
+    #ifndef PLUS
     digitalWrite(MOTOR, LOW);
+    #endif
 }
 
 void showAlert(const void *src, bool state, int size, uint16_t code)

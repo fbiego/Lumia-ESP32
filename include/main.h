@@ -27,8 +27,32 @@
 #define LUMIA-ESP32_MAIN_H
 
 #include <lvgl.h>
+// #define PLUS
 
-#define BL 23
+#ifdef PLUS
+
+#define TFT_RST 4
+#define TFT_CS -1
+#define TFT_BL 45
+
+#define I2C_SDA 6
+#define I2C_SCL 5
+#define RST_N_PIN -1
+#define INT_N_PIN 7
+
+#define MOTOR -1
+#define SCR 30
+
+#define WAKE_PIN GPIO_NUM_7
+
+#else
+#define TFT_RST 4
+#define TFT_CS 15
+#define TFT_SCLK 14
+#define TFT_DC 21
+#define TFT_MOSI 13
+#define TFT_MISO -1
+#define TFT_BL 23
 
 #define I2C_SDA 18
 #define I2C_SCL 19
@@ -37,27 +61,21 @@
 
 #define MOTOR 4
 
+#define SCR 8
+#define WAKE_PIN GPIO_NUM_39
+
+#endif
+
+
 #define FORMAT_SPIFFS_IF_FAILED true
 
 #define MAX_REQUEST 5
-#define MAX_APPS 10
+#define MAX_APPS 5
 
 #define TIME_REQUEST 0
 #define APPS_REQUEST 1
 
 
-struct TouchData
-{
-  int xpos;
-  int ypos;
-  int event;
-} touch_data;
-
-// backlight settings
-const int ledPin = BL;
-const int freq = 1000;
-const int ledChannel = 15;
-const int resolution = 8;
 
 long currentMillis;
 bool onConnect;
@@ -68,10 +86,10 @@ char ssid1[20], ssid2[20], ssid3[20], ssid4[20], ssid5[20];
 char pass1[20], pass2[20], pass3[20], pass4[20], pass5[20];
 
 /* Change to your screen resolution */
-static uint32_t screenWidth;
-static uint32_t screenHeight;
+static const uint32_t screenWidth = 320;
+static const uint32_t screenHeight = 480;
+
 static lv_disp_draw_buf_t draw_buf;
-static lv_color_t *disp_draw_buf;
 static lv_disp_drv_t disp_drv;
 
 struct Request
