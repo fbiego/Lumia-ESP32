@@ -22,12 +22,10 @@
   SOFTWARE.
 */
 
-
-#ifndef LUMIA-ESP32_MAIN_H
-#define LUMIA-ESP32_MAIN_H
+#ifndef LUMIA - ESP32_MAIN_H
+#define LUMIA -ESP32_MAIN_H
 
 #include <lvgl.h>
-// #define PLUS
 
 #ifdef PLUS
 
@@ -44,6 +42,8 @@
 #define SCR 30
 
 #define WAKE_PIN GPIO_NUM_7
+
+#define MUSIC_PLAYER
 
 #else
 #define TFT_RST 4
@@ -66,16 +66,25 @@
 
 #endif
 
+#define SD_CS 41
+#define SDMMC_CMD 40
+#define SDMMC_CLK 39
+#define SDMMC_D0 38
+
+#define I2S_DOUT 37
+#define I2S_BCLK 36
+#define I2S_LRC 35
 
 #define FORMAT_SPIFFS_IF_FAILED true
 
 #define MAX_REQUEST 5
 #define MAX_APPS 5
+#define MAX_MUSIC 10
 
 #define TIME_REQUEST 0
 #define APPS_REQUEST 1
 
-
+// #define LVGL_LOOP 1
 
 long currentMillis;
 bool onConnect;
@@ -145,11 +154,20 @@ struct AppStore appList[MAX_APPS];
 
 lv_obj_t *create_component(lv_obj_t *parent, struct AppComponent component);
 
-struct Passcode{
+struct Passcode
+{
   bool set;
   uint8_t code[4];
 } passcode;
 
+struct Music
+{
+  char path[50];
+  uint16_t id;
+  uint32_t size;
+};
+
+struct Music music[MAX_MUSIC];
 
 // extern struct Passcode passcode;
 #endif

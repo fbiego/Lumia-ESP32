@@ -50,6 +50,7 @@ lv_obj_t *ui_storageBar;
 lv_obj_t *ui_storageText;
 lv_obj_t *ui_themeLabel;
 lv_obj_t *ui_themeWheel;
+lv_obj_t *color_tiles;
 lv_obj_t *ui_settingPanel;
 lv_obj_t *ui_settingsIcon;
 lv_obj_t *ui_settingsLabel;
@@ -123,24 +124,48 @@ lv_obj_t *list1;
 lv_obj_t *alertBox;
 lv_obj_t *chatList;
 
-lv_obj_t * ui_notificationAlert;
-lv_obj_t * ui_notificationAppIcon;
-lv_obj_t * ui_notificationAppTitle;
-lv_obj_t * ui_notificationContent;
-lv_obj_t * ui_weatherScreen;
-lv_obj_t * ui_weatherCity;
-lv_obj_t * ui_weatherTemperature;
-lv_obj_t * ui_weatherDescription;
-lv_obj_t * ui_weatherWindspeed;
-lv_obj_t * ui_callerScreen;
-lv_obj_t * ui_callerDetails;
-lv_obj_t * ui_callDetails;
-lv_obj_t * ui_callAnswerButton;
-lv_obj_t * ui_callAnswerLabel;
-lv_obj_t * ui_callMessageButton;
-lv_obj_t * ui_callMessageLabel;
-lv_obj_t * ui_callDeclineButton;
-lv_obj_t * ui_callDeclineText;
+lv_obj_t *musicList;
+
+lv_obj_t *ui_notificationAlert;
+lv_obj_t *ui_notificationAppIcon;
+lv_obj_t *ui_notificationAppTitle;
+lv_obj_t *ui_notificationContent;
+lv_obj_t *ui_weatherScreen;
+lv_obj_t *ui_weatherCity;
+lv_obj_t *ui_weatherTemperature;
+lv_obj_t *ui_weatherDescription;
+lv_obj_t *ui_weatherWindspeed;
+lv_obj_t *ui_callerScreen;
+lv_obj_t *ui_callerDetails;
+lv_obj_t *ui_callDetails;
+lv_obj_t *ui_callAnswerButton;
+lv_obj_t *ui_callAnswerLabel;
+lv_obj_t *ui_callMessageButton;
+lv_obj_t *ui_callMessageLabel;
+lv_obj_t *ui_callDeclineButton;
+lv_obj_t *ui_callDeclineText;
+
+lv_obj_t *ui_musicPanel;
+lv_obj_t *ui_musicArt;
+lv_obj_t *ui_musicTrack;
+lv_obj_t *ui_musicArtist;
+lv_obj_t *ui_musicAlbum;
+lv_obj_t *ui_musicNextBtn;
+lv_obj_t *ui_musicVolumeIcon;
+lv_obj_t *ui_musicPreviousBtn;
+lv_obj_t *ui_musicPlayBtn;
+lv_obj_t *ui_musicLikeBtn;
+lv_obj_t *ui_musicShuffleBtn;
+lv_obj_t *ui_musicProgress;
+lv_obj_t *ui_musicPlayTime;
+lv_obj_t *ui_musicTotalTime;
+lv_obj_t *ui_musicVolume;
+lv_obj_t *ui_musicArtPanel;
+lv_obj_t *ui_musicAlbumArt;
+lv_obj_t *ui_musicPanelMini;
+lv_obj_t *ui_musicMiniText;
+lv_obj_t *ui_musicMiniPlay;
+lv_obj_t *ui_musicMiniNext;
 
 char aboutText[740] = {
     0x4c, 0x75, 0x6d, 0x69, 0x61, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x0a,
@@ -192,7 +217,6 @@ uint32_t themeColor = 0xFF0081FF;
 long timeouts[4] = {30000, 60000, 180000, 300000};
 long screenTime = 30000;
 
-
 bool chatScr = false;
 
 uint32_t STORE_REFRESH = 0xA45E0001;
@@ -203,21 +227,25 @@ uint8_t PHONE = 0xEA;
 uint8_t LOCK = 0xEB;
 uint8_t SETTINGS = 0xEC;
 
+uint16_t MUSIC = 0x451C;
+
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// ANIMATIONS ////////////////////
 static void close_alert();
 
-static void anim_y_cb(void * var, int32_t v)
+static void anim_y_cb(void *var, int32_t v)
 {
     printf("Animating - set y : %d\n", v);
     lv_obj_set_y(ui_notificationAlert, v);
-    if (v == 0){
+    if (v == 0)
+    {
         close_alert();
     }
 }
 
-static void close_alert(){
+static void close_alert()
+{
     lv_anim_t PropertyAnimation_1;
     lv_anim_init(&PropertyAnimation_1);
     lv_anim_set_time(&PropertyAnimation_1, 1000);
@@ -234,7 +262,7 @@ static void close_alert(){
     lv_anim_start(&PropertyAnimation_1);
 }
 
-void showNotification_Animation(lv_obj_t * TargetObject, int delay)
+void showNotification_Animation(lv_obj_t *TargetObject, int delay)
 {
     lv_anim_t PropertyAnimation_0;
     lv_anim_init(&PropertyAnimation_0);
@@ -250,11 +278,55 @@ void showNotification_Animation(lv_obj_t * TargetObject, int delay)
     lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
     lv_anim_set_early_apply(&PropertyAnimation_0, false);
     lv_anim_start(&PropertyAnimation_0);
-    
-
 }
 
+// void musicList_Animation(lv_obj_t * TargetObject, int delay)
+// {
+//     lv_anim_t PropertyAnimation_0;
+//     lv_anim_init(&PropertyAnimation_0);
+//     lv_anim_set_time(&PropertyAnimation_0, 1000);
+//     lv_anim_set_user_data(&PropertyAnimation_0, TargetObject);
+//     lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_opacity);
+//     lv_anim_set_values(&PropertyAnimation_0, 255, 0);
+//     lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_ease_out);
+//     lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
+//     lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+//     lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+//     lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+//     lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+//     lv_anim_set_early_apply(&PropertyAnimation_0, false);
+//     lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_opacity);
+//     lv_anim_start(&PropertyAnimation_0);
 
+// }
+int32_t _ui_anim_callback_get_image_angle(lv_anim_t *a)
+{
+    return lv_img_get_angle((lv_obj_t *)a->user_data);
+}
+
+void _ui_anim_callback_set_image_angle(lv_anim_t *a, int32_t v)
+{
+    lv_img_set_angle((lv_obj_t *)a->user_data, v);
+}
+
+void musicPlay_Animation(lv_obj_t *TargetObject, int delay)
+{
+    lv_anim_t PropertyAnimation_0;
+    lv_anim_init(&PropertyAnimation_0);
+    lv_anim_set_time(&PropertyAnimation_0, 10000);
+    lv_anim_set_user_data(&PropertyAnimation_0, TargetObject);
+    lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_image_angle);
+    lv_anim_set_values(&PropertyAnimation_0, 0, 3600);
+    lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_linear);
+    lv_anim_set_delay(&PropertyAnimation_0, delay + 0);
+    lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+    lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+    lv_anim_set_repeat_count(&PropertyAnimation_0, LV_ANIM_REPEAT_INFINITE);
+    lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+    lv_anim_set_early_apply(&PropertyAnimation_0, false);
+    lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_image_angle);
+    lv_anim_start(&PropertyAnimation_0);
+}
 
 ///////////////////// CALLBACK FUNCTIONS ////////////////////
 
@@ -265,6 +337,13 @@ static void slider_event_cb(lv_event_t *e)
     {
         brightness = (int)lv_slider_get_value(slider);
     }
+#ifdef MUSIC_PLAYER
+    if (slider == ui_musicVolume)
+    {
+        int vol = (int)lv_slider_get_value(slider);
+        setVolume(vol);
+    }
+#endif
 }
 
 static void event_handler(lv_event_t *e)
@@ -316,9 +395,11 @@ static void event_handler(lv_event_t *e)
         }
     }
 
-    if (code == LV_EVENT_VALUE_CHANGED){
+    if (code == LV_EVENT_VALUE_CHANGED)
+    {
         uint32_t index = lv_dropdown_get_selected(ui_timeoutSelect);
-        if (index < 4){
+        if (index < 4)
+        {
             screenTime = timeouts[index];
             printf("screen time: %d\n", screenTime);
         }
@@ -327,9 +408,18 @@ static void event_handler(lv_event_t *e)
 
 static void theme_change(lv_event_t *e)
 {
-    lv_obj_t *picker = lv_event_get_target(e);
-    // val = lv_slider_get_value(picker); //
-    lv_color_t c = lv_colorwheel_get_rgb(picker);
+    lv_obj_t *obj = lv_event_get_target(e);
+    lv_color_t c;
+    if (obj == ui_themeWheel)
+    {
+        c = lv_colorwheel_get_rgb(obj);
+    }
+    else
+    {
+        uint32_t vl = (uint32_t)lv_event_get_user_data(e);
+        c = lv_color_hex(vl);
+    }
+
     lv_disp_t *display = lv_disp_get_default();
     lv_theme_t *theme = lv_theme_default_init(display, c, lv_palette_main(LV_PALETTE_GREY), true, LV_FONT_DEFAULT);
     lv_disp_set_theme(display, theme);
@@ -375,7 +465,8 @@ static void event_navigate(lv_event_t *e)
         {
             // printf("Back\n");
             vibrate(100);
-            if (chatScr){
+            if (chatScr)
+            {
                 chatScr = false;
                 openMessage();
             }
@@ -395,7 +486,7 @@ static void event_navigate(lv_event_t *e)
         if (obj == ui_startButton)
         {
             // printf("Start\n");
-            vibrate(100); 
+            vibrate(100);
             if (actScr != ui_startScreen)
             {
                 openStart();
@@ -405,7 +496,8 @@ static void event_navigate(lv_event_t *e)
                 lv_obj_set_tile_id(ui_tileView, 0, 0, LV_ANIM_ON);
             }
 
-            if (chatScr){
+            if (chatScr)
+            {
                 chatScr = false;
             }
         }
@@ -629,6 +721,31 @@ static void event_alert(lv_event_t *e)
     showAlert(NULL, false, 0, 0x00);
 }
 
+static void event_music_play(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+    if (code == LV_EVENT_CLICKED)
+    {
+        char buf[150];
+        char *data = (char *)lv_event_get_user_data(e);
+        printf("Path: %s\n", data);
+    }
+}
+
+static void event_file(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+    if (code == LV_EVENT_CLICKED)
+    {
+
+        char buf[150];
+        char *data = (char *)lv_event_get_user_data(e);
+        printf("Folder clicked: %s\n", data);
+    }
+}
+
 static void event_launch(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -683,6 +800,16 @@ static void event_launch(lv_event_t *e)
         else if (data == "Chat")
         {
             openChat();
+        }
+#ifdef MUSIC_PLAYER
+        else if (data == "Music")
+        {
+            openMusic();
+        }
+#endif
+        else if (data == "Files")
+        {
+            openFiles();
         }
         else
         {
@@ -826,7 +953,6 @@ static void event_app_component(lv_event_t *e)
                 lv_obj_add_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
                 endVibrate();
                 callFunction(0x02);
-
             }
             else
             {
@@ -926,6 +1052,45 @@ static void event_app_component(lv_event_t *e)
         {
             openAppStore();
         }
+#ifdef MUSIC_PLAYER
+        else if (pId == MUSIC)
+        {
+            if (oId < 0x00FF)
+            {
+                printf("Playing file %s\n", music[oId].path);
+                playFile(music[oId].path);
+            }
+            else if (oId == 0xA100)
+            {
+            }
+            else if (oId == 0xA101)
+            {
+                playPause();
+            }
+            else if (oId == 0xA102)
+            {
+                changeMusic(true);
+            }
+            else if (oId == 0xA103)
+            {
+                changeMusic(false);
+            }
+            else if (oId == 0xB100)
+            {
+                lv_obj_add_flag(ui_musicPanelMini, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(musicList, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(ui_musicArtPanel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(ui_musicPanel, LV_OBJ_FLAG_HIDDEN);
+            }
+            else if (oId == 0xB101)
+            {
+                lv_obj_clear_flag(ui_musicPanelMini, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(musicList, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(ui_musicArtPanel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(ui_musicPanel, LV_OBJ_FLAG_HIDDEN);
+            }
+        }
+#endif
         else
         {
             printf("Button %X clicked from %X\n", oId, pId);
@@ -1008,6 +1173,32 @@ void create_action_tile(lv_obj_t *parent, char *name, const void *src, bool chec
     lv_obj_set_align(icon, LV_ALIGN_CENTER);
     lv_obj_add_flag(icon, LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
+}
+
+void create_color_tile(lv_obj_t *parent, uint32_t color, int x, int y, int size, lv_event_cb_t callback)
+{
+    // lv_obj_t *label;
+    lv_obj_t *obj;
+    obj = lv_btn_create(parent);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_width(obj, 50);
+    lv_obj_set_height(obj, 40);
+    lv_obj_set_x(obj, x);
+    lv_obj_set_y(obj, y);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_CLICKED, (uint32_t)color);
+    lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(obj, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_CHECKED);
+
+    // label = lv_label_create(obj);
+    // lv_label_set_text(label, name);
+    // lv_obj_center(label);
+    // lv_obj_set_align(label, LV_ALIGN_BOTTOM_LEFT);
+    // lv_obj_set_x(label, -10);
+    // lv_obj_set_y(label, 5);
+    // lv_obj_set_style_text_font(label, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 void add_item(lv_obj_t *parent, char *name, const void *src, lv_event_cb_t callback)
@@ -1098,23 +1289,110 @@ void add_app(lv_obj_t *parent, struct AppStore app)
     lv_label_set_text(ui_appListActionLabel, app.installed ? "Uninstall" : "Install");
 }
 
-void showCaller(const char *name, const char *call, bool incoming){
-    if (incoming){
+void add_file_item(lv_obj_t *parent, char *path, int size, bool file)
+{
+    lv_obj_t *ui_appListItem = lv_obj_create(parent);
+    lv_obj_set_width(ui_appListItem, 320);
+    lv_obj_set_height(ui_appListItem, 59);
+    lv_obj_set_x(ui_appListItem, 0);
+    lv_obj_set_y(ui_appListItem, 137);
+    lv_obj_set_align(ui_appListItem, LV_ALIGN_TOP_MID);
+    lv_obj_clear_flag(ui_appListItem, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_radius(ui_appListItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appListItem, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appListItem, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_appListItem, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
+    if (!file)
+    {
+        lv_obj_add_event_cb(ui_appListItem, event_file, LV_EVENT_CLICKED, path);
+    }
+
+    lv_obj_t *ui_appListName = lv_label_create(ui_appListItem);
+    lv_obj_set_width(ui_appListName, 260);
+    lv_obj_set_height(ui_appListName, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appListName, 0);
+    lv_obj_set_y(ui_appListName, -4);
+    lv_label_set_text(ui_appListName, path);
+    lv_obj_set_style_text_font(ui_appListName, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_appListSize = lv_label_create(ui_appListItem);
+    lv_obj_set_width(ui_appListSize, 260);
+    lv_obj_set_height(ui_appListSize, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appListSize, 0);
+    lv_obj_set_y(ui_appListSize, 14);
+    lv_label_set_text_fmt(ui_appListSize, file ? "File: %.3f MB" : "Folder", (size / (1024.0 * 1024.0)));
+    lv_obj_set_style_text_font(ui_appListSize, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // lv_obj_t *ui_appListAction = lv_btn_create(ui_appListItem);
+    // lv_obj_set_width(ui_appListAction, 100);
+    // lv_obj_set_height(ui_appListAction, LV_SIZE_CONTENT); /// 50
+    // lv_obj_set_align(ui_appListAction, LV_ALIGN_RIGHT_MID);
+    // lv_obj_add_flag(ui_appListAction, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+    // lv_obj_clear_flag(ui_appListAction, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
+    // lv_obj_set_style_radius(ui_appListAction, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_add_event_cb(ui_appListAction, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, ms.id));
+
+    // lv_obj_t *ui_appListActionLabel = lv_label_create(ui_appListAction);
+    // lv_obj_set_width(ui_appListActionLabel, LV_SIZE_CONTENT);  /// 1
+    // lv_obj_set_height(ui_appListActionLabel, LV_SIZE_CONTENT); /// 1
+    // lv_obj_set_align(ui_appListActionLabel, LV_ALIGN_CENTER);
+    // lv_label_set_text(ui_appListActionLabel, "Play");
+}
+
+void add_music_item(lv_obj_t *parent, struct Music ms)
+{
+    lv_obj_t *ui_appListItem = lv_obj_create(parent);
+    lv_obj_set_width(ui_appListItem, 320);
+    lv_obj_set_height(ui_appListItem, 40);
+    lv_obj_set_x(ui_appListItem, 0);
+    lv_obj_set_y(ui_appListItem, 137);
+    lv_obj_set_align(ui_appListItem, LV_ALIGN_TOP_MID);
+    lv_obj_clear_flag(ui_appListItem, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_radius(ui_appListItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appListItem, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appListItem, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_appListItem, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_appListItem, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, ms.id));
+
+    lv_obj_t *ui_appListName = lv_label_create(ui_appListItem);
+    lv_obj_set_width(ui_appListName, 280);
+    lv_obj_set_height(ui_appListName, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appListName, 0);
+    lv_obj_set_y(ui_appListName, -4);
+    lv_label_set_text(ui_appListName, ms.path);
+    lv_obj_set_style_text_font(ui_appListName, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // lv_obj_t *ui_appListSize = lv_label_create(ui_appListItem);
+    // lv_obj_set_width(ui_appListSize, 260);
+    // lv_obj_set_height(ui_appListSize, LV_SIZE_CONTENT); /// 1
+    // lv_obj_set_x(ui_appListSize, 0);
+    // lv_obj_set_y(ui_appListSize, 14);
+    // lv_label_set_text_fmt(ui_appListSize, "%.3f MB", (ms.size / (1024.0 * 1024.0)));
+    // lv_obj_set_style_text_font(ui_appListSize, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+}
+
+void showCaller(const char *name, const char *call, bool incoming)
+{
+    if (incoming)
+    {
         lv_label_set_text(ui_callDetails, "Incoming Call");
         lv_label_set_text(ui_callAnswerLabel, "Answer");
-        lv_obj_clear_flag(ui_callMessageButton, LV_OBJ_FLAG_HIDDEN); 
+        lv_obj_clear_flag(ui_callMessageButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(ui_callDeclineButton, LV_OBJ_FLAG_HIDDEN);
         startVibrate();
-    } else {
+    }
+    else
+    {
         lv_label_set_text(ui_callDetails, "Outgoing Call");
         lv_label_set_text(ui_callAnswerLabel, "End Call");
-        lv_obj_add_flag(ui_callMessageButton, LV_OBJ_FLAG_HIDDEN); 
-        lv_obj_add_flag(ui_callDeclineButton, LV_OBJ_FLAG_HIDDEN); 
+        lv_obj_add_flag(ui_callMessageButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_callDeclineButton, LV_OBJ_FLAG_HIDDEN);
     }
     lv_label_set_text(ui_callerDetails, name);
     lv_obj_clear_flag(ui_callerScreen, LV_OBJ_FLAG_HIDDEN);
 }
-void showNotification(const char* app, const void *src, const char *alert){
+void showNotification(const char *app, const void *src, const char *alert)
+{
     lv_label_set_text(ui_notificationAppTitle, app);
     lv_label_set_text(ui_notificationContent, alert);
     lv_img_set_src(ui_notificationAppIcon, src);
@@ -1327,6 +1605,259 @@ lv_obj_t *list_canvas(bool bottom, uint32_t bottomPad)
     lv_obj_set_style_pad_bottom(list, bottomPad, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     return list;
+}
+
+void music_player(lv_obj_t *parent)
+{
+
+    musicList = lv_list_create(parent);
+    lv_obj_set_size(musicList, 320, 400);
+    lv_obj_set_y(musicList, 40);
+    lv_obj_set_align(musicList, LV_ALIGN_TOP_MID);
+    lv_obj_set_style_bg_color(musicList, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(musicList, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(musicList, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_scrollbar_mode(musicList, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_pad_left(musicList, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(musicList, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(musicList, 40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(musicList, 60, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_flag(musicList, LV_OBJ_FLAG_HIDDEN);
+
+    ui_musicArtPanel = lv_obj_create(parent);
+    lv_obj_set_width(ui_musicArtPanel, 320);
+    lv_obj_set_height(ui_musicArtPanel, 260);
+    lv_obj_set_align(ui_musicArtPanel, LV_ALIGN_TOP_MID);
+    lv_obj_clear_flag(ui_musicArtPanel, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_radius(ui_musicArtPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_musicArtPanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_musicArtPanel, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_musicArtPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_musicAlbumArt = lv_img_create(ui_musicArtPanel);
+    lv_img_set_src(ui_musicAlbumArt, &ui_img_album_play_png);
+    lv_obj_set_width(ui_musicAlbumArt, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_musicAlbumArt, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_musicAlbumArt, LV_ALIGN_CENTER);
+    lv_obj_set_y(ui_musicAlbumArt, 20);
+    lv_obj_add_flag(ui_musicAlbumArt, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
+    lv_obj_clear_flag(ui_musicAlbumArt, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+
+    ui_musicPanel = lv_obj_create(parent);
+    lv_obj_set_width(ui_musicPanel, 320);
+    lv_obj_set_height(ui_musicPanel, 180);
+    lv_obj_set_x(ui_musicPanel, 0);
+    lv_obj_set_y(ui_musicPanel, 260);
+    lv_obj_set_align(ui_musicPanel, LV_ALIGN_TOP_MID);
+    lv_obj_clear_flag(ui_musicPanel, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_radius(ui_musicPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_musicPanel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_musicPanel, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_musicPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_musicArt = lv_img_create(ui_musicPanel);
+    lv_img_set_src(ui_musicArt, &ui_img_playlist_png);
+    lv_obj_set_width(ui_musicArt, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_musicArt, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_musicArt, LV_ALIGN_TOP_RIGHT);
+    lv_obj_add_flag(ui_musicArt, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST); /// Flags
+    lv_obj_clear_flag(ui_musicArt, LV_OBJ_FLAG_SCROLLABLE);                        /// Flags
+    lv_obj_set_style_radius(ui_musicArt, 15, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(ui_musicArt, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_musicArt, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_color(ui_musicArt, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_opa(ui_musicArt, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_width(ui_musicArt, 5, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_pad(ui_musicArt, 0, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_add_event_cb(ui_musicArt, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xB101));
+
+    ui_musicTrack = lv_label_create(ui_musicPanel);
+    lv_obj_set_width(ui_musicTrack, 240);
+    lv_obj_set_height(ui_musicTrack, LV_SIZE_CONTENT); /// 1
+    lv_label_set_long_mode(ui_musicTrack, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_musicTrack, "Track");
+
+    ui_musicArtist = lv_label_create(ui_musicPanel);
+    lv_obj_set_width(ui_musicArtist, 240);
+    lv_obj_set_height(ui_musicArtist, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicArtist, 0);
+    lv_obj_set_y(ui_musicArtist, 20);
+    lv_label_set_long_mode(ui_musicArtist, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_musicArtist, "Artist");
+
+    ui_musicAlbum = lv_label_create(ui_musicPanel);
+    lv_obj_set_width(ui_musicAlbum, 240);
+    lv_obj_set_height(ui_musicAlbum, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicAlbum, 0);
+    lv_obj_set_y(ui_musicAlbum, 40);
+    lv_label_set_long_mode(ui_musicAlbum, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_label_set_text(ui_musicAlbum, "Album");
+
+    ui_musicNextBtn = lv_img_create(ui_musicPanel);
+    lv_img_set_src(ui_musicNextBtn, &ui_img_next_png);
+    lv_obj_set_width(ui_musicNextBtn, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_musicNextBtn, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicNextBtn, 60);
+    lv_obj_set_y(ui_musicNextBtn, 90);
+    lv_obj_set_align(ui_musicNextBtn, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_musicNextBtn, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST); /// Flags
+    lv_obj_clear_flag(ui_musicNextBtn, LV_OBJ_FLAG_SCROLLABLE);                        /// Flags
+    lv_obj_set_style_radius(ui_musicNextBtn, 15, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(ui_musicNextBtn, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_musicNextBtn, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_color(ui_musicNextBtn, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_opa(ui_musicNextBtn, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_width(ui_musicNextBtn, 8, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_pad(ui_musicNextBtn, 0, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_add_event_cb(ui_musicNextBtn, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xA102));
+
+    ui_musicVolumeIcon = lv_img_create(ui_musicPanel);
+    lv_img_set_src(ui_musicVolumeIcon, &ui_img_volume_png);
+    lv_obj_set_width(ui_musicVolumeIcon, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_musicVolumeIcon, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicVolumeIcon, -120);
+    lv_obj_set_y(ui_musicVolumeIcon, 125);
+    lv_obj_set_align(ui_musicVolumeIcon, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_musicVolumeIcon, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
+    lv_obj_clear_flag(ui_musicVolumeIcon, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+
+    ui_musicPreviousBtn = lv_img_create(ui_musicPanel);
+    lv_img_set_src(ui_musicPreviousBtn, &ui_img_previous_png);
+    lv_obj_set_width(ui_musicPreviousBtn, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_musicPreviousBtn, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicPreviousBtn, -60);
+    lv_obj_set_y(ui_musicPreviousBtn, 90);
+    lv_obj_set_align(ui_musicPreviousBtn, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_musicPreviousBtn, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST); /// Flags
+    lv_obj_clear_flag(ui_musicPreviousBtn, LV_OBJ_FLAG_SCROLLABLE);                        /// Flags
+    lv_obj_set_style_radius(ui_musicPreviousBtn, 15, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(ui_musicPreviousBtn, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_musicPreviousBtn, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_color(ui_musicPreviousBtn, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_opa(ui_musicPreviousBtn, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_width(ui_musicPreviousBtn, 8, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_pad(ui_musicPreviousBtn, 0, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_add_event_cb(ui_musicPreviousBtn, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xA103));
+
+    ui_musicPlayBtn = lv_imgbtn_create(ui_musicPanel);
+    lv_imgbtn_set_src(ui_musicPlayBtn, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_pause_32_png, NULL);
+    lv_imgbtn_set_src(ui_musicPlayBtn, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_play_png, NULL);
+    lv_imgbtn_set_src(ui_musicPlayBtn, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &ui_img_pause_32_png, NULL);
+    lv_imgbtn_set_src(ui_musicPlayBtn, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &ui_img_play_png, NULL);
+    lv_obj_set_height(ui_musicPlayBtn, 32);
+    lv_obj_set_width(ui_musicPlayBtn, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicPlayBtn, 0);
+    lv_obj_set_y(ui_musicPlayBtn, 90);
+    lv_obj_set_align(ui_musicPlayBtn, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_musicPlayBtn, LV_OBJ_FLAG_CHECKABLE); /// Flags
+    lv_obj_add_event_cb(ui_musicPlayBtn, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xA101));
+
+    ui_musicLikeBtn = lv_imgbtn_create(ui_musicPanel);
+    lv_imgbtn_set_src(ui_musicLikeBtn, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_like_off_png, NULL);
+    lv_imgbtn_set_src(ui_musicLikeBtn, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_like_on_png, NULL);
+    lv_imgbtn_set_src(ui_musicLikeBtn, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &ui_img_like_off_png, NULL);
+    lv_imgbtn_set_src(ui_musicLikeBtn, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &ui_img_like_on_png, NULL);
+    lv_obj_set_height(ui_musicLikeBtn, 32);
+    lv_obj_set_width(ui_musicLikeBtn, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicLikeBtn, -120);
+    lv_obj_set_y(ui_musicLikeBtn, 90);
+    lv_obj_set_align(ui_musicLikeBtn, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_musicLikeBtn, LV_OBJ_FLAG_CHECKABLE); /// Flags
+    lv_obj_add_event_cb(ui_musicLikeBtn, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xA1F0));
+
+    ui_musicShuffleBtn = lv_imgbtn_create(ui_musicPanel);
+    lv_imgbtn_set_src(ui_musicShuffleBtn, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_shuffle_off_png, NULL);
+    lv_imgbtn_set_src(ui_musicShuffleBtn, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_shuffle_on_png, NULL);
+    lv_imgbtn_set_src(ui_musicShuffleBtn, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &ui_img_shuffle_on_png, NULL);
+    lv_imgbtn_set_src(ui_musicShuffleBtn, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &ui_img_shuffle_on_png, NULL);
+    lv_obj_set_height(ui_musicShuffleBtn, 32);
+    lv_obj_set_width(ui_musicShuffleBtn, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicShuffleBtn, 120);
+    lv_obj_set_y(ui_musicShuffleBtn, 90);
+    lv_obj_set_align(ui_musicShuffleBtn, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_musicShuffleBtn, LV_OBJ_FLAG_CHECKABLE); /// Flags
+    lv_obj_add_event_cb(ui_musicShuffleBtn, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xA1F1));
+
+    ui_musicProgress = lv_bar_create(ui_musicPanel);
+    lv_bar_set_value(ui_musicProgress, 25, LV_ANIM_OFF);
+    lv_obj_set_width(ui_musicProgress, 190);
+    lv_obj_set_height(ui_musicProgress, 5);
+    lv_obj_set_x(ui_musicProgress, 0);
+    lv_obj_set_y(ui_musicProgress, 65);
+    lv_obj_set_align(ui_musicProgress, LV_ALIGN_TOP_MID);
+
+    ui_musicPlayTime = lv_label_create(ui_musicPanel);
+    lv_obj_set_width(ui_musicPlayTime, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_musicPlayTime, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicPlayTime, 5);
+    lv_obj_set_y(ui_musicPlayTime, 60);
+    lv_label_set_text(ui_musicPlayTime, "1:25");
+
+    ui_musicTotalTime = lv_label_create(ui_musicPanel);
+    lv_obj_set_width(ui_musicTotalTime, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_musicTotalTime, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicTotalTime, -5);
+    lv_obj_set_y(ui_musicTotalTime, 60);
+    lv_obj_set_align(ui_musicTotalTime, LV_ALIGN_TOP_RIGHT);
+    lv_label_set_text(ui_musicTotalTime, "4:25");
+
+    ui_musicVolume = lv_slider_create(ui_musicPanel);
+    lv_slider_set_range(ui_musicVolume, 0, 21);
+    lv_obj_set_width(ui_musicVolume, 200);
+    lv_obj_set_height(ui_musicVolume, 5);
+    lv_obj_set_x(ui_musicVolume, 21);
+    lv_obj_set_y(ui_musicVolume, 142);
+    lv_obj_set_align(ui_musicVolume, LV_ALIGN_TOP_MID);
+    lv_obj_add_event_cb(ui_musicVolume, slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    ui_musicPanelMini = lv_obj_create(parent);
+    lv_obj_set_width(ui_musicPanelMini, 320);
+    lv_obj_set_height(ui_musicPanelMini, 50);
+    lv_obj_set_y(ui_musicPanelMini, 390);
+    lv_obj_set_align(ui_musicPanelMini, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag(ui_musicPanelMini, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST); /// Flags
+    lv_obj_clear_flag(ui_musicPanelMini, LV_OBJ_FLAG_SCROLLABLE);                        /// Flags
+    lv_obj_set_style_radius(ui_musicPanelMini, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_musicPanelMini, lv_color_hex(0x222222), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_musicPanelMini, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_musicPanelMini, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_flag(ui_musicPanelMini, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_event_cb(ui_musicPanelMini, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xB100));
+
+    ui_musicMiniText = lv_label_create(ui_musicPanelMini);
+    lv_obj_set_width(ui_musicMiniText, 200);
+    lv_obj_set_height(ui_musicMiniText, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_musicMiniText, LV_ALIGN_LEFT_MID);
+    lv_label_set_long_mode(ui_musicMiniText, LV_LABEL_LONG_SCROLL_CIRCULAR);
+
+    ui_musicMiniPlay = lv_imgbtn_create(ui_musicPanelMini);
+    lv_imgbtn_set_src(ui_musicMiniPlay, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_pause_32_png, NULL);
+    lv_imgbtn_set_src(ui_musicMiniPlay, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_play_png, NULL);
+    lv_imgbtn_set_src(ui_musicMiniPlay, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &ui_img_pause_32_png, NULL);
+    lv_imgbtn_set_src(ui_musicMiniPlay, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &ui_img_play_png, NULL);
+    lv_obj_set_height(ui_musicMiniPlay, 32);
+    lv_obj_set_width(ui_musicMiniPlay, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_musicMiniPlay, -45);
+    lv_obj_set_y(ui_musicMiniPlay, 0);
+    lv_obj_set_align(ui_musicMiniPlay, LV_ALIGN_RIGHT_MID);
+    lv_obj_add_flag(ui_musicMiniPlay, LV_OBJ_FLAG_CHECKABLE); /// Flags
+    lv_obj_add_event_cb(ui_musicMiniPlay, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xA101));
+
+    ui_musicMiniNext = lv_img_create(ui_musicPanelMini);
+    lv_img_set_src(ui_musicMiniNext, &ui_img_next_png);
+    lv_obj_set_width(ui_musicMiniNext, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_musicMiniNext, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_musicMiniNext, LV_ALIGN_RIGHT_MID);
+    lv_obj_add_flag(ui_musicMiniNext, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST); /// Flags
+    lv_obj_clear_flag(ui_musicMiniNext, LV_OBJ_FLAG_SCROLLABLE);                        /// Flags
+    lv_obj_set_style_radius(ui_musicMiniNext, 15, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(ui_musicMiniNext, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_musicMiniNext, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_color(ui_musicMiniNext, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_opa(ui_musicMiniNext, 255, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_width(ui_musicMiniNext, 8, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_outline_pad(ui_musicMiniNext, 0, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_add_event_cb(ui_musicMiniNext, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xA102));
 }
 
 void alert_box(lv_obj_t *parent)
@@ -1719,14 +2250,15 @@ lv_obj_t *keypad(lv_obj_t *parent, int offset, uint8_t id)
     return key;
 }
 
-void notification_alert(lv_obj_t *parent){
+void notification_alert(lv_obj_t *parent)
+{
     ui_notificationAlert = lv_obj_create(parent);
     lv_obj_set_width(ui_notificationAlert, 320);
     lv_obj_set_height(ui_notificationAlert, 120);
     lv_obj_set_x(ui_notificationAlert, 0);
     lv_obj_set_y(ui_notificationAlert, -120);
     lv_obj_set_align(ui_notificationAlert, LV_ALIGN_TOP_MID);
-    lv_obj_clear_flag(ui_notificationAlert, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_clear_flag(ui_notificationAlert, LV_OBJ_FLAG_SCROLLABLE); /// Flags
     lv_obj_set_style_radius(ui_notificationAlert, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_notificationAlert, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_notificationAlert, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1737,16 +2269,16 @@ void notification_alert(lv_obj_t *parent){
 
     ui_notificationAppIcon = lv_img_create(ui_notificationAlert);
     lv_img_set_src(ui_notificationAppIcon, &ui_img_237043237);
-    lv_obj_set_width(ui_notificationAppIcon, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_notificationAppIcon, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_notificationAppIcon, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_notificationAppIcon, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_notificationAppIcon, 0);
     lv_obj_set_y(ui_notificationAppIcon, 17);
-    lv_obj_add_flag(ui_notificationAppIcon, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_notificationAppIcon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_add_flag(ui_notificationAppIcon, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
+    lv_obj_clear_flag(ui_notificationAppIcon, LV_OBJ_FLAG_SCROLLABLE); /// Flags
 
     ui_notificationAppTitle = lv_label_create(ui_notificationAlert);
-    lv_obj_set_width(ui_notificationAppTitle, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_notificationAppTitle, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_notificationAppTitle, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_notificationAppTitle, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_notificationAppTitle, 40);
     lv_obj_set_y(ui_notificationAppTitle, 21);
     lv_label_set_text(ui_notificationAppTitle, "Message");
@@ -1759,15 +2291,15 @@ void notification_alert(lv_obj_t *parent){
     lv_obj_set_align(ui_notificationContent, LV_ALIGN_TOP_MID);
     lv_label_set_long_mode(ui_notificationContent, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_label_set_text(ui_notificationContent, "Notification content Notification \nNotification content");
-
 }
 
-void caller_screen(lv_obj_t *parent){
+void caller_screen(lv_obj_t *parent)
+{
 
     ui_callerScreen = lv_obj_create(parent);
     lv_obj_set_width(ui_callerScreen, 320);
     lv_obj_set_height(ui_callerScreen, 480);
-    lv_obj_clear_flag(ui_callerScreen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_clear_flag(ui_callerScreen, LV_OBJ_FLAG_SCROLLABLE); /// Flags
     lv_obj_set_style_radius(ui_callerScreen, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_callerScreen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_callerScreen, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1776,10 +2308,9 @@ void caller_screen(lv_obj_t *parent){
     lv_obj_set_style_pad_left(ui_callerScreen, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_callerScreen, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-
     ui_callerDetails = lv_label_create(ui_callerScreen);
-    lv_obj_set_width(ui_callerDetails, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_callerDetails, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_callerDetails, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_callerDetails, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_callerDetails, 0);
     lv_obj_set_y(ui_callerDetails, 100);
     lv_obj_set_align(ui_callerDetails, LV_ALIGN_TOP_MID);
@@ -1787,8 +2318,8 @@ void caller_screen(lv_obj_t *parent){
     lv_obj_set_style_text_font(ui_callerDetails, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_callDetails = lv_label_create(ui_callerScreen);
-    lv_obj_set_width(ui_callDetails, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_callDetails, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_callDetails, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_callDetails, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_callDetails, 0);
     lv_obj_set_y(ui_callDetails, 70);
     lv_obj_set_align(ui_callDetails, LV_ALIGN_TOP_MID);
@@ -1800,14 +2331,14 @@ void caller_screen(lv_obj_t *parent){
     lv_obj_set_x(ui_callAnswerButton, 0);
     lv_obj_set_y(ui_callAnswerButton, 370);
     lv_obj_set_align(ui_callAnswerButton, LV_ALIGN_TOP_MID);
-    lv_obj_add_flag(ui_callAnswerButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_clear_flag(ui_callAnswerButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_add_flag(ui_callAnswerButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+    lv_obj_clear_flag(ui_callAnswerButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
     lv_obj_set_style_radius(ui_callAnswerButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_event_cb(ui_callAnswerButton, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | PHONE), 0xFD));
 
     ui_callAnswerLabel = lv_label_create(ui_callAnswerButton);
-    lv_obj_set_width(ui_callAnswerLabel, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_callAnswerLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_callAnswerLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_callAnswerLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_callAnswerLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_callAnswerLabel, "Answer");
 
@@ -1816,14 +2347,14 @@ void caller_screen(lv_obj_t *parent){
     lv_obj_set_height(ui_callMessageButton, 50);
     lv_obj_set_x(ui_callMessageButton, 0);
     lv_obj_set_y(ui_callMessageButton, 316);
-    lv_obj_add_flag(ui_callMessageButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_clear_flag(ui_callMessageButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_add_flag(ui_callMessageButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+    lv_obj_clear_flag(ui_callMessageButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
     lv_obj_set_style_radius(ui_callMessageButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_callMessageButton, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_callMessageLabel = lv_label_create(ui_callMessageButton);
-    lv_obj_set_width(ui_callMessageLabel, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_callMessageLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_callMessageLabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_callMessageLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_callMessageLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_callMessageLabel, "Message");
 
@@ -1833,14 +2364,14 @@ void caller_screen(lv_obj_t *parent){
     lv_obj_set_x(ui_callDeclineButton, 0);
     lv_obj_set_y(ui_callDeclineButton, 316);
     lv_obj_set_align(ui_callDeclineButton, LV_ALIGN_TOP_RIGHT);
-    lv_obj_add_flag(ui_callDeclineButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_clear_flag(ui_callDeclineButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_add_flag(ui_callDeclineButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
+    lv_obj_clear_flag(ui_callDeclineButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
     lv_obj_set_style_radius(ui_callDeclineButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_callDeclineButton, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_callDeclineText = lv_label_create(ui_callDeclineButton);
-    lv_obj_set_width(ui_callDeclineText, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_callDeclineText, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_callDeclineText, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_callDeclineText, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_callDeclineText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_callDeclineText, "Decline");
     lv_obj_add_event_cb(ui_callDeclineButton, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | PHONE), 0xFE));
@@ -2284,9 +2815,6 @@ void ui_lockScreen_screen_init(void)
     notification_alert(ui_lockScreen);
     caller_screen(ui_lockScreen);
     status_bar(ui_lockScreen);
-
-    
-
 }
 
 void ui_startScreen_screen_init(void)
@@ -2348,7 +2876,7 @@ void ui_startScreen_screen_init(void)
     create_tile(cont, "Store", &ui_img_571330079, 1, 1, 1, event_launch);
     create_tile(cont, "Calendar", &ui_img_calendar_png, 2, 1, 1, event_launch);
 
-    create_tile(cont, "Edge", &ui_img_microsoft_png, 0, 2, 1, event_launch);
+    create_tile(cont, "Files", &ui_img_folder_png, 0, 2, 1, event_launch);
     create_tile(cont, "Weather", &ui_img_1127648905, 1, 2, 2, event_launch);
 
     create_tile(cont, "Photos", &ui_img_gallery_png, 0, 3, 2, event_launch);
@@ -2386,6 +2914,7 @@ void ui_startScreen_screen_init(void)
     add_item(list1, "About", &ui_img_gear_png, event_launch);
     add_item(list1, "Calendar", &ui_img_calendar_png, event_launch);
     add_item(list1, "Edge", &ui_img_microsoft_png, event_launch);
+    add_item(list1, "Files", &ui_img_folder_png, event_launch);
     add_item(list1, "Mail", &ui_img_email_png, event_launch);
     add_item(list1, "Maps", &ui_img_846015263, event_launch);
     add_item(list1, "Messaging", &ui_img_237043237, event_launch);
@@ -2601,21 +3130,47 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_height(ui_themeWheel, 150);
     lv_obj_set_x(ui_themeWheel, 50);
     lv_obj_set_y(ui_themeWheel, 398);
+    lv_obj_add_flag(ui_themeWheel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_event_cb(ui_themeWheel, theme_change, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_clear_flag(ui_themeWheel, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
+
+    create_color_tile(ui_settingsScroll, 0xA4C400, 10, 400, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x60A917, 70, 400, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x008A00, 130, 400, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x00ABA9, 190, 400, 1, theme_change);
+
+    create_color_tile(ui_settingsScroll, 0x1BA1E2, 10, 450, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x0050EF, 70, 450, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x6A00FF, 130, 450, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0xAA00FF, 190, 450, 1, theme_change);
+
+    create_color_tile(ui_settingsScroll, 0xF472D0, 10, 500, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0xD80073, 70, 500, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0xA20025, 130, 500, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0xE51400, 190, 500, 1, theme_change);
+
+    create_color_tile(ui_settingsScroll, 0xFA6800, 10, 550, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0xF0A30A, 70, 550, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0xE3C800, 130, 550, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x825A2C, 190, 550, 1, theme_change);
+
+    create_color_tile(ui_settingsScroll, 0x6D8764, 10, 600, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x647687, 70, 600, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x76608A, 130, 600, 1, theme_change);
+    create_color_tile(ui_settingsScroll, 0x87794E, 190, 600, 1, theme_change);
 
     ui_aboutLabel = lv_label_create(ui_settingsScroll);
     lv_obj_set_width(ui_aboutLabel, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height(ui_aboutLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_aboutLabel, 20);
-    lv_obj_set_y(ui_aboutLabel, 580);
+    lv_obj_set_y(ui_aboutLabel, 650);
     lv_label_set_text(ui_aboutLabel, "About");
 
     ui_aboutText = lv_label_create(ui_settingsScroll);
     lv_obj_set_width(ui_aboutText, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height(ui_aboutText, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_aboutText, 30);
-    lv_obj_set_y(ui_aboutText, 610);
+    lv_obj_set_y(ui_aboutText, 660);
 
     lv_label_set_text(ui_aboutText, "Text");
 
@@ -2914,6 +3469,41 @@ void openAppStore()
     launchApp("App Store", &ui_img_571330079, true);
 }
 
+void openFiles()
+{
+    closeApp();
+
+    lv_obj_t *fileList = list_canvas(false, 0);
+
+    getFileList(fileList, "/");
+
+    launchApp("Files", &ui_img_571330079, true);
+}
+
+void openMusic()
+{
+    closeApp();
+
+    // lv_obj_t *msList = list_canvas(false, 0);
+    // lv_obj_set_y(msList, 200);
+
+    lv_obj_t *canvas = app_canvas();
+    lv_obj_set_style_pad_bottom(canvas, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(canvas, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_height(canvas, 440);
+
+    music_player(canvas);
+
+    getMusicList();
+
+    for (int a = 0; a < MAX_MUSIC; a++)
+    {
+        add_music_item(musicList, music[a]);
+    }
+
+    launchApp("Music", &ui_img_359952343, false);
+}
+
 void openAppAbout()
 {
     closeApp();
@@ -2959,23 +3549,25 @@ void openChat()
 
 void vibrate(long time)
 {
-    #ifndef PLUS
+#ifndef PLUS
     digitalWrite(MOTOR, HIGH);
     delay(time);
     digitalWrite(MOTOR, LOW);
-    #endif
+#endif
 }
 
-void startVibrate(){
-    #ifndef PLUS
+void startVibrate()
+{
+#ifndef PLUS
     digitalWrite(MOTOR, HIGH);
-    #endif
+#endif
 }
 
-void endVibrate(){
-    #ifndef PLUS
+void endVibrate()
+{
+#ifndef PLUS
     digitalWrite(MOTOR, LOW);
-    #endif
+#endif
 }
 
 void showAlert(const void *src, bool state, int size, uint16_t code)

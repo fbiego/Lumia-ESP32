@@ -40,8 +40,12 @@
 
 // #define GSM Serial1
 
-#ifdef PLUS
+#include "SD.h"
+#include "FS.h"
 
+
+#ifdef PLUS
+#include "Audio.h"
 class LGFX : public lgfx::LGFX_Device
 {
 
@@ -99,8 +103,7 @@ public:
       cfg.invert = true;
       cfg.rgb_order = false;
       cfg.dlen_16bit = false;
-      cfg.bus_shared = false;
-      
+      cfg.bus_shared = true;
 
       _panel_instance.config(cfg);
     }
@@ -261,14 +264,16 @@ FT6336U ft6336u(18, 19, -1, 36);
 // Create an instance of the prepared class.
 LGFX tft;
 
-
 static lv_color_t disp_draw_buf[screenWidth * SCR];
 static lv_color_t disp_draw_buf2[screenWidth * SCR];
 
 ESP32Time rtc(3 * 3600);
 WiFiMulti wifiMulti;
 HTTPClient http;
-
+#ifdef MUSIC_PLAYER
+Audio audio;
+#endif
+bool playing;
 
 // AppComponent testApp[] = {
 //     {.id = 0, .parent = 0, .type = LABEL, .text = "Hello world", .xPos = 20, .yPos = 20, .width = 25, .height = 25},
@@ -531,6 +536,181 @@ bool runRequest()
   }
 }
 
+#ifdef MUSIC_PLAYER
+void musicPlayer(void *parameter)
+{
+
+  while (playing)
+  {
+    audio.loop();
+
+    uint32_t act = audio.getAudioCurrentTime();
+    uint32_t afd = audio.getAudioFileDuration();
+
+    int progress = 0;
+    if (afd != 0)
+    {
+      progress = int((act * 100.0) / afd);
+      lv_bar_set_value(ui_musicProgress, progress, LV_ANIM_ON);
+
+      lv_label_set_text_fmt(ui_musicPlayTime, "%02d:%02d", act / 60, act % 60);
+      lv_label_set_text_fmt(ui_musicTotalTime, "%02d:%02d", afd / 60, afd % 60);
+    }
+    // uint32_t pos =audio.getFilePos();
+  }
+  vTaskDelete(NULL);
+}
+
+void runMusic()
+{
+
+  // musicPlay_Animation(ui_musicAlbumArt, 0);
+  if (!playing)
+  {
+    playing = true;
+    xTaskCreatePinnedToCore(
+        // xTaskCreate(
+        musicPlayer,    // Function that should be called
+        "Music Player", // Name of the task (for debugging)
+        16384,          // Stack size (bytes)
+        NULL,           // Parameter to pass
+        1,              // Task priority
+        // NULL
+        NULL, // Task handle
+        1);
+  }
+}
+
+void playFile(const char *track)
+{
+  audio.connecttoFS(SD, track);
+
+  runMusic();
+}
+
+void playPause()
+{
+  audio.pauseResume();
+  bool isPlay = audio.isRunning();
+}
+
+void changeMusic(bool forward)
+{
+
+  int r = random(MAX_MUSIC);
+  playFile(music[r].path);
+}
+
+void listMusic(fs::FS &fs, const char *dirname, uint8_t levels)
+{
+  Serial.printf("Listing directory: %s\n", dirname);
+
+  File root = fs.open(dirname);
+  if (!root)
+  {
+    Serial.println("Failed to open directory");
+    return;
+  }
+  if (!root.isDirectory())
+  {
+    Serial.println("Not a directory");
+    return;
+  }
+
+  File file = root.openNextFile();
+  int x = 0;
+  while (file)
+  {
+    if (!file.isDirectory())
+    {
+
+      String fileName = String(file.name());
+      if (!fileName.startsWith(".") && fileName.endsWith(".mp3") && x < MAX_MUSIC)
+      {
+        Serial.print("  MP3 ");
+
+        fileName = "/" + fileName;
+        strncpy(music[x].path, fileName.c_str(), fileName.length() + 1);
+        music[x].id = x;
+        music[x].size = (uint32_t)file.size();
+        x++;
+      }
+
+      Serial.print("  FILE: ");
+      Serial.print(file.name());
+      Serial.print("  SIZE: ");
+      Serial.println(file.size());
+    }
+    file = root.openNextFile();
+  }
+}
+
+void getMusicList()
+{
+  int v = audio.getVolume();
+  lv_slider_set_value(ui_musicVolume, v, LV_ANIM_ON);
+
+  listMusic(SD, "/", 0);
+}
+#endif
+
+void getFileList(lv_obj_t *parent, const char *path)
+{
+
+  File root = SD.open(path);
+  if (!root)
+  {
+    Serial.println("Failed to open directory");
+    return;
+  }
+  if (!root.isDirectory())
+  {
+    Serial.println("Not a directory");
+    return;
+  }
+
+  File file = root.openNextFile();
+  while (file)
+  {
+    String fileName = String(file.name());
+    // char n[50];
+    // strncpy(n, fileName.c_str(), fileName.length() + 1);
+    if (!fileName.startsWith("."))
+    {
+      add_file_item(parent, (char *)fileName.c_str(), file.size(), !file.isDirectory());
+    }
+    file = root.openNextFile();
+  }
+}
+
+#ifdef LVGL_LOOP
+void lvgl_loop(void *parameter)
+{
+
+  while (true)
+  {
+    lv_timer_handler();
+    delay(5);
+  }
+  vTaskDelete(NULL);
+}
+
+void guiHandler()
+{
+
+  xTaskCreatePinnedToCore(
+      // xTaskCreate(
+      lvgl_loop,   // Function that should be called
+      "LVGL Loop", // Name of the task (for debugging)
+      16384,       // Stack size (bytes)
+      NULL,        // Parameter to pass
+      1,           // Task priority
+      // NULL
+      NULL, // Task handle
+      1);
+}
+#endif
+
 void getNVSData()
 {
   String val;
@@ -740,6 +920,9 @@ void setup()
 {
   Serial.begin(115200);
 
+#ifdef MUSIC_PLAYER
+  audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+#endif
 #ifdef GSM
   GSM.begin(115200, SERIAL_8N1, 26, 25);
 #endif
@@ -755,6 +938,14 @@ void setup()
   digitalWrite(MOTOR, LOW);
 #endif
 
+#ifdef PLUS
+
+  pinMode(SD_CS, OUTPUT);
+  digitalWrite(SD_CS, HIGH);
+  SPI.begin(SDMMC_CLK, SDMMC_D0, SDMMC_CMD);
+  SD.begin(SD_CS);
+
+#endif
 
   NVS.begin();
 
@@ -822,11 +1013,16 @@ void setup()
 
     Serial.println("Setup done");
   }
+#ifdef LVGL_LOOP
+  guiHandler();
+#endif
   tft.setBrightness(brightness);
   currentMillis = millis();
   while (currentMillis + 2000 > millis())
   {
+#ifndef LVGL_LOOP
     lv_timer_handler();
+#endif
   }
   vibrate(200);
   openLock();
@@ -853,6 +1049,7 @@ void setup()
   //   Serial.print(byte(mac >> (i * 8) & 0xFF), HEX);
   // }
   // Serial.println();
+  // const esp_partition_t *nxt = esp_ota_get_next_update_partition(NULL);
 
   String info = "";
 
@@ -883,7 +1080,10 @@ void setup()
   // info += "\nScreen resolution: " + String(screenWidth) + "x" + String(screenHeight);
   // info += "\nScreen model: " ;
   // info += "\nTouch model: FT6336U" ;
-
+#ifdef MUSIC_PLAYER
+  audio.setVolume(10); // 0...21
+  audio.forceMono(true);
+#endif
   Serial.println(info);
 
   uint32_t total = ESP.getFlashChipSize();
@@ -929,14 +1129,20 @@ void loop()
   touch_data.xpos = ft6336u.read_touch1_x();
   touch_data.ypos = ft6336u.read_touch1_y();
 #endif
+
+#ifndef LVGL_LOOP
   lv_timer_handler(); /* let the GUI do its work */
   delay(5);
+#endif
+  if (playing)
+  {
+  }
 
   if (currentMillis + screenTime < millis())
   {
-    if (activeRequest)
+    if (activeRequest || playing)
     {
-      printf("requests are active\n");
+      // printf("requests are active\n");
       tft.setBrightness(0);
     }
     else
@@ -1058,3 +1264,70 @@ void callFunction(uint8_t type)
   }
 #endif
 }
+
+#ifdef MUSIC_PLAYER
+
+void setVolume(int volume)
+{
+  Serial.printf("Set volume: %d\n", volume);
+  audio.setVolume(volume);
+
+  uint32_t act = audio.getAudioCurrentTime();
+  uint32_t afd = audio.getAudioFileDuration();
+
+  Serial.printf("Duration: %d / %d \n", act, afd);
+}
+
+// optional
+void audio_info(const char *info)
+{
+  Serial.print("info        ");
+  Serial.println(info);
+  // info        Reading file: "/sky_high.mp3"
+  String inf = String(info);
+  if (inf.startsWith("Reading file:"))
+  {
+    String fl = inf.substring(16, inf.length() - 1);
+    lv_label_set_text(ui_musicTrack, fl.c_str());
+    lv_label_set_text(ui_musicMiniText, fl.c_str());
+    lv_label_set_text(ui_musicArtist, "");
+    lv_label_set_text(ui_musicAlbum, "");
+  }
+}
+void audio_id3data(const char *info)
+{ // id3 metadata
+  Serial.print("id3data     ");
+  Serial.println(info);
+  String inf = String(info);
+  if (inf.startsWith("Title: "))
+  {
+    String tt = inf.substring(7, inf.length());
+    lv_label_set_text(ui_musicTrack, tt.c_str());
+    lv_label_set_text(ui_musicMiniText, tt.c_str());
+  }
+  if (inf.startsWith("Artist: "))
+  {
+    String ats = inf.substring(8, inf.length());
+    lv_label_set_text(ui_musicArtist, ats.c_str());
+  }
+  if (inf.startsWith("Album: "))
+  {
+    String alb = inf.substring(7, inf.length());
+    lv_label_set_text(ui_musicAlbum, alb.c_str());
+  }
+}
+void audio_eof_mp3(const char *info)
+{ // end of file
+  Serial.print("eof_mp3     ");
+  Serial.println(info);
+
+  int r = random(MAX_MUSIC);
+  playFile(music[r].path);
+}
+void audio_bitrate(const char *info)
+{
+  Serial.print("bitrate     ");
+  Serial.println(info);
+}
+
+#endif
