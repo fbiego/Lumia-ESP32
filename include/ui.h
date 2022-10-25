@@ -145,6 +145,9 @@ extern "C"
   extern lv_obj_t *ui_musicMiniPlay;
   extern lv_obj_t *ui_musicMiniNext;
 
+  extern lv_obj_t *ui_blogPanel;
+  extern lv_obj_t *ui_blogSpinner;
+
   extern lv_obj_t *musicList;
 
   LV_IMG_DECLARE(ui_img_windows_logo_png); // assets\windows_logo.png
@@ -183,6 +186,9 @@ extern "C"
   LV_IMG_DECLARE(ui_img_album_play_png);  // assets\album_play.png
   LV_IMG_DECLARE(ui_img_folder_png);      // assets\folder.png
 
+  LV_IMG_DECLARE(ui_img_files_png); // assets\files.png
+  LV_IMG_DECLARE(ui_img_blog_png);  // assets\blog.png
+
   // user settings
   extern int brightness;
   extern uint32_t themeColor;
@@ -207,6 +213,7 @@ extern "C"
   void openChat();
   void openMusic();
   void openFiles();
+  void openBlog();
 
 #ifdef MUSIC_PLAYER
   void runMusic();

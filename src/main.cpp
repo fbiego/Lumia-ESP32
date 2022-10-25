@@ -43,7 +43,6 @@
 #include "SD.h"
 #include "FS.h"
 
-
 #ifdef PLUS
 #include "Audio.h"
 class LGFX : public lgfx::LGFX_Device
@@ -451,6 +450,49 @@ void requestResult(int requestCode, int statusCode, String payload, long time)
         if (x >= MAX_APPS)
         {
           break;
+        }
+      }
+    }
+    break;
+
+  case BLOG_REQUEST:
+    if (statusCode == HTTP_CODE_OK)
+    {
+      DynamicJsonDocument json(2048);
+      deserializeJson(json, payload);
+      if (json["success"])
+      {
+        JsonArray array = json["article"].as<JsonArray>();
+        for (JsonVariant j : array)
+        {
+          JsonObject v = j.as<JsonObject>();
+          String text = v["text"].as<String>();
+          int id = v["id"].as<int>();
+          String link = v["image"].as<String>();
+        }
+      }
+    }
+    break;
+  case BLOG_ITEM_REQUEST:
+    if (statusCode == HTTP_CODE_OK)
+    {
+      DynamicJsonDocument json(4096);
+      deserializeJson(json, payload);
+      if (json["success"])
+      {
+        
+        String title = json["title"].as<String>();
+
+        JsonArray array = json["text"].as<JsonArray>(); // text
+        for (JsonVariant j : array)
+        {
+          String text = j.as<String>();
+        }
+
+        JsonArray images = json["image"].as<JsonArray>(); // images
+        for (JsonVariant j : images)
+        {
+          String link = j.as<String>();
         }
       }
     }

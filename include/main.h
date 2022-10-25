@@ -84,6 +84,9 @@
 #define TIME_REQUEST 0
 #define APPS_REQUEST 1
 
+#define BLOG_REQUEST 2
+#define BLOG_ITEM_REQUEST 3
+
 // #define LVGL_LOOP 1
 
 long currentMillis;
@@ -123,7 +126,8 @@ enum Type
   SLIDER,
   CHECKBOX,
   SWITCH,
-  TEXTAREA
+  TEXTAREA,
+  SPINNER
 };
 
 struct AppComponent

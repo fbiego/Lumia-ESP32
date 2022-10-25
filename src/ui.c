@@ -167,6 +167,9 @@ lv_obj_t *ui_musicMiniText;
 lv_obj_t *ui_musicMiniPlay;
 lv_obj_t *ui_musicMiniNext;
 
+lv_obj_t *ui_blogPanel;
+lv_obj_t *ui_blogSpinner;
+
 char aboutText[740] = {
     0x4c, 0x75, 0x6d, 0x69, 0x61, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x0a,
     0x41, 0x20, 0x55, 0x49, 0x20, 0x62, 0x61, 0x73, 0x65, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x4c, 0x56, 0x47, 0x4c, 0x20, 0x72, 0x75, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x20, 0x6f, 0x6e, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x20, 0x73, 0x69, 0x6d, 0x75, 0x6c, 0x61, 0x74, 0x69, 0x6e, 0x67, 0x20, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x73, 0x20, 0x4d, 0x6f, 0x62, 0x69, 0x6c, 0x65, 0x2e, 0x0a,
@@ -392,6 +395,10 @@ static void event_handler(lv_event_t *e)
         if (obj == ui_settingsScreen)
         {
             saveSettings();
+        }
+        if (obj == ui_appScreen)
+        {
+            lv_obj_set_parent(ui_blogPanel, NULL);
         }
     }
 
@@ -810,6 +817,10 @@ static void event_launch(lv_event_t *e)
         else if (data == "Files")
         {
             openFiles();
+        }
+        else if (data == "Arduino Blog")
+        {
+            openBlog();
         }
         else
         {
@@ -2528,6 +2539,63 @@ void notification_panel(lv_obj_t *parent)
     lv_label_set_text(ui_Label7, "_____");
 }
 
+void blog_panel(lv_obj_t *parent)
+{
+
+    ui_blogPanel = lv_obj_create(parent);
+    lv_obj_set_width(ui_blogPanel, 320);
+    lv_obj_set_height(ui_blogPanel, 370);
+    lv_obj_set_x(ui_blogPanel, 0);
+    lv_obj_set_y(ui_blogPanel, 60);
+    lv_obj_set_align(ui_blogPanel, LV_ALIGN_TOP_MID);
+    lv_obj_set_scrollbar_mode(ui_blogPanel, LV_SCROLLBAR_MODE_ACTIVE);
+    lv_obj_set_scroll_dir(ui_blogPanel, LV_DIR_VER);
+    lv_obj_set_style_radius(ui_blogPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_blogPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_blogPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_blogPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_blogSpinner = lv_spinner_create(ui_blogPanel, 1000, 90);
+    lv_obj_set_width(ui_blogSpinner, 100);
+    lv_obj_set_height(ui_blogSpinner, 100);
+    lv_obj_set_align(ui_blogSpinner, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_blogSpinner, LV_OBJ_FLAG_CLICKABLE); /// Flags
+    lv_obj_set_style_arc_width(ui_blogSpinner, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_arc_width(ui_blogSpinner, 5, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    // lv_obj_add_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
+}
+
+lv_obj_t *blogTitle(lv_obj_t *parent, char *title)
+{
+    lv_obj_t *ui_blogTitle = lv_label_create(parent);
+    lv_obj_set_width(ui_blogTitle, 300);
+    lv_obj_set_height(ui_blogTitle, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_blogTitle, LV_ALIGN_TOP_MID);
+    lv_label_set_text(ui_blogTitle, title);
+    lv_obj_set_style_text_font(ui_blogTitle, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_blogTitle, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_blogTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_blogTitle, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_blogTitle, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_blogTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_blogTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_blogTitle, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_blogTitle, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
+    return ui_blogTitle;
+}
+
+lv_obj_t *blogText(lv_obj_t *parent, int y, char *text)
+{
+    lv_obj_t *ui_blogText = lv_label_create(parent);
+    lv_obj_set_width(ui_blogText, 300);
+    lv_obj_set_height(ui_blogText, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_blogText, 0);
+    lv_obj_set_y(ui_blogText, y);
+    lv_obj_set_align(ui_blogText, LV_ALIGN_TOP_MID);
+    lv_label_set_text(ui_blogText, text);
+    return ui_blogText;
+}
+
 /////////////////////// APPS //////////////////////
 
 void appCalendar()
@@ -2876,7 +2944,7 @@ void ui_startScreen_screen_init(void)
     create_tile(cont, "Store", &ui_img_571330079, 1, 1, 1, event_launch);
     create_tile(cont, "Calendar", &ui_img_calendar_png, 2, 1, 1, event_launch);
 
-    create_tile(cont, "Files", &ui_img_folder_png, 0, 2, 1, event_launch);
+    create_tile(cont, "Files", &ui_img_files_png, 0, 2, 1, event_launch);
     create_tile(cont, "Weather", &ui_img_1127648905, 1, 2, 2, event_launch);
 
     create_tile(cont, "Photos", &ui_img_gallery_png, 0, 3, 2, event_launch);
@@ -2912,9 +2980,10 @@ void ui_startScreen_screen_init(void)
     /*Add apps to the list*/
 
     add_item(list1, "About", &ui_img_gear_png, event_launch);
+    add_item(list1, "Arduino Blog", &ui_img_blog_png, event_launch);
     add_item(list1, "Calendar", &ui_img_calendar_png, event_launch);
     add_item(list1, "Edge", &ui_img_microsoft_png, event_launch);
-    add_item(list1, "Files", &ui_img_folder_png, event_launch);
+    add_item(list1, "Files", &ui_img_files_png, event_launch);
     add_item(list1, "Mail", &ui_img_email_png, event_launch);
     add_item(list1, "Maps", &ui_img_846015263, event_launch);
     add_item(list1, "Messaging", &ui_img_237043237, event_launch);
@@ -3235,6 +3304,7 @@ void ui_appScreen_screen_init(void)
     lv_obj_clear_flag(ui_appScreen, LV_OBJ_FLAG_SCROLLABLE); /// Flags
     lv_obj_set_style_bg_color(ui_appScreen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_appScreen, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_appScreen, event_handler, LV_EVENT_SCREEN_UNLOADED, NULL);
 
     ui_appPanel = lv_obj_create(ui_appScreen);
     lv_obj_set_width(ui_appPanel, 320);
@@ -3303,6 +3373,7 @@ void ui_appScreen_screen_init(void)
 
     appWifi();
     appCalendar();
+    blog_panel(NULL);
 }
 
 void ui_init(void)
@@ -3484,8 +3555,6 @@ void openMusic()
 {
     closeApp();
 
-    // lv_obj_t *msList = list_canvas(false, 0);
-    // lv_obj_set_y(msList, 200);
 
     lv_obj_t *canvas = app_canvas();
     lv_obj_set_style_pad_bottom(canvas, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -3502,6 +3571,25 @@ void openMusic()
     }
 
     launchApp("Music", &ui_img_359952343, false);
+}
+
+void openBlog()
+{
+    closeApp();
+
+
+    blog_panel(ui_appPanel);
+
+    lv_obj_t *t = blogTitle(ui_blogPanel, "Test title");
+    int y = lv_obj_get_content_height(t);
+
+    for (int i = 0; i < 4; i++)
+    {
+        lv_obj_t *p = blogText(ui_blogPanel, y, "Hello world");
+        y += lv_obj_get_self_height(p);
+    }
+
+    launchApp("Arduino Blog", &ui_img_blog_png, true);
 }
 
 void openAppAbout()
