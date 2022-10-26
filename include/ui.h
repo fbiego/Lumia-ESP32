@@ -149,6 +149,7 @@ extern "C"
   extern lv_obj_t *ui_blogSpinner;
 
   extern lv_obj_t *musicList;
+  extern lv_obj_t *blogList;
 
   LV_IMG_DECLARE(ui_img_windows_logo_png); // assets\windows_logo.png
   LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
@@ -258,8 +259,15 @@ extern "C"
 
   void musicPlay_Animation(lv_obj_t *TargetObject, int delay);
 
+  void add_blog_item(lv_obj_t *parent, const char * title, uint16_t id); 
+  void blog_panel(lv_obj_t *parent);
+  lv_obj_t *blogText(lv_obj_t *parent, int y, char *text);
+  lv_obj_t *blogTitle(lv_obj_t *parent, char *title);
+
   lv_obj_t *activeApp[10];
   uint16_t appSize;
+
+  extern bool runRequest();
 
   typedef struct RtcTime
   {

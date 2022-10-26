@@ -115,7 +115,6 @@ struct Request
 
 struct Request request[MAX_REQUEST];
 
-bool runRequest();
 
 enum Type
 {

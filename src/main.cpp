@@ -467,26 +467,45 @@ void requestResult(int requestCode, int statusCode, String payload, long time)
         {
           JsonObject v = j.as<JsonObject>();
           String text = v["text"].as<String>();
-          int id = v["id"].as<int>();
+          uint16_t id = v["id"].as<uint16_t>();
           String link = v["image"].as<String>();
+          add_blog_item(blogList, text.c_str(), id);
         }
+      } else {
+        blogText(ui_blogPanel, 50, "Failed to load the blog list");
       }
+    } else {
+      blogText(ui_blogPanel, 50, "Failed to load the blog list");
     }
+    lv_obj_add_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
     break;
   case BLOG_ITEM_REQUEST:
+    blog_panel(ui_appPanel);
+    lv_obj_clear_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(blogList, LV_OBJ_FLAG_HIDDEN);
     if (statusCode == HTTP_CODE_OK)
     {
+
       DynamicJsonDocument json(4096);
       deserializeJson(json, payload);
       if (json["success"])
       {
-        
+
         String title = json["title"].as<String>();
+        lv_obj_t *t = blogTitle(ui_blogPanel, (char *)title.c_str());
+        lv_obj_set_style_text_font(t, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_update_layout(t);
+        int16_t y = lv_obj_get_height(t);
+        y += 10;
 
         JsonArray array = json["text"].as<JsonArray>(); // text
         for (JsonVariant j : array)
         {
           String text = j.as<String>();
+          lv_obj_t *p = blogText(ui_blogPanel, y, (char *)text.c_str());
+          lv_obj_update_layout(p);
+          y += 10;
+          y += lv_obj_get_height(p);
         }
 
         JsonArray images = json["image"].as<JsonArray>(); // images
@@ -495,7 +514,17 @@ void requestResult(int requestCode, int statusCode, String payload, long time)
           String link = j.as<String>();
         }
       }
+      else
+      {
+        blogText(ui_blogPanel, 50, "Failed to load the blog");
+      }
     }
+    else
+    {
+      blogText(ui_blogPanel, 50, "Failed to load the blog");
+    }
+    lv_obj_add_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_scroll_by(ui_blogPanel, 0, 2, LV_ANIM_ON);
     break;
   }
 }

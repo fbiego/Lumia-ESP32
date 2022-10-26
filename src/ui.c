@@ -169,6 +169,7 @@ lv_obj_t *ui_musicMiniNext;
 
 lv_obj_t *ui_blogPanel;
 lv_obj_t *ui_blogSpinner;
+lv_obj_t *blogList;
 
 char aboutText[740] = {
     0x4c, 0x75, 0x6d, 0x69, 0x61, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x0a,
@@ -231,6 +232,7 @@ uint8_t LOCK = 0xEB;
 uint8_t SETTINGS = 0xEC;
 
 uint16_t MUSIC = 0x451C;
+uint16_t BLOGS = 0x451F;
 
 ///////////////////// ANIMATIONS ////////////////////
 
@@ -1102,6 +1104,22 @@ static void event_app_component(lv_event_t *e)
             }
         }
 #endif
+        else if (pId == BLOGS)
+        {
+            printf("Blog item %d clicked\n", oId);
+
+            request[3].active = true;
+            request[3].method = false;
+            request[3].code = BLOG_ITEM_REQUEST;
+            // request[3].url = "https://iot.fbiego.com/arduino/blog?id=32859";
+            char link[50];
+            sprintf(link, "https://iot.fbiego.com/arduino/blog?id=%d", oId);
+            request[3].url = link;
+            printf("Blig link: %s\n", link);
+            lv_obj_clear_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
+            
+            runRequest();
+        }
         else
         {
             printf("Button %X clicked from %X\n", oId, pId);
@@ -1370,7 +1388,7 @@ void add_music_item(lv_obj_t *parent, struct Music ms)
     lv_obj_set_height(ui_appListName, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_appListName, 0);
     lv_obj_set_y(ui_appListName, -4);
-    lv_label_set_text(ui_appListName, ms.path);
+    lv_label_set_text(ui_appListName, ms.path + 1);
     lv_obj_set_style_text_font(ui_appListName, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // lv_obj_t *ui_appListSize = lv_label_create(ui_appListItem);
@@ -1380,6 +1398,30 @@ void add_music_item(lv_obj_t *parent, struct Music ms)
     // lv_obj_set_y(ui_appListSize, 14);
     // lv_label_set_text_fmt(ui_appListSize, "%.3f MB", (ms.size / (1024.0 * 1024.0)));
     // lv_obj_set_style_text_font(ui_appListSize, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+}
+
+void add_blog_item(lv_obj_t *parent, const char *title, uint16_t id)
+{
+    lv_obj_t *ui_appListItem = lv_obj_create(parent);
+    lv_obj_set_width(ui_appListItem, 320);
+    lv_obj_set_height(ui_appListItem, LV_SIZE_CONTENT);
+    lv_obj_set_x(ui_appListItem, 0);
+    lv_obj_set_y(ui_appListItem, 137);
+    lv_obj_set_align(ui_appListItem, LV_ALIGN_TOP_MID);
+    lv_obj_clear_flag(ui_appListItem, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_radius(ui_appListItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_appListItem, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_appListItem, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_appListItem, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(ui_appListItem, event_app_component, LV_EVENT_CLICKED, uuid(BLOGS, id));
+
+    lv_obj_t *ui_appListName = lv_label_create(ui_appListItem);
+    lv_obj_set_width(ui_appListName, 280);
+    lv_obj_set_height(ui_appListName, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_appListName, 0);
+    lv_obj_set_y(ui_appListName, -4);
+    lv_label_set_text(ui_appListName, title);
+    lv_obj_set_style_text_font(ui_appListName, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 void showCaller(const char *name, const char *call, bool incoming)
@@ -2546,7 +2588,7 @@ void blog_panel(lv_obj_t *parent)
     lv_obj_set_width(ui_blogPanel, 320);
     lv_obj_set_height(ui_blogPanel, 370);
     lv_obj_set_x(ui_blogPanel, 0);
-    lv_obj_set_y(ui_blogPanel, 60);
+    lv_obj_set_y(ui_blogPanel, 70);
     lv_obj_set_align(ui_blogPanel, LV_ALIGN_TOP_MID);
     lv_obj_set_scrollbar_mode(ui_blogPanel, LV_SCROLLBAR_MODE_ACTIVE);
     lv_obj_set_scroll_dir(ui_blogPanel, LV_DIR_VER);
@@ -2555,6 +2597,9 @@ void blog_panel(lv_obj_t *parent)
     lv_obj_set_style_bg_opa(ui_blogPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_blogPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+}
+
+void blog_spinner(){
     ui_blogSpinner = lv_spinner_create(ui_blogPanel, 1000, 90);
     lv_obj_set_width(ui_blogSpinner, 100);
     lv_obj_set_height(ui_blogSpinner, 100);
@@ -2562,7 +2607,7 @@ void blog_panel(lv_obj_t *parent)
     lv_obj_clear_flag(ui_blogSpinner, LV_OBJ_FLAG_CLICKABLE); /// Flags
     lv_obj_set_style_arc_width(ui_blogSpinner, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_arc_width(ui_blogSpinner, 5, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    // lv_obj_add_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
 }
 
 lv_obj_t *blogTitle(lv_obj_t *parent, char *title)
@@ -2572,7 +2617,7 @@ lv_obj_t *blogTitle(lv_obj_t *parent, char *title)
     lv_obj_set_height(ui_blogTitle, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_blogTitle, LV_ALIGN_TOP_MID);
     lv_label_set_text(ui_blogTitle, title);
-    lv_obj_set_style_text_font(ui_blogTitle, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_blogTitle, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_blogTitle, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_blogTitle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_blogTitle, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -2593,6 +2638,7 @@ lv_obj_t *blogText(lv_obj_t *parent, int y, char *text)
     lv_obj_set_y(ui_blogText, y);
     lv_obj_set_align(ui_blogText, LV_ALIGN_TOP_MID);
     lv_label_set_text(ui_blogText, text);
+    lv_obj_set_style_text_font(ui_blogText, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
     return ui_blogText;
 }
 
@@ -3555,7 +3601,6 @@ void openMusic()
 {
     closeApp();
 
-
     lv_obj_t *canvas = app_canvas();
     lv_obj_set_style_pad_bottom(canvas, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(canvas, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -3577,19 +3622,55 @@ void openBlog()
 {
     closeApp();
 
-
     blog_panel(ui_appPanel);
 
-    lv_obj_t *t = blogTitle(ui_blogPanel, "Test title");
-    int y = lv_obj_get_content_height(t);
+    
 
-    for (int i = 0; i < 4; i++)
-    {
-        lv_obj_t *p = blogText(ui_blogPanel, y, "Hello world");
-        y += lv_obj_get_self_height(p);
-    }
+    blogList = lv_list_create(ui_blogPanel);
+    lv_obj_set_size(blogList, 320, 370);
+    lv_obj_set_y(blogList, 0);
+    lv_obj_set_align(blogList, LV_ALIGN_TOP_MID);
+    lv_obj_set_style_bg_color(blogList, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(blogList, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(blogList, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_scrollbar_mode(blogList, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_pad_left(blogList, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(blogList, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(blogList, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(blogList, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_add_flag(blogList, LV_OBJ_FLAG_HIDDEN);
+
+    blog_spinner();
+
+    lv_obj_clear_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
+
+    // lv_obj_t *t = blogTitle(ui_blogPanel, "Test title");
+    // lv_obj_set_style_text_font(t, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_update_layout(t);
+    // int16_t y = lv_obj_get_height(t);
+    // y += 10;
+
+    // for (int i = 1; i < 4; i++)
+    // {
+    //     lv_obj_t *p = blogText(ui_blogPanel, y, "Playing music from micro SD card on WT32 SC01 Plus module.\nDecoded audio is sent via I2S to NS4168 IC, a 2.5W mono class D audio power amplifier which is then played on the connected speaker.");
+    //     lv_obj_update_layout(p);
+    //     y += 10;
+    //     y += lv_obj_get_height(p);
+    // }
 
     launchApp("Arduino Blog", &ui_img_blog_png, true);
+
+    request[2].active = true;
+    request[2].method = false;
+    request[2].code = BLOG_REQUEST;
+    request[2].url = "https://iot.fbiego.com/arduino/blog";
+
+    // request[3].active = true;
+    // request[3].method = false;
+    // request[3].code = BLOG_ITEM_REQUEST;
+    // request[3].url = "https://iot.fbiego.com/arduino/blog?id=32859";
+
+    runRequest();
 }
 
 void openAppAbout()
