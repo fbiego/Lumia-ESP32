@@ -155,7 +155,7 @@ class LGFX : public lgfx::LGFX_Device
 
   lgfx::Light_PWM _light_instance;
 
-  // lgfx::Touch_FT5x06 _touch_instance;
+  lgfx::Touch_FT5x06 _touch_instance;
 
 public:
   LGFX(void)
@@ -221,42 +221,31 @@ public:
       _panel_instance.setLight(&_light_instance); // Sets the backlight to the panel.
     }
 
-    // { // Configure settings for touch screen control. (delete if not necessary)
-    //    auto cfg = _touch_instance.config();
+    { // Configure settings for touch screen control. (delete if not necessary)
+      auto cfg = _touch_instance.config();
 
-    //    cfg.x_min = 0;    // Minimum X value (raw value) obtained from the touchscreen
-    //    cfg.x_max = 319;  // Maximum X value (raw value) obtained from the touchscreen
-    //    cfg.y_min = 0;    // Minimum Y value obtained from touchscreen (raw value)
-    //    cfg.y_max = 479;  // Maximum Y value (raw value) obtained from the touchscreen
-    //    cfg.pin_int = 36; // pin number to which INT is connected
-    //    cfg.bus_shared = false;
-    //    cfg.offset_rotation = 0;
+      cfg.x_min = 0;    // Minimum X value (raw value) obtained from the touchscreen
+      cfg.x_max = 319;  // Maximum X value (raw value) obtained from the touchscreen
+      cfg.y_min = 0;    // Minimum Y value obtained from touchscreen (raw value)
+      cfg.y_max = 479;  // Maximum Y value (raw value) obtained from the touchscreen
+      cfg.pin_int = 39; // pin number to which INT is connected
+      cfg.bus_shared = false;
+      cfg.offset_rotation = 0;
 
-    //    // For I2C connection
-    //    cfg.i2c_port = 0;    // Select I2C to use (0 or 1)
-    //    cfg.i2c_addr = 0x38; // I2C device address number
-    //    cfg.pin_sda = 18;    // pin number where SDA is connected
-    //    cfg.pin_scl = 19;    // pin number to which SCL is connected
-    //    cfg.freq = 400000;   // set I2C clock
+      // For I2C connection
+      cfg.i2c_port = 1;    // Select I2C to use (0 or 1)
+      cfg.i2c_addr = 0x38; // I2C device address number
+      cfg.pin_sda = 18;    // pin number where SDA is connected
+      cfg.pin_scl = 19;    // pin number to which SCL is connected
+      cfg.freq = 400000;   // set I2C clock
 
-    //    _touch_instance.config(cfg);
-    //    _panel_instance.setTouch(&_touch_instance); // Set the touchscreen to the panel.
-    // }
+      _touch_instance.config(cfg);
+      _panel_instance.setTouch(&_touch_instance); // Set the touchscreen to the panel.
+    }
 
     setPanel(&_panel_instance); // Sets the panel to use.
   }
 };
-
-struct TouchData
-{
-  int xpos;
-  int ypos;
-  int event;
-} touch_data;
-
-#include "FT6336U.h"
-
-FT6336U ft6336u(18, 19, -1, 36);
 
 #endif
 
@@ -1003,8 +992,6 @@ void setup()
   tft.startWrite();
 
 #ifndef PLUS
-  ft6336u.begin();
-
   pinMode(MOTOR, OUTPUT);
   digitalWrite(MOTOR, LOW);
 #endif
@@ -1195,11 +1182,6 @@ void setup()
 void loop()
 {
 
-#ifndef PLUS
-  touch_data.event = ft6336u.read_td_status();
-  touch_data.xpos = ft6336u.read_touch1_x();
-  touch_data.ypos = ft6336u.read_touch1_y();
-#endif
 
 #ifndef LVGL_LOOP
   lv_timer_handler(); /* let the GUI do its work */
