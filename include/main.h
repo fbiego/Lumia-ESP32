@@ -22,10 +22,11 @@
   SOFTWARE.
 */
 
-#ifndef LUMIA - ESP32_MAIN_H
-#define LUMIA -ESP32_MAIN_H
+#ifndef LUMIA_ESP32_MAIN_H
+#define LUMIA_ESP32_MAIN_H
 
 #include <lvgl.h>
+#include <pgmspace.h>
 
 #ifdef PLUS
 
@@ -45,7 +46,18 @@
 
 #define MUSIC_PLAYER
 
+#define SD_CS 41
+#define SDMMC_CMD 40
+#define SDMMC_CLK 39
+#define SDMMC_D0 38
+
+#define I2S_DOUT 37
+#define I2S_BCLK 36
+#define I2S_LRC 35
+
+
 #else
+
 #define TFT_RST 4
 #define TFT_CS 15
 #define TFT_SCLK 14
@@ -66,14 +78,6 @@
 
 #endif
 
-#define SD_CS 41
-#define SDMMC_CMD 40
-#define SDMMC_CLK 39
-#define SDMMC_D0 38
-
-#define I2S_DOUT 37
-#define I2S_BCLK 36
-#define I2S_LRC 35
 
 #define FORMAT_SPIFFS_IF_FAILED true
 
@@ -83,7 +87,6 @@
 
 #define TIME_REQUEST 0
 #define APPS_REQUEST 1
-
 #define BLOG_REQUEST 2
 #define BLOG_ITEM_REQUEST 3
 
@@ -163,6 +166,7 @@ struct Passcode
   uint8_t code[4];
 } passcode;
 
+#ifdef MUSIC_PLAYER
 struct Music
 {
   char path[50];
@@ -172,5 +176,6 @@ struct Music
 
 struct Music music[MAX_MUSIC];
 
+#endif
 // extern struct Passcode passcode;
 #endif

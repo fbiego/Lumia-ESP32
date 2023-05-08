@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include "ui.h"
 #include "main.h"
-//#include "ui_helpers.h"
+// #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
 lv_obj_t *ui_bootScreen;
@@ -145,6 +145,8 @@ lv_obj_t *ui_callMessageLabel;
 lv_obj_t *ui_callDeclineButton;
 lv_obj_t *ui_callDeclineText;
 
+#ifdef MUSIC_PLAYER
+
 lv_obj_t *ui_musicPanel;
 lv_obj_t *ui_musicArt;
 lv_obj_t *ui_musicTrack;
@@ -166,12 +168,15 @@ lv_obj_t *ui_musicPanelMini;
 lv_obj_t *ui_musicMiniText;
 lv_obj_t *ui_musicMiniPlay;
 lv_obj_t *ui_musicMiniNext;
+#endif
 
+#ifdef PLUS
 lv_obj_t *ui_blogPanel;
 lv_obj_t *ui_blogSpinner;
 lv_obj_t *blogList;
+#endif
 
-char aboutText[740] = {
+const char aboutText[740] = {
     0x4c, 0x75, 0x6d, 0x69, 0x61, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x0a,
     0x41, 0x20, 0x55, 0x49, 0x20, 0x62, 0x61, 0x73, 0x65, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x4c, 0x56, 0x47, 0x4c, 0x20, 0x72, 0x75, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x20, 0x6f, 0x6e, 0x20, 0x45, 0x53, 0x50, 0x33, 0x32, 0x20, 0x73, 0x69, 0x6d, 0x75, 0x6c, 0x61, 0x74, 0x69, 0x6e, 0x67, 0x20, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x73, 0x20, 0x4d, 0x6f, 0x62, 0x69, 0x6c, 0x65, 0x2e, 0x0a,
     0x5b, 0x52, 0x49, 0x50, 0x20, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x73, 0x20, 0x50, 0x68, 0x6f, 0x6e, 0x65, 0x5d, 0x20, 0x3a, 0x28, 0x0a,
@@ -313,7 +318,7 @@ void _ui_anim_callback_set_image_angle(lv_anim_t *a, int32_t v)
 {
     lv_img_set_angle((lv_obj_t *)a->user_data, v);
 }
-
+#ifdef MUSIC_PLAYER
 void musicPlay_Animation(lv_obj_t *TargetObject, int delay)
 {
     lv_anim_t PropertyAnimation_0;
@@ -332,7 +337,7 @@ void musicPlay_Animation(lv_obj_t *TargetObject, int delay)
     lv_anim_set_get_value_cb(&PropertyAnimation_0, &_ui_anim_callback_get_image_angle);
     lv_anim_start(&PropertyAnimation_0);
 }
-
+#endif
 ///////////////////// CALLBACK FUNCTIONS ////////////////////
 
 static void slider_event_cb(lv_event_t *e)
@@ -398,10 +403,12 @@ static void event_handler(lv_event_t *e)
         {
             saveSettings();
         }
+#ifdef PLUS
         if (obj == ui_appScreen)
         {
             lv_obj_set_parent(ui_blogPanel, NULL);
         }
+#endif
     }
 
     if (code == LV_EVENT_VALUE_CHANGED)
@@ -816,6 +823,7 @@ static void event_launch(lv_event_t *e)
             openMusic();
         }
 #endif
+#ifdef PLUS
         else if (data == "Files")
         {
             openFiles();
@@ -824,6 +832,7 @@ static void event_launch(lv_event_t *e)
         {
             openBlog();
         }
+#endif
         else
         {
             alert.title = "App not installed";
@@ -1104,6 +1113,7 @@ static void event_app_component(lv_event_t *e)
             }
         }
 #endif
+#ifdef PLUS
         else if (pId == BLOGS)
         {
             printf("Blog item %d clicked\n", oId);
@@ -1117,9 +1127,10 @@ static void event_app_component(lv_event_t *e)
             request[3].url = link;
             printf("Blig link: %s\n", link);
             lv_obj_clear_flag(ui_blogSpinner, LV_OBJ_FLAG_HIDDEN);
-            
+
             runRequest();
         }
+#endif
         else
         {
             printf("Button %X clicked from %X\n", oId, pId);
@@ -1368,6 +1379,7 @@ void add_file_item(lv_obj_t *parent, char *path, int size, bool file)
     // lv_label_set_text(ui_appListActionLabel, "Play");
 }
 
+#ifdef MUSIC_PLAYER
 void add_music_item(lv_obj_t *parent, struct Music ms)
 {
     lv_obj_t *ui_appListItem = lv_obj_create(parent);
@@ -1399,7 +1411,8 @@ void add_music_item(lv_obj_t *parent, struct Music ms)
     // lv_label_set_text_fmt(ui_appListSize, "%.3f MB", (ms.size / (1024.0 * 1024.0)));
     // lv_obj_set_style_text_font(ui_appListSize, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
-
+#endif
+#ifdef PLUS
 void add_blog_item(lv_obj_t *parent, const char *title, uint16_t id)
 {
     lv_obj_t *ui_appListItem = lv_obj_create(parent);
@@ -1423,7 +1436,7 @@ void add_blog_item(lv_obj_t *parent, const char *title, uint16_t id)
     lv_label_set_text(ui_appListName, title);
     lv_obj_set_style_text_font(ui_appListName, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
-
+#endif
 void showCaller(const char *name, const char *call, bool incoming)
 {
     if (incoming)
@@ -1659,6 +1672,8 @@ lv_obj_t *list_canvas(bool bottom, uint32_t bottomPad)
 
     return list;
 }
+
+#ifdef MUSIC_PLAYER
 
 void music_player(lv_obj_t *parent)
 {
@@ -1912,6 +1927,7 @@ void music_player(lv_obj_t *parent)
     lv_obj_set_style_outline_pad(ui_musicMiniNext, 0, LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_add_event_cb(ui_musicMiniNext, event_app_component, LV_EVENT_CLICKED, uuid(MUSIC, 0xA102));
 }
+#endif
 
 void alert_box(lv_obj_t *parent)
 {
@@ -2580,7 +2596,7 @@ void notification_panel(lv_obj_t *parent)
 
     lv_label_set_text(ui_Label7, "_____");
 }
-
+#ifdef PLUS
 void blog_panel(lv_obj_t *parent)
 {
 
@@ -2596,10 +2612,10 @@ void blog_panel(lv_obj_t *parent)
     lv_obj_set_style_bg_color(ui_blogPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_blogPanel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_blogPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
 }
 
-void blog_spinner(){
+void blog_spinner()
+{
     ui_blogSpinner = lv_spinner_create(ui_blogPanel, 1000, 90);
     lv_obj_set_width(ui_blogSpinner, 100);
     lv_obj_set_height(ui_blogSpinner, 100);
@@ -2641,7 +2657,7 @@ lv_obj_t *blogText(lv_obj_t *parent, int y, char *text)
     lv_obj_set_style_text_font(ui_blogText, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
     return ui_blogText;
 }
-
+#endif
 /////////////////////// APPS //////////////////////
 
 void appCalendar()
@@ -3419,7 +3435,9 @@ void ui_appScreen_screen_init(void)
 
     appWifi();
     appCalendar();
+#ifdef PLUS
     blog_panel(NULL);
+#endif
 }
 
 void ui_init(void)
@@ -3586,6 +3604,7 @@ void openAppStore()
     launchApp("App Store", &ui_img_571330079, true);
 }
 
+#ifdef PLUS
 void openFiles()
 {
     closeApp();
@@ -3596,7 +3615,8 @@ void openFiles()
 
     launchApp("Files", &ui_img_571330079, true);
 }
-
+#endif
+#ifdef MUSIC_PLAYER
 void openMusic()
 {
     closeApp();
@@ -3617,14 +3637,13 @@ void openMusic()
 
     launchApp("Music", &ui_img_359952343, false);
 }
-
+#endif
+#ifdef PLUS
 void openBlog()
 {
     closeApp();
 
     blog_panel(ui_appPanel);
-
-    
 
     blogList = lv_list_create(ui_blogPanel);
     lv_obj_set_size(blogList, 320, 370);
@@ -3672,7 +3691,7 @@ void openBlog()
 
     runRequest();
 }
-
+#endif
 void openAppAbout()
 {
     closeApp();

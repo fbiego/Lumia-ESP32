@@ -3,8 +3,8 @@
 // LVGL VERSION: 8.2
 // PROJECT: Lumia-ESP32
 
-#ifndef _LUMIA - ESP32_UI_H
-#define _LUMIA -ESP32_UI_H
+#ifndef _LUMIA_ESP32_UI_H
+#define _LUMIA_ESP32_UI_H
 
 #ifdef __cplusplus
 extern "C"
@@ -123,6 +123,7 @@ extern "C"
   extern lv_obj_t *ui_callDeclineButton;
   extern lv_obj_t *ui_callDeclineText;
 
+#ifdef MUSIC_PLAYER
   extern lv_obj_t *ui_musicPanel;
   extern lv_obj_t *ui_musicArt;
   extern lv_obj_t *ui_musicTrack;
@@ -144,12 +145,13 @@ extern "C"
   extern lv_obj_t *ui_musicMiniText;
   extern lv_obj_t *ui_musicMiniPlay;
   extern lv_obj_t *ui_musicMiniNext;
-
+#endif
+#ifdef PLUS
   extern lv_obj_t *ui_blogPanel;
   extern lv_obj_t *ui_blogSpinner;
-
-  extern lv_obj_t *musicList;
   extern lv_obj_t *blogList;
+#endif
+  extern lv_obj_t *musicList;
 
   LV_IMG_DECLARE(ui_img_windows_logo_png); // assets\windows_logo.png
   LV_IMG_DECLARE(ui_img_wallpaper_png);    // assets\wallpaper.png
@@ -214,8 +216,9 @@ extern "C"
   void openChat();
   void openMusic();
   void openFiles();
+#ifdef PLUS
   void openBlog();
-
+#endif
 #ifdef MUSIC_PLAYER
   void runMusic();
   void playPause();
@@ -254,17 +257,19 @@ extern "C"
   lv_obj_t *create_switch(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t yPos);
 
   lv_obj_t *add_chat_item(lv_obj_t *parent, const char *message, bool dir);
+#ifdef PLUS
   void add_file_item(lv_obj_t *parent, char *path, int size, bool file);
+
   extern void getFileList(lv_obj_t *parent, const char *path);
 
   void musicPlay_Animation(lv_obj_t *TargetObject, int delay);
 
-  void add_blog_item(lv_obj_t *parent, const char * title, uint16_t id); 
+  void add_blog_item(lv_obj_t *parent, const char *title, uint16_t id);
   void blog_panel(lv_obj_t *parent);
   lv_obj_t *blogText(lv_obj_t *parent, int y, char *text);
   lv_obj_t *blogTitle(lv_obj_t *parent, char *title);
-
-  lv_obj_t *activeApp[10];
+#endif
+  // lv_obj_t *activeApp[10];
   uint16_t appSize;
 
   extern bool runRequest();
