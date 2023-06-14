@@ -16,6 +16,9 @@ This is a demo project for the WT32-SC01 module.
 ### [`Simulator Code`](https://github.com/fbiego/lv_platformio)
 - tested on Mac
 
+### Compiling
+Use `Espressif 32` v5.1.1 as the platform. If you have a higher version, you will need to uninstall then install v5.1.1
+
 These are the current features
 ### Screens
 - Boot Screen
