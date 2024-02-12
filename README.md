@@ -6,13 +6,14 @@ This is a demo project for the WT32-SC01 module.
 
 
 <!-- [![Lumia ESP32](youtube.png?raw=true "youtube")](https://www.youtube.com/watch?v=jaJCa-hXfNk) -->
-![1](screens/lock.png?raw=true "1")
-![2](screens/home.png?raw=true "2")
-![2](screens/apps.png?raw=true "2")
-![2](screens/status.png?raw=true "2")
-![2](screens/settings.png?raw=true "2")
-![2](screens/sms.png?raw=true "2")
-![2](screens/test.png?raw=true "2")
+
+<img src="screens/lock.png" width="320" height="480" alt="screen"/>
+<img src="screens/home.png" width="320" height="480" alt="screen"/>
+<img src="screens/apps.png" width="320" height="480" alt="screen"/>
+<img src="screens/status.png" width="320" height="480" alt="screen"/>
+<img src="screens/settings.png" width="320" height="480" alt="screen"/>
+<img src="screens/sms.png" width="320" height="480" alt="screen"/>
+<img src="screens/test.png" width="320" height="480" alt="screen"/>
 
 
 
