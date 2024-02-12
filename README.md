@@ -7,15 +7,18 @@ This is a demo project for the WT32-SC01 module.
 
 <!-- [![Lumia ESP32](youtube.png?raw=true "youtube")](https://www.youtube.com/watch?v=jaJCa-hXfNk) -->
 
-<img src="screens/lock.png" width="320" height="480" alt="screen"/>
-<img src="screens/home.png" width="320" height="480" alt="screen"/>
-<img src="screens/apps.png" width="320" height="480" alt="screen"/>
-<img src="screens/status.png" width="320" height="480" alt="screen"/>
-<img src="screens/settings.png" width="320" height="480" alt="screen"/>
-<img src="screens/sms.png" width="320" height="480" alt="screen"/>
-<img src="screens/test.png" width="320" height="480" alt="screen"/>
-
-
+<table>
+<tr>
+<td><img src="screens/lock.png" width="320" height="480" alt="screen"/></td>
+<td><img src="screens/home.png" width="320" height="480" alt="screen"/></td>
+<td><img src="screens/apps.png" width="320" height="480" alt="screen"/></td>
+</tr>
+<tr>
+<td><img src="screens/status.png" width="320" height="480" alt="screen"/></td>
+<td><img src="screens/settings.png" width="320" height="480" alt="screen"/></td>
+<td><img src="screens/sms.png" width="320" height="480" alt="screen"/></td>
+</tr>
+</table>
 
 <img src="simulation.gif" width="320" height="480" alt="simulator video"/>
 
